@@ -1,0 +1,74 @@
+<h4>Row selection</h4>
+<p class="text-muted">Multi-select with row-click toggle. Use the buttons to query the current selection.</p>
+
+<div class="mb-3 d-flex gap-2 flex-wrap">
+  <button class="btn btn-sm btn-outline-primary" id="ex-sel-show">Show selected ids</button>
+  <button class="btn btn-sm btn-outline-danger" id="ex-sel-remove">Remove selected</button>
+</div>
+
+<table id="ex-sel" class="table table-hover"
+       data-selection="true" data-multi-select="true" data-row-select="true" data-keep-selection="true">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="80">ID</th>
+      <th data-column-id="sender">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="received">Received</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="sel-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="sel-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="sel-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="sel-html"><code><span class="cm">&lt;!-- Enable selection via data-* on the table --&gt;</span>
+&lt;<span class="tag">table</span> <span class="attr">id</span>=<span class="str">"grid"</span> <span class="attr">class</span>=<span class="str">"table table-hover"</span>
+       <span class="attr">data-selection</span>=<span class="str">"true"</span>
+       <span class="attr">data-multi-select</span>=<span class="str">"true"</span>
+       <span class="attr">data-row-select</span>=<span class="str">"true"</span>
+       <span class="attr">data-keep-selection</span>=<span class="str">"true"</span>&gt;
+  …
+&lt;/<span class="tag">table</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="sel-vanilla"><code><span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>);
+
+<span class="cm">// Read currently selected identifier values</span>
+<span class="kw">const</span> ids = grid.<span class="fn">getSelectedRows</span>();
+<span class="cm">// → [1, 4, 12]</span>
+
+<span class="cm">// Programmatic select / deselect</span>
+grid.<span class="fn">select</span>([<span class="num">1</span>, <span class="num">4</span>, <span class="num">12</span>]);
+grid.<span class="fn">deselect</span>();           <span class="cm">// all</span>
+
+<span class="cm">// Remove selected rows from the data</span>
+grid.<span class="fn">remove</span>();              <span class="cm">// uses current selection</span>
+
+<span class="cm">// Listen for selection changes</span>
+grid.<span class="fn">on</span>(<span class="str">"selected"</span>,   (rows) =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"+"</span>, rows));
+grid.<span class="fn">on</span>(<span class="str">"deselected"</span>, (rows) =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"-"</span>, rows));</code></pre>
+  <pre class="code-samples-panel" data-code-panel="sel-react"><code><span class="kw">import</span> { useRef } <span class="kw">from</span> <span class="str">"react"</span>;
+<span class="kw">import</span> { ReactBoostgrid, type ReactBoostgridHandle } <span class="kw">from</span> <span class="str">"react-boostgrid"</span>;
+
+<span class="kw">const</span> ref = <span class="fn">useRef</span>&lt;ReactBoostgridHandle&gt;(<span class="kw">null</span>);
+
+&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">ref</span>={ref}
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={columns}
+  <span class="attr">options</span>={{
+    <span class="prop">selection</span>:     <span class="kw">true</span>,
+    <span class="prop">multiSelect</span>:   <span class="kw">true</span>,
+    <span class="prop">rowSelect</span>:     <span class="kw">true</span>,
+    <span class="prop">keepSelection</span>: <span class="kw">true</span>,
+  }}
+  <span class="attr">onSelected</span>={(rows) =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"+"</span>, rows)}
+  <span class="attr">onDeselected</span>={(rows) =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"-"</span>, rows)}
+/&gt;
+
+<span class="cm">// Imperative escape hatches via the ref handle:</span>
+ref.current?.<span class="fn">getSelectedRows</span>();   <span class="cm">// [1, 4, 12]</span>
+ref.current?.grid?.<span class="fn">select</span>([<span class="num">1</span>, <span class="num">4</span>]);</code></pre>
+</section>

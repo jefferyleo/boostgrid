@@ -1,0 +1,57 @@
+{
+  "name": "react-boostgrid",
+  "version": "2.0.0",
+  "description": "React wrapper for boostgrid — a vanilla TypeScript data grid for Bootstrap 5.",
+  "type": "module",
+  "main": "./dist/react-boostgrid.umd.cjs",
+  "module": "./dist/react-boostgrid.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/react-boostgrid.js",
+      "require": "./dist/react-boostgrid.umd.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && vite build",
+    "test": "vitest run",
+    "clean": "rimraf dist"
+  },
+  "peerDependencies": {
+    "boostgrid": "^2.0.0",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.0",
+    "@testing-library/react": "^16.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "boostgrid": "file:../..",
+    "jsdom": "^24.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  },
+  "keywords": [
+    "react",
+    "boostgrid",
+    "bootstrap5",
+    "datagrid",
+    "table"
+  ],
+  "author": "Jeffery Leo <jeffery.leo@ogglobal.net>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JefferyLeo/boostgrid.git",
+    "directory": "packages/react-boostgrid"
+  }
+}

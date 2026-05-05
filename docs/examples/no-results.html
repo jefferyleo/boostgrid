@@ -1,0 +1,45 @@
+<h4>Empty &amp; no-results state</h4>
+<p class="text-muted">
+  Customize the empty / no-match copy via the <code>labels</code> option. The button
+  below filters to nothing so the no-results row appears.
+</p>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+  <button id="ex-empty-filter" type="button" class="btn btn-sm btn-outline-secondary">Filter to nothing</button>
+  <button id="ex-empty-clear"  type="button" class="btn btn-sm btn-outline-secondary">Clear search</button>
+  <button id="ex-empty-wipe"   type="button" class="btn btn-sm btn-outline-danger">Clear all rows</button>
+</div>
+
+<table id="ex-empty" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="sender" data-width="240">Sender</th>
+      <th data-column-id="subject">Subject</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="ne-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ne-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="ne-vanilla"><code><span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">labels</span>: {
+    <span class="prop">noResults</span>: <span class="str">"No matches — try a different search."</span>,
+    <span class="prop">empty</span>:     <span class="str">"Nothing here yet."</span>,
+  },
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ne-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={cols}
+  <span class="attr">options</span>={{
+    <span class="prop">labels</span>: {
+      <span class="prop">noResults</span>: <span class="str">"No matches — try a different search."</span>,
+      <span class="prop">empty</span>:     <span class="str">"Nothing here yet."</span>,
+    },
+  }}
+/&gt;</code></pre>
+</section>

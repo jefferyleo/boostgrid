@@ -1,0 +1,52 @@
+<h4>Icon set swap (FontAwesome)</h4>
+<p class="text-muted">
+  Boostgrid ships with two ready-made icon maps —
+  <code>bootstrapIcons</code> (default) and <code>fontAwesomeIcons</code>. Pass either
+  to the <code>icons</code> option, or supply your own object of class strings.
+</p>
+
+<div class="alert alert-secondary">
+  <strong>Heads-up:</strong> the FontAwesome stylesheet is loaded on demand for this
+  demo. In your own app, add the FA CDN <code>&lt;link&gt;</code> to your page first.
+</div>
+
+<table id="ex-icons" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="sender" data-width="240" data-order="asc">Sender</th>
+      <th data-column-id="subject">Subject</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="ic-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ic-custom">Custom map</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ic-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="ic-vanilla"><code><span class="kw">import</span> { attach, fontAwesomeIcons } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+<span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">icons</span>: fontAwesomeIcons,
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ic-custom"><code><span class="cm">// Roll your own — every key falls back to bootstrapIcons if omitted</span>
+<span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">icons</span>: {
+    <span class="prop">columns</span>:    <span class="str">"bi-layout-three-columns"</span>,
+    <span class="prop">refresh</span>:    <span class="str">"bi-arrow-clockwise"</span>,
+    <span class="prop">search</span>:     <span class="str">"bi-search"</span>,
+    <span class="prop">sortAsc</span>:    <span class="str">"bi-caret-up-fill"</span>,
+    <span class="prop">sortDesc</span>:   <span class="str">"bi-caret-down-fill"</span>,
+  },
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ic-react"><code><span class="kw">import</span> { fontAwesomeIcons } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={cols}
+  <span class="attr">options</span>={{ <span class="prop">icons</span>: fontAwesomeIcons }}
+/&gt;</code></pre>
+</section>

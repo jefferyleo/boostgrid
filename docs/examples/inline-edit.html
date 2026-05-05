@@ -1,0 +1,110 @@
+<h4>Inline row edit</h4>
+<p class="text-muted">
+  Each cell is rendered through a formatter that returns an
+  <code>&lt;input&gt;</code>. A delegated <code>change</code> handler on the
+  table element captures edits and updates the row data &mdash; the grid's
+  internal state is the source of truth.
+</p>
+
+<table id="ex-edit" class="table align-middle">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="sender" data-formatter="editText" data-width="280">Sender</th>
+      <th data-column-id="subject" data-formatter="editText">Subject</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<div class="mt-3">
+  <p class="small text-muted mb-1">Change events:</p>
+  <div id="ex-edit-log" class="border rounded p-2 small bg-body-tertiary"
+       style="font-family: SFMono-Regular, Menlo, Consolas, monospace; max-height: 9rem; overflow:auto;"></div>
+</div>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="ed-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ed-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ed-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ed-req">Request</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="ed-html"><code><span class="cm">&lt;!-- Mark editable columns with a formatter --&gt;</span>
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"sender"</span>  <span class="attr">data-formatter</span>=<span class="str">"editText"</span>&gt;Sender&lt;/<span class="tag">th</span>&gt;
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"subject"</span> <span class="attr">data-formatter</span>=<span class="str">"editText"</span>&gt;Subject&lt;/<span class="tag">th</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ed-vanilla"><code><span class="kw">const</span> rows = [<span class="cm">/* … */</span>];
+
+<span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">formatters</span>: {
+    <span class="fn">editText</span>(col, row) {
+      <span class="kw">const</span> v = <span class="fn">String</span>(row[col.id] ?? <span class="str">""</span>).<span class="fn">replace</span>(<span class="str">/"/g</span>, <span class="str">"&amp;quot;"</span>);
+      <span class="kw">return</span> <span class="str">`&lt;input class="form-control form-control-sm"</span>
+        <span class="str">  data-edit-id="</span>${row.id}<span class="str">"</span>
+        <span class="str">  data-edit-field="</span>${col.id}<span class="str">"</span>
+        <span class="str">  value="</span>${v}<span class="str">"&gt;`</span>;
+    },
+  },
+});
+
+<span class="cm">// One delegated listener handles every editable cell.</span>
+grid.element.<span class="fn">addEventListener</span>(<span class="str">"change"</span>, (e) =&gt; {
+  <span class="kw">const</span> inp = e.target.<span class="fn">closest</span>(<span class="str">"input[data-edit-field]"</span>);
+  <span class="kw">if</span> (!inp) <span class="kw">return</span>;
+
+  <span class="kw">const</span> id    = <span class="fn">Number</span>(inp.dataset.editId);
+  <span class="kw">const</span> field = inp.dataset.editField;
+  <span class="kw">const</span> row   = rows.<span class="fn">find</span>((r) =&gt; r.id === id);
+  <span class="kw">if</span> (row) row[field] = inp.value;
+
+  <span class="fn">savePatch</span>(id, { [field]: inp.value });
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ed-react"><code><span class="kw">const</span> [rows, setRows] = <span class="fn">useState</span>(initial);
+<span class="kw">const</span> ref = <span class="fn">useRef</span>&lt;ReactBoostgridHandle&gt;(<span class="kw">null</span>);
+
+<span class="kw">const</span> <span class="fn">editText</span> = (col, row) =&gt; {
+  <span class="kw">const</span> v = <span class="fn">String</span>(row[col.id] ?? <span class="str">""</span>).<span class="fn">replace</span>(<span class="str">/"/g</span>, <span class="str">"&amp;quot;"</span>);
+  <span class="kw">return</span> <span class="str">`&lt;input class="form-control form-control-sm"</span>
+<span class="str">      data-edit-id="</span>${row.id}<span class="str">"</span>
+<span class="str">      data-edit-field="</span>${col.id}<span class="str">"</span>
+<span class="str">      value="</span>${v}<span class="str">"&gt;`</span>;
+};
+
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="kw">const</span> el = ref.current?.grid?.element;
+  <span class="kw">if</span> (!el) <span class="kw">return</span>;
+  <span class="kw">const</span> <span class="fn">on</span> = (e) =&gt; {
+    <span class="kw">const</span> inp = e.target.<span class="fn">closest</span>(<span class="str">"input[data-edit-field]"</span>);
+    <span class="kw">if</span> (!inp) <span class="kw">return</span>;
+    <span class="kw">const</span> id    = <span class="fn">Number</span>(inp.dataset.editId);
+    <span class="kw">const</span> field = inp.dataset.editField;
+    <span class="fn">setRows</span>((rs) =&gt; rs.<span class="fn">map</span>((r) =&gt; r.id === id ? { ...r, [field]: inp.value } : r));
+    <span class="fn">savePatch</span>(id, { [field]: inp.value });
+  };
+  el.<span class="fn">addEventListener</span>(<span class="str">"change"</span>, on);
+  <span class="kw">return</span> () =&gt; el.<span class="fn">removeEventListener</span>(<span class="str">"change"</span>, on);
+}, []);
+
+&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">ref</span>={ref}
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={[
+    { <span class="prop">id</span>: <span class="str">"id"</span>,      <span class="prop">text</span>: <span class="str">"ID"</span>,      <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span>, <span class="prop">align</span>: <span class="str">"right"</span> },
+    { <span class="prop">id</span>: <span class="str">"sender"</span>,  <span class="prop">text</span>: <span class="str">"Sender"</span>,  <span class="prop">formatter</span>: editText },
+    { <span class="prop">id</span>: <span class="str">"subject"</span>, <span class="prop">text</span>: <span class="str">"Subject"</span>, <span class="prop">formatter</span>: editText },
+  ]}
+/&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ed-req"><code><span class="cm">// PATCH /api/messages/12</span>
+<span class="cm">// Content-Type: application/json</span>
+{
+  <span class="prop">"subject"</span>: <span class="str">"Updated subject text"</span>
+}
+
+<span class="cm">// 200 OK · application/json</span>
+{
+  <span class="prop">"id"</span>:       <span class="num">12</span>,
+  <span class="prop">"sender"</span>:   <span class="str">"alpha@example.com"</span>,
+  <span class="prop">"subject"</span>:  <span class="str">"Updated subject text"</span>,
+  <span class="prop">"received"</span>: <span class="str">"2026-04-12T10:33:00Z"</span>
+}</code></pre>
+</section>

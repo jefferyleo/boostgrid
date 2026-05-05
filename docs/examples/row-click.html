@@ -1,0 +1,51 @@
+<h4>Row-click select (sticky)</h4>
+<p class="text-muted">
+  With <code>rowSelect: true</code> the entire row body becomes the click target —
+  not just the checkbox. Combined with <code>keepSelection: true</code>, your selection
+  survives sorting, filtering, and pagination.
+</p>
+
+<table id="ex-rowclick" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="sender" data-width="240">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="received" data-width="160">Received</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<div class="mt-3 small">
+  <span class="text-muted">Selected ids:</span>
+  <code id="ex-rowclick-out" class="ms-2">[]</code>
+</div>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="rc-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="rc-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="rc-vanilla"><code><span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">selection</span>:     <span class="kw">true</span>,
+  <span class="prop">multiSelect</span>:   <span class="kw">true</span>,
+  <span class="prop">rowSelect</span>:     <span class="kw">true</span>,    <span class="cm">// click anywhere on a row</span>
+  <span class="prop">keepSelection</span>: <span class="kw">true</span>,    <span class="cm">// survive paging / filter / sort</span>
+});
+
+grid.<span class="fn">on</span>(<span class="str">"selected"</span>, () =&gt; render(grid.<span class="fn">getSelectedRows</span>()));
+grid.<span class="fn">on</span>(<span class="str">"deselected"</span>, () =&gt; render(grid.<span class="fn">getSelectedRows</span>()));</code></pre>
+  <pre class="code-samples-panel" data-code-panel="rc-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={cols}
+  <span class="attr">options</span>={{
+    <span class="prop">selection</span>:     <span class="kw">true</span>,
+    <span class="prop">multiSelect</span>:   <span class="kw">true</span>,
+    <span class="prop">rowSelect</span>:     <span class="kw">true</span>,
+    <span class="prop">keepSelection</span>: <span class="kw">true</span>,
+  }}
+  <span class="attr">onSelected</span>={(rs) =&gt; <span class="fn">setIds</span>(rs.<span class="fn">map</span>((r) =&gt; r.id))}
+  <span class="attr">onDeselected</span>={() =&gt; <span class="fn">setIds</span>(ref.current?.<span class="fn">getSelectedRows</span>().<span class="fn">map</span>(...))}
+/&gt;</code></pre>
+</section>

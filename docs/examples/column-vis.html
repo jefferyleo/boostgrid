@@ -1,0 +1,39 @@
+<h4>Column visibility</h4>
+<p class="text-muted">
+  The toolbar's <strong>columns</strong> dropdown lets the user toggle visibility per
+  column at runtime. It's on by default &mdash; flip <code>columnSelection: false</code>
+  to remove it. Try opening it and unchecking <em>Subject</em>.
+</p>
+
+<table id="ex-colvis" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="sender" data-width="240">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="received" data-width="160">Received</th>
+      <th data-column-id="status" data-width="100" data-align="center">Status</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="cv-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="cv-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="cv-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="cv-html"><code><span class="cm">&lt;!-- columnSelection is on by default; the toolbar dropdown is rendered automatically --&gt;</span>
+&lt;<span class="tag">table</span> <span class="attr">id</span>=<span class="str">"grid"</span> <span class="attr">class</span>=<span class="str">"table table-hover"</span>&gt;
+  &lt;<span class="tag">thead</span>&gt;…&lt;/<span class="tag">thead</span>&gt;<span class="tag">tbody</span>&gt;…&lt;/<span class="tag">tbody</span>&gt;
+&lt;/<span class="tag">table</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="cv-vanilla"><code><span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">columnSelection</span>: <span class="kw">true</span>,   <span class="cm">// default — set to false to hide the dropdown</span>
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="cv-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={columns}
+  <span class="attr">options</span>={{ <span class="prop">columnSelection</span>: <span class="kw">true</span> }}
+/&gt;</code></pre>
+</section>

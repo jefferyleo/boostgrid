@@ -1,0 +1,47 @@
+<h4>React wrapper</h4>
+<p class="text-muted">
+  The <code>react-boostgrid</code> package mounts a Boostgrid instance for you.
+  React renders an empty host <code>&lt;div&gt;</code>; the table is built imperatively so
+  the reconciler never fights boostgrid's DOM mutations.
+</p>
+
+<div class="mb-3 d-flex gap-2 flex-wrap">
+  <button class="btn btn-sm btn-outline-primary" id="ex-react-add">Append a row</button>
+  <button class="btn btn-sm btn-outline-secondary" id="ex-react-search">Search "alpha"</button>
+  <button class="btn btn-sm btn-outline-secondary" id="ex-react-reload">Reset</button>
+</div>
+
+<div id="ex-react-host" class="boostgrid-react-host"></div>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="rx-tsx">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="rx-install">Install</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="rx-tsx"><code><span class="kw">import</span> { useRef, useState } <span class="kw">from</span> <span class="str">"react"</span>;
+<span class="kw">import</span> { ReactBoostgrid, type ReactBoostgridHandle } <span class="kw">from</span> <span class="str">"react-boostgrid"</span>;
+<span class="kw">import</span> <span class="str">"boostgrid/style.css"</span>;
+
+<span class="kw">export default function</span> <span class="fn">Inbox</span>() {
+  <span class="kw">const</span> [rows, setRows] = <span class="fn">useState</span>(initial);
+  <span class="kw">const</span> ref = <span class="fn">useRef</span>&lt;ReactBoostgridHandle&gt;(<span class="kw">null</span>);
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">ReactBoostgrid</span>
+      <span class="attr">ref</span>={ref}
+      <span class="attr">data</span>={rows}
+      <span class="attr">columns</span>={[
+        { <span class="prop">id</span>: <span class="str">"id"</span>,      <span class="prop">text</span>: <span class="str">"ID"</span>,      <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span>, <span class="prop">align</span>: <span class="str">"right"</span> },
+        { <span class="prop">id</span>: <span class="str">"sender"</span>,  <span class="prop">text</span>: <span class="str">"Sender"</span>,  <span class="prop">order</span>: <span class="str">"asc"</span> },
+        { <span class="prop">id</span>: <span class="str">"subject"</span>, <span class="prop">text</span>: <span class="str">"Subject"</span> },
+      ]}
+      <span class="attr">options</span>={{ <span class="prop">rowCount</span>: <span class="num">10</span>, <span class="prop">selection</span>: <span class="kw">true</span>, <span class="prop">multiSelect</span>: <span class="kw">true</span> }}
+      <span class="attr">onSelected</span>={(rows) =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"selected"</span>, rows)}
+    /&gt;
+  );
+}</code></pre>
+  <pre class="code-samples-panel" data-code-panel="rx-install"><code><span class="prompt">$</span> npm install react-boostgrid boostgrid
+
+<span class="cm">// Source on GitHub:</span>
+<span class="cm">// https://github.com/JefferyLeo/boostgrid/tree/main/packages/react-boostgrid</span></code></pre>
+</section>

@@ -1,0 +1,75 @@
+{
+  "name": "boostgrid",
+  "version": "2.0.0",
+  "description": "A modern, framework-agnostic data grid for Bootstrap 5. Vanilla TypeScript, no jQuery.",
+  "type": "module",
+  "main": "./dist/boostgrid.umd.cjs",
+  "module": "./dist/boostgrid.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/boostgrid.js",
+      "require": "./dist/boostgrid.umd.cjs"
+    },
+    "./style.css": "./dist/boostgrid.css"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "build:all": "npm run build && npm run -w react-boostgrid build",
+    "test": "vitest run",
+    "test:all": "vitest run && npm run -w react-boostgrid test",
+    "test:watch": "vitest",
+    "docs": "npx -y http-server -p 4174 -s -c-1 -o /docs/index.html",
+    "lint": "eslint \"src/**/*.ts\"",
+    "size": "size-limit",
+    "pack:nuget": "dotnet pack Boostgrid.csproj --nologo",
+    "pack:npm": "npm pack --pack-destination dist"
+  },
+  "keywords": [
+    "bootstrap",
+    "bootstrap5",
+    "grid",
+    "datagrid",
+    "table",
+    "vanilla",
+    "typescript"
+  ],
+  "author": "Jeffery Leo <jeffery.leo@ogglobal.net>",
+  "license": "MIT",
+  "homepage": "https://github.com/JefferyLeo/boostgrid",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JefferyLeo/boostgrid.git"
+  },
+  "peerDependencies": {
+    "bootstrap": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "bootstrap": { "optional": true }
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^11.0.0",
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^1.6.0",
+    "jsdom": "^24.0.0",
+    "sass": "^1.77.0",
+    "size-limit": "^11.0.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.2.0",
+    "vitest": "^1.6.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "size-limit": [
+    { "path": "dist/boostgrid.js", "limit": "15 KB" }
+  ]
+}

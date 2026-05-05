@@ -1,0 +1,105 @@
+# Deploys the showcase docs site to GitHub Pages.
+#
+# The docs/ folder loads the library via relative paths:
+#   - docs/index.html          → ../dist/boostgrid.css, ../dist/boostgrid.js
+#   - docs/assets/site.js      → ../../dist/boostgrid.js
+#   - importmap (in index.html) → ../packages/react-boostgrid/dist/react-boostgrid.js
+#
+# So the published Pages site mirrors the same layout: docs/ as the entry,
+# with dist/ and packages/react-boostgrid/dist/ kept as siblings. A tiny
+# redirect at the site root (/) sends visitors straight into /docs/.
+
+name: Deploy docs to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "src/**"
+      - "packages/react-boostgrid/**"
+      - "scss/**"
+      - "vite.config.ts"
+      - "tsconfig*.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/deploy-docs.yml"
+  workflow_dispatch:
+
+# One concurrent deploy at a time; cancel any superseded run.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build library + React wrapper
+        run: npm run build:all
+
+      - name: Stage site
+        run: |
+          mkdir -p _site
+          cp -R docs                              _site/docs
+          cp -R dist                              _site/dist
+          mkdir -p                                _site/packages/react-boostgrid
+          cp -R packages/react-boostgrid/dist     _site/packages/react-boostgrid/dist
+
+          # Disable Jekyll so paths starting with `_` (none today, but safe)
+          # are served as-is.
+          touch _site/.nojekyll
+
+          # Root redirect → /docs/
+          cat > _site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8" />
+              <title>Boostgrid · docs</title>
+              <meta http-equiv="refresh" content="0; url=./docs/" />
+              <link rel="canonical" href="./docs/" />
+            </head>
+            <body>
+              <p>Redirecting to <a href="./docs/">/docs/</a>…</p>
+            </body>
+          </html>
+          HTML
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

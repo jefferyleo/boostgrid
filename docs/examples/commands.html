@@ -1,0 +1,105 @@
+<h4>Commands column</h4>
+<p class="text-muted">
+  A formatter renders an Edit / Delete button group per row. The grid's root
+  element receives delegated <code>click</code>s on <code>[data-bg-action]</code>
+  &mdash; the same mechanism the library uses internally for sort, paging and
+  selection, so you don't need a per-row handler.
+</p>
+
+<table id="ex-cmd" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="sender">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="commands" data-formatter="commands"
+          data-sortable="false" data-searchable="false"
+          data-align="center" data-header-align="center" data-width="120">Actions</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<div class="mt-3">
+  <p class="small text-muted mb-1"><code>data-bg-action</code> events:</p>
+  <div id="ex-cmd-log" class="border rounded p-2 small bg-body-tertiary"
+       style="font-family: SFMono-Regular, Menlo, Consolas, monospace; max-height: 9rem; overflow:auto;"></div>
+</div>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="cmd-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="cmd-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="cmd-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="cmd-html"><code>&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"commands"</span>
+    <span class="attr">data-formatter</span>=<span class="str">"commands"</span>
+    <span class="attr">data-sortable</span>=<span class="str">"false"</span>
+    <span class="attr">data-searchable</span>=<span class="str">"false"</span>
+    <span class="attr">data-align</span>=<span class="str">"center"</span>
+    <span class="attr">data-width</span>=<span class="str">"120"</span>&gt;Actions&lt;/<span class="tag">th</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="cmd-vanilla"><code><span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">formatters</span>: {
+    <span class="fn">commands</span>(_col, row) {
+      <span class="kw">return</span> <span class="str">`</span>
+        <span class="str">&lt;div class="btn-group btn-group-sm" role="group"&gt;</span>
+        <span class="str">  &lt;button class="btn btn-outline-primary"</span>
+        <span class="str">          data-bg-action="cmd-edit" data-bg-value="</span>${row.id}<span class="str">"&gt;</span>
+        <span class="str">    &lt;i class="bi bi-pencil"&gt;&lt;/i&gt; Edit</span>
+        <span class="str">  &lt;/button&gt;</span>
+        <span class="str">  &lt;button class="btn btn-outline-danger"</span>
+        <span class="str">          data-bg-action="cmd-delete" data-bg-value="</span>${row.id}<span class="str">"&gt;</span>
+        <span class="str">    &lt;i class="bi bi-trash"&gt;&lt;/i&gt; Delete</span>
+        <span class="str">  &lt;/button&gt;</span>
+        <span class="str">&lt;/div&gt;`</span>;
+    },
+  },
+});
+
+<span class="cm">// Single delegated listener — survives re-render, no per-row binding needed.</span>
+grid.element.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, (e) =&gt; {
+  <span class="kw">const</span> btn = e.target.<span class="fn">closest</span>(<span class="str">"[data-bg-action]"</span>);
+  <span class="kw">if</span> (!btn) <span class="kw">return</span>;
+  <span class="kw">const</span> id = <span class="fn">Number</span>(btn.dataset.bgValue);
+
+  <span class="kw">if</span> (btn.dataset.bgAction === <span class="str">"cmd-edit"</span>)   <span class="fn">openEditDialog</span>(id);
+  <span class="kw">if</span> (btn.dataset.bgAction === <span class="str">"cmd-delete"</span>) grid.<span class="fn">remove</span>([id]);
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="cmd-react"><code><span class="kw">const</span> ref = <span class="fn">useRef</span>&lt;ReactBoostgridHandle&gt;(<span class="kw">null</span>);
+
+<span class="kw">const</span> <span class="fn">commands</span> = (_col, row) =&gt; <span class="str">`</span>
+<span class="str">  &lt;div class="btn-group btn-group-sm"&gt;</span>
+<span class="str">    &lt;button class="btn btn-outline-primary"</span>
+<span class="str">            data-bg-action="cmd-edit" data-bg-value="</span>${row.id}<span class="str">"&gt;</span>
+<span class="str">      &lt;i class="bi bi-pencil"&gt;&lt;/i&gt;</span>
+<span class="str">    &lt;/button&gt;</span>
+<span class="str">    &lt;button class="btn btn-outline-danger"</span>
+<span class="str">            data-bg-action="cmd-delete" data-bg-value="</span>${row.id}<span class="str">"&gt;</span>
+<span class="str">      &lt;i class="bi bi-trash"&gt;&lt;/i&gt;</span>
+<span class="str">    &lt;/button&gt;</span>
+<span class="str">  &lt;/div&gt;`</span>;
+
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="kw">const</span> el = ref.current?.grid?.element;
+  <span class="kw">if</span> (!el) <span class="kw">return</span>;
+  <span class="kw">const</span> <span class="fn">handler</span> = (e) =&gt; {
+    <span class="kw">const</span> btn = e.target.<span class="fn">closest</span>(<span class="str">"[data-bg-action]"</span>);
+    <span class="kw">if</span> (!btn) <span class="kw">return</span>;
+    <span class="kw">const</span> id = <span class="fn">Number</span>(btn.dataset.bgValue);
+    <span class="kw">if</span> (btn.dataset.bgAction === <span class="str">"cmd-edit"</span>)   <span class="fn">openEditDialog</span>(id);
+    <span class="kw">if</span> (btn.dataset.bgAction === <span class="str">"cmd-delete"</span>) <span class="fn">setRows</span>((rs) =&gt; rs.<span class="fn">filter</span>((r) =&gt; r.id !== id));
+  };
+  el.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, handler);
+  <span class="kw">return</span> () =&gt; el.<span class="fn">removeEventListener</span>(<span class="str">"click"</span>, handler);
+}, []);
+
+&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">ref</span>={ref}
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={[
+    <span class="cm">/* … other columns … */</span>
+    { <span class="prop">id</span>: <span class="str">"commands"</span>, <span class="prop">text</span>: <span class="str">"Actions"</span>, <span class="prop">formatter</span>: commands,
+      <span class="prop">sortable</span>: <span class="kw">false</span>, <span class="prop">searchable</span>: <span class="kw">false</span>, <span class="prop">align</span>: <span class="str">"center"</span>, <span class="prop">width</span>: <span class="str">"120"</span> },
+  ]}
+/&gt;</code></pre>
+</section>

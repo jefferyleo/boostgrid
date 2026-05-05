@@ -1,0 +1,68 @@
+<h4>Responsive</h4>
+<p class="text-muted">
+  Wrap the table in <code>.table-responsive</code> for horizontal scroll on narrow screens.
+  Give the table a <code>min-width</code> (or sum-of-column widths) so the overflow actually
+  triggers — try resizing your window and watch the bottom scrollbar appear under
+  ~1100&nbsp;px.
+</p>
+
+<div class="table-responsive border rounded">
+  <table id="ex-resp" class="table table-bordered mb-0" style="min-width: 1100px">
+    <thead>
+      <tr>
+        <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="80">ID</th>
+        <th data-column-id="sender" data-width="240">Sender</th>
+        <th data-column-id="subject" data-width="380">Subject</th>
+        <th data-column-id="received" data-width="180">Received</th>
+        <th data-column-id="status" data-width="120" data-align="center">Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="resp-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="resp-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="resp-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="resp-html"><code><span class="cm">&lt;!-- Wrap with .table-responsive for x-scroll on narrow screens.</span>
+<span class="cm">     The min-width is what makes the parent overflow trigger. --&gt;</span>
+&lt;<span class="tag">div</span> <span class="attr">class</span>=<span class="str">"table-responsive"</span>&gt;
+  &lt;<span class="tag">table</span> <span class="attr">id</span>=<span class="str">"grid"</span> <span class="attr">class</span>=<span class="str">"table table-bordered"</span>
+         <span class="attr">style</span>=<span class="str">"min-width: 1100px"</span>&gt;
+    &lt;<span class="tag">thead</span>&gt;
+      &lt;<span class="tag">tr</span>&gt;
+        &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"id"</span> <span class="attr">data-identifier</span>=<span class="str">"true"</span> <span class="attr">data-width</span>=<span class="str">"80"</span>&gt;ID&lt;/<span class="tag">th</span>&gt;
+        &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"sender"</span>  <span class="attr">data-width</span>=<span class="str">"240"</span>&gt;Sender&lt;/<span class="tag">th</span>&gt;
+        &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"subject"</span> <span class="attr">data-width</span>=<span class="str">"380"</span>&gt;Subject&lt;/<span class="tag">th</span>&gt;
+        &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"received"</span> <span class="attr">data-width</span>=<span class="str">"180"</span>&gt;Received&lt;/<span class="tag">th</span>&gt;
+        &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"status"</span>  <span class="attr">data-width</span>=<span class="str">"120"</span>&gt;Status&lt;/<span class="tag">th</span>&gt;
+      &lt;/<span class="tag">tr</span>&gt;
+    &lt;/<span class="tag">thead</span>&gt;
+    &lt;<span class="tag">tbody</span>&gt;…&lt;/<span class="tag">tbody</span>&gt;
+  &lt;/<span class="tag">table</span>&gt;
+&lt;/<span class="tag">div</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="resp-vanilla"><code><span class="fn">attach</span>(<span class="str">"#grid"</span>);
+
+<span class="cm">// data-width on a column accepts pixels ("80"), em, % or any CSS length.</span>
+<span class="cm">// Pair with a min-width on the table itself so the .table-responsive</span>
+<span class="cm">// parent's overflow-x: auto actually triggers when the viewport shrinks.</span></code></pre>
+  <pre class="code-samples-panel" data-code-panel="resp-react"><code>&lt;<span class="tag">div</span> <span class="attr">className</span>=<span class="str">"table-responsive"</span>&gt;
+  &lt;<span class="tag">ReactBoostgrid</span>
+    <span class="attr">tableClassName</span>=<span class="str">"table table-bordered"</span>
+    <span class="attr">data</span>={rows}
+    <span class="attr">columns</span>={[
+      { <span class="prop">id</span>: <span class="str">"id"</span>,       <span class="prop">text</span>: <span class="str">"ID"</span>,       <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span>, <span class="prop">width</span>: <span class="str">"80"</span> },
+      { <span class="prop">id</span>: <span class="str">"sender"</span>,   <span class="prop">text</span>: <span class="str">"Sender"</span>,   <span class="prop">width</span>: <span class="str">"240"</span> },
+      { <span class="prop">id</span>: <span class="str">"subject"</span>,  <span class="prop">text</span>: <span class="str">"Subject"</span>,  <span class="prop">width</span>: <span class="str">"380"</span> },
+      { <span class="prop">id</span>: <span class="str">"received"</span>, <span class="prop">text</span>: <span class="str">"Received"</span>, <span class="prop">width</span>: <span class="str">"180"</span> },
+      { <span class="prop">id</span>: <span class="str">"status"</span>,   <span class="prop">text</span>: <span class="str">"Status"</span>,   <span class="prop">width</span>: <span class="str">"120"</span> },
+    ]}
+  /&gt;
+&lt;/<span class="tag">div</span>&gt;
+
+<span class="cm">// Add a small CSS rule to give the inner table a min-width:</span>
+<span class="cm">// .table-responsive table { min-width: 1100px; }</span></code></pre>
+</section>

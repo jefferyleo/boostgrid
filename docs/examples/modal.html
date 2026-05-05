@@ -1,0 +1,107 @@
+<h4>Inside a Bootstrap 5 modal</h4>
+<p class="text-muted">
+  Two gotchas to know up-front:
+</p>
+<ol class="text-muted small">
+  <li>If the modal is rendered inside a parent with <code>transform</code>,
+      <code>filter</code> or <code>contain</code> set, the modal's fixed positioning
+      gets trapped and the backdrop covers it. Move the element to
+      <code>document.body</code> before showing.</li>
+  <li>Attach the grid <strong>after</strong> the dialog is visible — listen for
+      <code>shown.bs.modal</code>. Mounting against a <code>display: none</code> ancestor
+      makes the toolbar measure 0&nbsp;px.</li>
+</ol>
+<p class="text-muted">
+  Also pass <code>navigation: 2</code> if you only want the bottom pager — by default
+  Boostgrid renders top + bottom (<code>navigation: 3</code>).
+</p>
+
+<button id="ex-modal-open" type="button" class="btn btn-primary">
+  <i class="bi bi-window"></i> Open grid in modal
+</button>
+
+<div class="modal fade" id="ex-modal" tabindex="-1" aria-labelledby="ex-modal-title" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="ex-modal-title"><i class="bi bi-table me-2"></i>Inbox</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table id="ex-modal-grid" class="table table-hover">
+          <thead>
+            <tr>
+              <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+              <th data-column-id="sender" data-width="240" data-order="asc">Sender</th>
+              <th data-column-id="subject">Subject</th>
+              <th data-column-id="received" data-width="160">Received</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="md-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="md-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="md-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="md-html"><code>&lt;<span class="tag">button</span> <span class="attr">data-bs-toggle</span>=<span class="str">"modal"</span> <span class="attr">data-bs-target</span>=<span class="str">"#ex-modal"</span>&gt;Open&lt;/<span class="tag">button</span>&gt;
+
+&lt;<span class="tag">div</span> <span class="attr">class</span>=<span class="str">"modal fade"</span> <span class="attr">id</span>=<span class="str">"ex-modal"</span>&gt;
+  &lt;<span class="tag">div</span> <span class="attr">class</span>=<span class="str">"modal-dialog modal-xl modal-dialog-scrollable"</span>&gt;
+    &lt;<span class="tag">div</span> <span class="attr">class</span>=<span class="str">"modal-content"</span>&gt;
+      &lt;<span class="tag">div</span> <span class="attr">class</span>=<span class="str">"modal-body"</span>&gt;
+        &lt;<span class="tag">table</span> <span class="attr">id</span>=<span class="str">"grid"</span> <span class="attr">class</span>=<span class="str">"table table-hover"</span>&gt;…&lt;/<span class="tag">table</span>&gt;
+      &lt;/<span class="tag">div</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  &lt;/<span class="tag">div</span>&gt;
+&lt;/<span class="tag">div</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="md-vanilla"><code><span class="kw">const</span> modal = <span class="fn">document</span>.<span class="fn">getElementById</span>(<span class="str">"ex-modal"</span>);
+
+<span class="cm">// 1. Portal the modal to &lt;body&gt; if a parent breaks fixed positioning.</span>
+<span class="kw">if</span> (modal.parentElement !== <span class="fn">document</span>.body) {
+  <span class="fn">document</span>.body.<span class="fn">appendChild</span>(modal);
+}
+
+<span class="kw">let</span> grid;
+
+<span class="cm">// 2. Defer attach() until the dialog is actually visible — otherwise the grid</span>
+<span class="cm">//    measures 0px and the toolbar/pagination render badly.</span>
+modal.<span class="fn">addEventListener</span>(<span class="str">"shown.bs.modal"</span>, () =&gt; {
+  <span class="kw">if</span> (!grid) {
+    [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+      <span class="prop">selection</span>:   <span class="kw">true</span>,
+      <span class="prop">multiSelect</span>: <span class="kw">true</span>,
+      <span class="prop">navigation</span>:  <span class="num">2</span>,        <span class="cm">// bottom toolbar only (1=top, 2=bottom, 3=both)</span>
+    });
+  } <span class="kw">else</span> {
+    grid.<span class="fn">reload</span>();           <span class="cm">// re-render in case viewport changed</span>
+  }
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="md-react"><code><span class="kw">const</span> [open, setOpen] = <span class="fn">useState</span>(<span class="kw">false</span>);
+<span class="kw">const</span> ref = <span class="fn">useRef</span>&lt;ReactBoostgridHandle&gt;(<span class="kw">null</span>);
+
+<span class="cm">// Reload after the modal animates in</span>
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="kw">if</span> (open) <span class="kw">const</span> t = <span class="fn">setTimeout</span>(() =&gt; ref.current?.<span class="fn">reload</span>(), <span class="num">200</span>);
+  <span class="kw">return</span> () =&gt; <span class="fn">clearTimeout</span>(t);
+}, [open]);
+
+&lt;<span class="tag">div</span> <span class="attr">className</span>={<span class="str">`modal fade </span>${open ? <span class="str">"show d-block"</span> : <span class="str">""</span>}<span class="str">`</span>}&gt;
+  &lt;<span class="tag">div</span> <span class="attr">className</span>=<span class="str">"modal-dialog modal-xl"</span>&gt;
+    &lt;<span class="tag">div</span> <span class="attr">className</span>=<span class="str">"modal-content"</span>&gt;
+      &lt;<span class="tag">div</span> <span class="attr">className</span>=<span class="str">"modal-body"</span>&gt;
+        &lt;<span class="tag">ReactBoostgrid</span> <span class="attr">ref</span>={ref} <span class="attr">data</span>={rows} <span class="attr">columns</span>={cols} /&gt;
+      &lt;/<span class="tag">div</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  &lt;/<span class="tag">div</span>&gt;
+&lt;/<span class="tag">div</span>&gt;</code></pre>
+</section>

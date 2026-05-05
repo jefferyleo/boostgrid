@@ -1,0 +1,57 @@
+// Boostgrid v2 — BS5-aware styling. Uses CSS variables exposed by Bootstrap 5
+// (--bs-border-color, --bs-primary, etc.) so it adapts to BS5 themes & dark mode
+// without a hard Sass dependency on the Bootstrap source.
+
+.boostgrid {
+  // CSS containment limits paint/layout to the grid subtree — meaningful win on
+  // long pages with multiple grids or reflow-heavy neighbours.
+  contain: content;
+  width: 100%;
+
+  &-table {
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  &-toolbar {
+    .bg-infos {
+      white-space: nowrap;
+    }
+  }
+
+  &-th {
+    user-select: none;
+    white-space: nowrap;
+
+    .boostgrid-sort {
+      color: inherit;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+
+      &:hover { color: var(--bs-primary, #0d6efd); }
+
+      i { font-size: 0.85em; opacity: 0.7; }
+    }
+  }
+
+  tbody > tr {
+    contain: layout style;
+    cursor: default;
+  }
+
+  .bg-select-cell {
+    width: 2.5rem;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .bg-pagination .pagination {
+    margin-bottom: 0;
+  }
+
+  .boostgrid-no-results {
+    font-style: italic;
+  }
+}

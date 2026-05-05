@@ -1,0 +1,53 @@
+<h4>External toolbar</h4>
+<p class="text-muted">
+  Drive the grid from buttons that live <em>outside</em> it. Hold a reference to the
+  instance returned by <code>attach()</code> and call its public methods —
+  <code>append</code>, <code>clear</code>, <code>search</code>, <code>reload</code>.
+</p>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+  <button id="ex-tb-add"    type="button" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-lg"></i> Append row</button>
+  <button id="ex-tb-clear"  type="button" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg"></i> Clear</button>
+  <button id="ex-tb-search" type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-search"></i> Search "alpha"</button>
+  <button id="ex-tb-reload" type="button" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i> Reload</button>
+</div>
+
+<table id="ex-tb" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="sender" data-width="240">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="received" data-width="160">Received</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="tb-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="tb-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="tb-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="tb-html"><code>&lt;<span class="tag">button</span> <span class="attr">id</span>=<span class="str">"add"</span>&gt;Append row&lt;/<span class="tag">button</span>&gt;
+&lt;<span class="tag">button</span> <span class="attr">id</span>=<span class="str">"clear"</span>&gt;Clear&lt;/<span class="tag">button</span>&gt;
+&lt;<span class="tag">button</span> <span class="attr">id</span>=<span class="str">"search"</span>&gt;Search&lt;/<span class="tag">button</span>&gt;
+&lt;<span class="tag">button</span> <span class="attr">id</span>=<span class="str">"reload"</span>&gt;Reload&lt;/<span class="tag">button</span>&gt;
+
+&lt;<span class="tag">table</span> <span class="attr">id</span>=<span class="str">"grid"</span> <span class="attr">class</span>=<span class="str">"table"</span>&gt;…&lt;/<span class="tag">table</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="tb-vanilla"><code><span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>);
+
+add.<span class="fn">onclick</span>    = () =&gt; grid.<span class="fn">append</span>([{ <span class="prop">id</span>: <span class="num">999</span>, <span class="prop">sender</span>: <span class="str">"new@x.io"</span>, <span class="prop">subject</span>: <span class="str">"Hot off the press"</span> }]);
+clear.<span class="fn">onclick</span>  = () =&gt; grid.<span class="fn">clear</span>();
+search.<span class="fn">onclick</span> = () =&gt; grid.<span class="fn">search</span>(<span class="str">"alpha"</span>);
+reload.<span class="fn">onclick</span> = () =&gt; grid.<span class="fn">reload</span>();</code></pre>
+  <pre class="code-samples-panel" data-code-panel="tb-react"><code><span class="kw">const</span> ref = <span class="fn">useRef</span>&lt;ReactBoostgridHandle&gt;(<span class="kw">null</span>);
+
+&lt;<span class="tag">button</span> <span class="attr">onClick</span>={() =&gt; <span class="fn">setRows</span>((rs) =&gt; [...rs, newRow])}&gt;Append&lt;/<span class="tag">button</span>&gt;
+&lt;<span class="tag">button</span> <span class="attr">onClick</span>={() =&gt; <span class="fn">setRows</span>([])}&gt;Clear&lt;/<span class="tag">button</span>&gt;
+&lt;<span class="tag">button</span> <span class="attr">onClick</span>={() =&gt; ref.current?.<span class="fn">search</span>(<span class="str">"alpha"</span>)}&gt;Search&lt;/<span class="tag">button</span>&gt;
+&lt;<span class="tag">button</span> <span class="attr">onClick</span>={() =&gt; ref.current?.<span class="fn">reload</span>()}&gt;Reload&lt;/<span class="tag">button</span>&gt;
+
+&lt;<span class="tag">ReactBoostgrid</span> <span class="attr">ref</span>={ref} <span class="attr">data</span>={rows} <span class="attr">columns</span>={cols} /&gt;</code></pre>
+</section>

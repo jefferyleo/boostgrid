@@ -1,0 +1,46 @@
+<h4>Multi-column sort</h4>
+<p class="text-muted">
+  With <code>multiSort: true</code>, hold <kbd>Shift</kbd> and click multiple
+  headers to combine sort orders. The grid below ships with
+  <strong>Sender ↑</strong> and <strong>Received ↓</strong> applied at load.
+</p>
+
+<table id="ex-msort" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="sender" data-order="asc" data-width="240">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="received" data-order="desc" data-width="160">Received</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="ms-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ms-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ms-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="ms-html"><code><span class="cm">&lt;!-- Initial sort: data-order on each header --&gt;</span>
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"sender"</span>   <span class="attr">data-order</span>=<span class="str">"asc"</span>&gt;Sender&lt;/<span class="tag">th</span>&gt;
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"received"</span> <span class="attr">data-order</span>=<span class="str">"desc"</span>&gt;Received&lt;/<span class="tag">th</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ms-vanilla"><code><span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">multiSort</span>: <span class="kw">true</span>,
+});
+
+<span class="cm">// Programmatic sort dictionary:</span>
+grid.<span class="fn">sort</span>({ <span class="prop">sender</span>: <span class="str">"asc"</span>, <span class="prop">received</span>: <span class="str">"desc"</span> });</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ms-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={[
+    { <span class="prop">id</span>: <span class="str">"id"</span>,       <span class="prop">text</span>: <span class="str">"ID"</span>,       <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span> },
+    { <span class="prop">id</span>: <span class="str">"sender"</span>,   <span class="prop">text</span>: <span class="str">"Sender"</span>,   <span class="prop">order</span>: <span class="str">"asc"</span> },
+    { <span class="prop">id</span>: <span class="str">"subject"</span>,  <span class="prop">text</span>: <span class="str">"Subject"</span> },
+    { <span class="prop">id</span>: <span class="str">"received"</span>, <span class="prop">text</span>: <span class="str">"Received"</span>, <span class="prop">order</span>: <span class="str">"desc"</span> },
+  ]}
+  <span class="attr">options</span>={{ <span class="prop">multiSort</span>: <span class="kw">true</span> }}
+  <span class="attr">onSorted</span>={(dict) =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"sort:"</span>, dict)}
+/&gt;</code></pre>
+</section>

@@ -1,0 +1,38 @@
+<!--
+  This .csproj exists only so `dotnet pack` can build the NuGet package
+  from Boostgrid.nuspec without requiring a separate nuget.exe install.
+  There is no .NET source here — the package is content-only (JS + CSS).
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Don't compile any C# source -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoBuild>true</NoBuild>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);NU5128;NU5100</NoWarn>
+
+    <!-- Hand the nuspec to MSBuild -->
+    <NuspecFile>Boostgrid.nuspec</NuspecFile>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)dist</PackageOutputPath>
+  </PropertyGroup>
+
+  <!-- Don't try to look at any *.cs in the working tree -->
+  <ItemGroup>
+    <Compile Remove="**\*.cs" />
+    <None Remove="**\*" />
+  </ItemGroup>
+
+  <!--
+    Workaround for `dotnet pack` quirk: when a single-file <file src=… target=…>
+    in a nuspec has a target whose filename has a different extension than the
+    source, dotnet pack treats target as a directory. Mirror the UMD bundle
+    next to it as boostgrid.umd.js so the nuspec target paths line up.
+  -->
+  <Target Name="MirrorUmdAsJs" BeforeTargets="GenerateNuspec">
+    <Copy SourceFiles="dist\boostgrid.umd.cjs"     DestinationFiles="dist\boostgrid.umd.js"     SkipUnchangedFiles="true" />
+    <Copy SourceFiles="dist\boostgrid.umd.cjs.map" DestinationFiles="dist\boostgrid.umd.js.map" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

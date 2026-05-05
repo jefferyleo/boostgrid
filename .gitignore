@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+.vite/
+.DS_Store
+*.log
+*.tsbuildinfo
+.idea/
+.vscode/
+.claude/
+Boostgrid.nuspec
+PUBLISHING.md
+.claude/settings.local.json

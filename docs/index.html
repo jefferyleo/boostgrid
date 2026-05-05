@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Boostgrid · A grid worth shipping</title>
+  <meta name="description" content="Boostgrid — a vanilla TypeScript data grid for Bootstrap 5. 5.51 KB brotli, no dependencies." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../dist/boostgrid.css" />
+  <link rel="stylesheet" href="assets/site.css?v=9" />
+
+  <!-- import map: lets the React wrapper bundle resolve `react`, `react-dom`,
+       and `boostgrid` in the browser without a build step -->
+  <script type="importmap">
+  {
+    "imports": {
+      "react":             "https://esm.sh/react@18.3.1",
+      "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+      "react-dom":         "https://esm.sh/react-dom@18.3.1",
+      "react-dom/client":  "https://esm.sh/react-dom@18.3.1/client",
+      "boostgrid":         "../dist/boostgrid.js",
+      "react-boostgrid":   "../packages/react-boostgrid/dist/react-boostgrid.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- ───── ATMOSPHERE ────────────────────────────────────────────── -->
+  <div class="atmosphere" aria-hidden="true">
+    <div class="atmosphere-grid"></div>
+    <div class="atmosphere-glow"></div>
+  </div>
+
+  <!-- ───── RIBBON ────────────────────────────────────────────────── -->
+  <header class="ribbon">
+    <div class="ribbon-inner">
+      <a class="brand" href="#" aria-label="Boostgrid home">
+        <span class="brand-mark">
+          <span class="brand-mark-grid">
+            <i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i>
+            <i></i><i></i><i></i><i></i>
+          </span>
+        </span>
+        <span class="brand-word">Boostgrid</span>
+      </a>
+
+      <ul class="ribbon-meta">
+        <li><span class="ribbon-key">VERSION</span><span class="ribbon-val">02.0.0</span></li>
+        <li><span class="ribbon-key">SIZE</span><span class="ribbon-val">5.51&nbsp;KB</span></li>
+        <li class="hide-md"><span class="ribbon-key">LICENSE</span><span class="ribbon-val">MIT</span></li>
+        <li class="ribbon-status"><span class="pulse"></span><span class="ribbon-val">stable</span></li>
+      </ul>
+
+      <nav class="ribbon-links">
+        <a href="https://github.com/JefferyLeo/boostgrid" aria-label="GitHub"><i class="bi bi-github"></i></a>
+        <a href="https://www.npmjs.com/package/boostgrid" aria-label="npm"><i class="bi bi-box-seam"></i></a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ───── PRIMARY TABS ──────────────────────────────────────────── -->
+  <div class="rail">
+    <div class="rail-inner">
+      <ul class="tabs" id="topTabs" role="tablist">
+        <li class="tab-item">
+          <button class="tab-link active" data-bs-toggle="tab" data-bs-target="#tab-getting-started" type="button">
+            <span class="tab-num">01</span><span class="tab-label">Getting&nbsp;started</span>
+          </button>
+        </li>
+        <li class="tab-item">
+          <button class="tab-link" data-bs-toggle="tab" data-bs-target="#tab-examples" type="button">
+            <span class="tab-num">02</span><span class="tab-label">Examples</span>
+          </button>
+        </li>
+        <li class="tab-item">
+          <button class="tab-link" data-bs-toggle="tab" data-bs-target="#tab-docs" type="button">
+            <span class="tab-num">03</span><span class="tab-label">Documentation</span>
+          </button>
+        </li>
+        <li class="tab-item">
+          <button class="tab-link" data-bs-toggle="tab" data-bs-target="#tab-about" type="button">
+            <span class="tab-num">04</span><span class="tab-label">About&nbsp;me</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ───── PANES ─────────────────────────────────────────────────── -->
+  <main class="page">
+    <div class="tab-content">
+      <!-- ────────────────────────────────────────────────────────── -->
+      <!-- 01 · GETTING STARTED                                        -->
+      <!-- ────────────────────────────────────────────────────────── -->
+      <section class="tab-pane fade show active" id="tab-getting-started">
+        <header class="hero">
+          <div class="hero-meta">
+            <span class="caps">↳&nbsp;chapter&nbsp;01&nbsp;/&nbsp;getting&nbsp;started</span>
+            <span class="caps muted">issue&nbsp;02 · spring&nbsp;edition</span>
+          </div>
+
+          <h1 class="hero-title">
+            <span class="hero-line" style="--d:0">A&nbsp;grid</span>
+            <span class="hero-line hero-line--em" style="--d:1">worth shipping.</span>
+          </h1>
+
+          <div class="hero-pull">
+            <span class="hero-rule"></span>
+            <p class="caps">
+              Sixty&nbsp;seconds, three&nbsp;files, zero dependencies.
+            </p>
+          </div>
+
+          <p class="hero-lede">
+            <strong>Boostgrid</strong> is a modern data grid for Bootstrap&nbsp;5. Written in
+            TypeScript, no jQuery, polished for the modern browser. It renders, sorts,
+            paginates&nbsp;and selects ten&nbsp;thousand rows in a hundred&nbsp;milliseconds, and the
+            entire bundle weighs less than a&nbsp;single SVG&nbsp;icon.
+          </p>
+
+          <ul class="stats">
+            <li>
+              <span class="stat-fig"><span class="stat-num">5.51</span><span class="stat-unit">kb</span></span>
+              <span class="stat-cap">brotli · minified · standalone</span>
+            </li>
+            <li>
+              <span class="stat-fig"><span class="stat-num">10<span class="thin">k</span></span><span class="stat-unit">/&nbsp;105ms</span></span>
+              <span class="stat-cap">first&nbsp;paint, ten thousand rows</span>
+            </li>
+            <li>
+              <span class="stat-fig"><span class="stat-num">0</span><span class="stat-unit">deps</span></span>
+              <span class="stat-cap">no&nbsp;jQuery, no runtime imports</span>
+            </li>
+            <li>
+              <span class="stat-fig"><span class="stat-num">17</span><span class="stat-unit">methods</span></span>
+              <span class="stat-cap">stable, typed public&nbsp;API</span>
+            </li>
+          </ul>
+        </header>
+
+        <!-- INSTALL TERMINALS -->
+        <section class="block">
+          <header class="block-head">
+            <span class="block-num">§&nbsp;01.1</span>
+            <h2 class="block-title">Install</h2>
+            <span class="block-rule"></span>
+            <span class="caps muted">three&nbsp;ways&nbsp;in</span>
+          </header>
+
+          <div class="terminals">
+            <article class="terminal">
+              <header class="terminal-bar">
+                <span class="dots"><i></i><i></i><i></i></span>
+                <span class="terminal-host">cdn.jsdelivr.net</span>
+                <button type="button" class="copy" data-copy>copy</button>
+              </header>
+              <pre><code><span class="cm">// drop in via CDN</span>
+&lt;script src=<span class="str">"https://cdn.jsdelivr.net/npm/boostgrid@2"</span>&gt;&lt;/script&gt;
+&lt;link rel=<span class="str">"stylesheet"</span>
+      href=<span class="str">"…/boostgrid@2/dist/boostgrid.css"</span>&gt;</code></pre>
+            </article>
+
+            <article class="terminal terminal--accent">
+              <header class="terminal-bar">
+                <span class="dots"><i></i><i></i><i></i></span>
+                <span class="terminal-host">~ / your-project</span>
+                <button type="button" class="copy" data-copy>copy</button>
+              </header>
+              <pre><code><span class="prompt">$</span> npm install boostgrid
+
+<span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+<span class="kw">import</span> <span class="str">"boostgrid/style.css"</span>;
+
+<span class="fn">attach</span>(<span class="str">"#grid"</span>);</code></pre>
+            </article>
+
+            <article class="terminal">
+              <header class="terminal-bar">
+                <span class="dots"><i></i><i></i><i></i></span>
+                <span class="terminal-host">PM&gt;</span>
+                <button type="button" class="copy" data-copy>copy</button>
+              </header>
+              <pre><code><span class="cm">// .NET / Visual Studio</span>
+<span class="prompt">PM&gt;</span> Install-Package Boostgrid
+
+<span class="cm">// drops boostgrid.min.{js,css}
+// into ~/Scripts and ~/Content</span></code></pre>
+            </article>
+          </div>
+        </section>
+
+        <!-- MINIMAL EXAMPLE -->
+        <section class="block">
+          <header class="block-head">
+            <span class="block-num">§&nbsp;01.2</span>
+            <h2 class="block-title">Minimal markup</h2>
+            <span class="block-rule"></span>
+            <span class="caps muted">html&nbsp;+&nbsp;data-attributes</span>
+          </header>
+
+          <p class="prose">
+            Mark up a regular Bootstrap&nbsp;5 table, then either set
+            <code>data-toggle="boostgrid"</code> for auto-init or call <code>attach()</code>.
+          </p>
+
+          <div class="terminal terminal--wide">
+            <header class="terminal-bar">
+              <span class="dots"><i></i><i></i><i></i></span>
+              <span class="terminal-host">index.html</span>
+              <button type="button" class="copy" data-copy>copy</button>
+            </header>
+            <pre><code>&lt;<span class="tag">table</span> <span class="attr">id</span>=<span class="str">"grid"</span> <span class="attr">class</span>=<span class="str">"table table-hover"</span> <span class="attr">data-toggle</span>=<span class="str">"boostgrid"</span>
+       <span class="attr">data-selection</span>=<span class="str">"true"</span> <span class="attr">data-multi-select</span>=<span class="str">"true"</span>&gt;
+  &lt;<span class="tag">thead</span>&gt;
+    &lt;<span class="tag">tr</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"id"</span> <span class="attr">data-identifier</span>=<span class="str">"true"</span> <span class="attr">data-type</span>=<span class="str">"numeric"</span>&gt;ID&lt;/<span class="tag">th</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"sender"</span> <span class="attr">data-order</span>=<span class="str">"asc"</span>&gt;Sender&lt;/<span class="tag">th</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"received"</span>&gt;Received&lt;/<span class="tag">th</span>&gt;
+    &lt;/<span class="tag">tr</span>&gt;
+  &lt;/<span class="tag">thead</span>&gt;
+  &lt;<span class="tag">tbody</span>&gt;…&lt;/<span class="tag">tbody</span>&gt;
+&lt;/<span class="tag">table</span>&gt;</code></pre>
+          </div>
+        </section>
+
+      </section>
+
+      <!-- ────────────────────────────────────────────────────────── -->
+      <!-- 02 · EXAMPLES                                              -->
+      <!-- ────────────────────────────────────────────────────────── -->
+      <section class="tab-pane fade" id="tab-examples">
+        <header class="block-head block-head--full">
+          <span class="block-num">§&nbsp;02</span>
+          <h2 class="block-title">Examples</h2>
+          <span class="block-rule"></span>
+          <span class="caps muted">live, copy-pastable</span>
+        </header>
+
+        <div class="examples">
+          <aside class="examples-rail">
+            <p class="rail-cap">examples&nbsp;/</p>
+            <div class="list" id="exampleList" role="tablist"></div>
+            <p class="rail-cap muted rail-cap--bottom">↳ each&nbsp;example mounts a real grid</p>
+          </aside>
+          <div class="examples-stage">
+            <div id="exampleHost" class="frame">
+              <header class="frame-bar">
+                <span class="dots"><i></i><i></i><i></i></span>
+                <span class="frame-title">— select an example —</span>
+              </header>
+              <div class="frame-body">
+                <p class="prose muted">Pick an example on the left to see it run with the real bundle.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ────────────────────────────────────────────────────────── -->
+      <!-- 03 · DOCUMENTATION                                         -->
+      <!-- ────────────────────────────────────────────────────────── -->
+      <section class="tab-pane fade" id="tab-docs">
+        <header class="hero hero--small">
+          <div class="hero-meta">
+            <span class="caps">↳&nbsp;chapter&nbsp;03&nbsp;/&nbsp;reference</span>
+            <span class="caps muted">api&nbsp;surface</span>
+          </div>
+          <h1 class="hero-title hero-title--small">
+            <span class="hero-line">The&nbsp;<em>full</em></span>
+            <span class="hero-line">specification.</span>
+          </h1>
+        </header>
+
+        <div class="examples">
+          <aside class="examples-rail">
+            <p class="rail-cap">reference&nbsp;/</p>
+            <div class="list" id="docsList" role="tablist">
+              <a href="#docs-options" data-doc-target="docs-options">Options</a>
+              <a href="#docs-methods" data-doc-target="docs-methods">Methods</a>
+              <a href="#docs-events" data-doc-target="docs-events">Events</a>
+              <a href="#docs-performance" data-doc-target="docs-performance">Performance</a>
+            </div>
+            <p class="rail-cap muted rail-cap--bottom">↳ scroll&nbsp;or&nbsp;click&nbsp;to&nbsp;jump</p>
+          </aside>
+
+          <div class="examples-stage">
+            <section class="block" id="docs-options">
+              <header class="block-head">
+                <span class="block-num">§&nbsp;03.1</span>
+                <h2 class="block-title">Options</h2>
+                <span class="block-rule"></span>
+                <span class="caps muted">passed&nbsp;to&nbsp;<code>new&nbsp;Boostgrid(t,&nbsp;…)</code></span>
+              </header>
+              <div class="reftable">
+                <table id="optionsTableTable">
+                  <thead><tr><th class="c-key">Option</th><th class="c-type">Type</th><th class="c-def">Default</th><th class="c-desc">Description</th></tr></thead>
+                  <tbody id="optionsTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="block" id="docs-methods">
+              <header class="block-head">
+                <span class="block-num">§&nbsp;03.2</span>
+                <h2 class="block-title">Methods</h2>
+                <span class="block-rule"></span>
+                <span class="caps muted">on&nbsp;a&nbsp;Boostgrid&nbsp;instance</span>
+              </header>
+              <div class="reftable">
+                <table>
+                  <thead><tr><th class="c-key">Method</th><th class="c-type">Returns</th><th class="c-desc">Description</th></tr></thead>
+                  <tbody id="methodsTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="block" id="docs-events">
+              <header class="block-head">
+                <span class="block-num">§&nbsp;03.3</span>
+                <h2 class="block-title">Events</h2>
+                <span class="block-rule"></span>
+                <span class="caps muted">DOM&nbsp;events&nbsp;+&nbsp;typed&nbsp;<code>grid.on()</code></span>
+              </header>
+              <div class="reftable">
+                <table>
+                  <thead><tr><th class="c-key">Event</th><th class="c-type">Payload</th><th class="c-desc">Description</th></tr></thead>
+                  <tbody id="eventsTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="block" id="docs-performance">
+              <header class="block-head">
+                <span class="block-num">§&nbsp;03.4</span>
+                <h2 class="block-title">Performance</h2>
+                <span class="block-rule"></span>
+                <span class="caps muted">why&nbsp;it&nbsp;is&nbsp;fast</span>
+              </header>
+              <ol class="perf">
+            <li>
+              <span class="perf-num">01</span>
+              <div><h4>Single delegated listener</h4><p>One click handler per grid; row buttons route through <code>data-bg-action</code>—no per-row bindings to rebuild on render.</p></div>
+            </li>
+            <li>
+              <span class="perf-num">02</span>
+              <div><h4>Memoized derived view</h4><p>Filter, sort and pagination are independent layers. Changing pages doesn't re-sort; sorting doesn't re-filter.</p></div>
+            </li>
+            <li>
+              <span class="perf-num">03</span>
+              <div><h4>O(1) selection lookups</h4><p>A <code>Map&lt;id,&nbsp;Row&gt;</code> is built once on data load—<code>select()</code>, <code>remove()</code> and <code>get</code>&nbsp;are constant-time.</p></div>
+            </li>
+            <li>
+              <span class="perf-num">04</span>
+              <div><h4>Debounced search</h4><p>The search input coalesces keystrokes (200&nbsp;ms by default) so the filter pipeline doesn't run on every letter.</p></div>
+            </li>
+            <li>
+              <span class="perf-num">05</span>
+              <div><h4>CSS containment</h4><p>The grid root carries <code>contain:&nbsp;content</code>; rows use <code>contain:&nbsp;layout&nbsp;style</code>—paint and layout stay inside the grid subtree.</p></div>
+            </li>
+            <li>
+              <span class="perf-num">06</span>
+              <div><h4>Bundle&nbsp;guarded&nbsp;at&nbsp;<code>&lt;&nbsp;15&nbsp;KB</code></h4><p>Every PR runs <code>size-limit</code>. We ship at <strong>5.51&nbsp;KB</strong> brotli today—numbers tracked against the build, not estimated.</p></div>
+            </li>
+          </ol>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <!-- ────────────────────────────────────────────────────────── -->
+      <!-- 04 · ABOUT ME                                              -->
+      <!-- ────────────────────────────────────────────────────────── -->
+      <section class="tab-pane fade" id="tab-about">
+        <header class="block-head block-head--full">
+          <span class="block-num">§&nbsp;04</span>
+          <h2 class="block-title">Colophon</h2>
+          <span class="block-rule"></span>
+          <span class="caps muted">about&nbsp;the&nbsp;maintainer</span>
+        </header>
+
+        <article class="colophon">
+          <aside class="colophon-aside">
+            <figure class="monogram">
+              <span class="monogram-grid"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+              <span class="monogram-mark">JL</span>
+            </figure>
+            <dl class="contact">
+              <dt>Email</dt>
+              <dd><a href="mailto:jeffery.leo@ogglobal.net">jeffery.leo@ogglobal.net</a></dd>
+              <dt>GitHub</dt>
+              <dd><a href="https://github.com/JefferyLeo/boostgrid">JefferyLeo/boostgrid</a></dd>
+              <dt>npm</dt>
+              <dd><a href="https://www.npmjs.com/package/boostgrid">npm/boostgrid</a></dd>
+            </dl>
+          </aside>
+
+          <div class="colophon-body">
+            <p class="colophon-greeting"><span class="caps">A&nbsp;letter&nbsp;from&nbsp;the&nbsp;maintainer</span></p>
+            <h2 class="colophon-title">Hi, my name is <em>Jeffery&nbsp;Leo.</em></h2>
+            <p class="colophon-lede">
+              I built <strong>Boostgrid</strong>—a modern, Bootstrap&nbsp;5-native data grid for
+              the modern browser. By day I work on developer tooling, .NET back-ends, and modern
+              web front-ends.
+            </p>
+            <p class="colophon-text">
+              Boostgrid is a clean, typed, vanilla, tree-shakeable package that drops into any
+              framework. No jQuery, no runtime dependencies, less than 15&nbsp;KB gzipped, and a
+              public API that stays out of your way.
+            </p>
+            <p class="colophon-text">
+              The project is permissively&nbsp;licensed, public on&nbsp;GitHub, and accepts
+              contributions of every shape. If something irks you, open an issue and tell me about
+              it; I read every one.
+            </p>
+            <p class="colophon-sig">
+              <span class="sig-name">— Jeffery</span>
+              <span class="sig-place caps">written&nbsp;in&nbsp;visual&nbsp;studio · 2026</span>
+            </p>
+          </div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <!-- ───── COLOPHON / FOOTER ─────────────────────────────────────── -->
+  <footer class="cred">
+    <div class="cred-inner">
+      <span class="caps">© 2024–<span id="year"></span> · Jeffery Leo</span>
+      <span class="cred-sep">·</span>
+      <span class="caps muted">MIT</span>
+      <span class="cred-spacer"></span>
+      <span class="caps muted cred-build">build&nbsp;v2.0.0&nbsp;·&nbsp;5.51&nbsp;KB</span>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="assets/site.js"></script>
+</body>
+</html>

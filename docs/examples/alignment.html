@@ -1,0 +1,78 @@
+<h4>Header &amp; row align</h4>
+<p class="text-muted">
+  <code>data-align</code> sets the cell alignment, <code>data-header-align</code>
+  the header alignment. Each defaults to <code>left</code>; values are
+  <code>left</code> · <code>center</code> · <code>right</code>.
+</p>
+
+<table id="ex-align" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric"
+          data-align="right" data-header-align="right" data-width="80">ID</th>
+      <th data-column-id="sender"
+          data-align="left" data-header-align="left">Sender (left)</th>
+      <th data-column-id="subject"
+          data-align="center" data-header-align="center">Subject (centred)</th>
+      <th data-column-id="received"
+          data-align="right" data-header-align="left" data-width="140">Received (header L · cell R)</th>
+      <th data-column-id="status" data-type="numeric"
+          data-align="center" data-header-align="center" data-width="100">Status</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="aln-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="aln-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="aln-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="aln-html"><code><span class="cm">&lt;!-- Header and cell alignment are independent --&gt;</span>
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"id"</span>
+    <span class="attr">data-align</span>=<span class="str">"right"</span>
+    <span class="attr">data-header-align</span>=<span class="str">"right"</span>&gt;ID&lt;/<span class="tag">th</span>&gt;
+
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"received"</span>
+    <span class="attr">data-align</span>=<span class="str">"right"</span>
+    <span class="attr">data-header-align</span>=<span class="str">"left"</span>&gt;Received&lt;/<span class="tag">th</span>&gt;
+
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"subject"</span>
+    <span class="attr">data-align</span>=<span class="str">"center"</span>
+    <span class="attr">data-header-align</span>=<span class="str">"center"</span>&gt;Subject&lt;/<span class="tag">th</span>&gt;
+
+<span class="cm">&lt;!-- Or via cssClass / headerCssClass for full BS5 utilities --&gt;</span>
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"status"</span>
+    <span class="attr">data-css-class</span>=<span class="str">"text-uppercase"</span>
+    <span class="attr">data-header-css-class</span>=<span class="str">"fw-bold"</span>&gt;Status&lt;/<span class="tag">th</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="aln-vanilla"><code><span class="cm">// All column alignment is data-driven — no JS configuration required.</span>
+<span class="fn">attach</span>(<span class="str">"#grid"</span>);
+
+<span class="cm">// Numeric columns auto-right by convention; you can still override:</span>
+<span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">converters</span>: {
+    <span class="prop">currency</span>: {
+      <span class="fn">from</span>: (v) =&gt; <span class="fn">Number</span>(v),
+      <span class="fn">to</span>:   (v) =&gt; v.<span class="fn">toLocaleString</span>(<span class="str">"en"</span>, { <span class="prop">style</span>: <span class="str">"currency"</span>, <span class="prop">currency</span>: <span class="str">"USD"</span> }),
+    },
+  },
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="aln-react"><code><span class="cm">// Alignment is configured directly on each column object.</span>
+&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={[
+    { <span class="prop">id</span>: <span class="str">"id"</span>,       <span class="prop">text</span>: <span class="str">"ID"</span>,       <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span>,
+      <span class="prop">align</span>: <span class="str">"right"</span>, <span class="prop">headerAlign</span>: <span class="str">"right"</span> },
+    { <span class="prop">id</span>: <span class="str">"sender"</span>,   <span class="prop">text</span>: <span class="str">"Sender"</span>,
+      <span class="prop">align</span>: <span class="str">"left"</span>,  <span class="prop">headerAlign</span>: <span class="str">"left"</span> },
+    { <span class="prop">id</span>: <span class="str">"subject"</span>,  <span class="prop">text</span>: <span class="str">"Subject"</span>,
+      <span class="prop">align</span>: <span class="str">"center"</span>, <span class="prop">headerAlign</span>: <span class="str">"center"</span> },
+    { <span class="prop">id</span>: <span class="str">"received"</span>, <span class="prop">text</span>: <span class="str">"Received"</span>,
+      <span class="prop">align</span>: <span class="str">"right"</span>, <span class="prop">headerAlign</span>: <span class="str">"left"</span> },
+    { <span class="prop">id</span>: <span class="str">"status"</span>,   <span class="prop">text</span>: <span class="str">"Status"</span>,
+      <span class="prop">align</span>: <span class="str">"center"</span>, <span class="prop">headerAlign</span>: <span class="str">"center"</span>,
+      <span class="prop">cssClass</span>: <span class="str">"text-uppercase"</span>, <span class="prop">headerCssClass</span>: <span class="str">"fw-bold"</span> },
+  ]}
+/&gt;</code></pre>
+</section>

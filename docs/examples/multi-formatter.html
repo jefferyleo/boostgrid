@@ -1,0 +1,63 @@
+<h4>Combined formatters</h4>
+<p class="text-muted">
+  Multiple formatters in a single grid. Status renders as a coloured pill;
+  Amount runs through <code>Intl.NumberFormat</code> for currency; Received gets a
+  human-readable relative date.
+</p>
+
+<table id="ex-mfmt" class="table table-hover align-middle">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="sender" data-width="240">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="amount"   data-formatter="money"   data-align="right" data-width="120">Amount</th>
+      <th data-column-id="received" data-formatter="rel"     data-width="160">Received</th>
+      <th data-column-id="status"   data-formatter="pill"    data-align="center" data-width="110">Status</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="mf-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="mf-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="mf-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="mf-html"><code>&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"amount"</span>   <span class="attr">data-formatter</span>=<span class="str">"money"</span>&gt;Amount&lt;/<span class="tag">th</span>&gt;
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"received"</span> <span class="attr">data-formatter</span>=<span class="str">"rel"</span>&gt;Received&lt;/<span class="tag">th</span>&gt;
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"status"</span>   <span class="attr">data-formatter</span>=<span class="str">"pill"</span>&gt;Status&lt;/<span class="tag">th</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="mf-vanilla"><code><span class="kw">const</span> money = <span class="kw">new</span> <span class="fn">Intl</span>.<span class="fn">NumberFormat</span>(<span class="str">"en-US"</span>, {
+  <span class="prop">style</span>: <span class="str">"currency"</span>, <span class="prop">currency</span>: <span class="str">"USD"</span>,
+});
+
+<span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">formatters</span>: {
+    <span class="fn">money</span>(_col, row) {
+      <span class="kw">return</span> money.<span class="fn">format</span>(row.amount ?? <span class="num">0</span>);
+    },
+    <span class="fn">rel</span>(_col, row) {
+      <span class="kw">const</span> diff = (<span class="kw">new</span> <span class="fn">Date</span>(row.received) - <span class="fn">Date</span>.<span class="fn">now</span>()) / <span class="num">86400000</span>;
+      <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Intl</span>.<span class="fn">RelativeTimeFormat</span>(<span class="str">"en"</span>, { <span class="prop">numeric</span>: <span class="str">"auto"</span> })
+        .<span class="fn">format</span>(<span class="fn">Math</span>.<span class="fn">round</span>(diff), <span class="str">"day"</span>);
+    },
+    <span class="fn">pill</span>(_col, row) {
+      <span class="kw">const</span> map = { <span class="num">0</span>: [<span class="str">"success"</span>, <span class="str">"OK"</span>], <span class="num">1</span>: [<span class="str">"info"</span>, <span class="str">"Info"</span>],
+                   <span class="num">2</span>: [<span class="str">"warning"</span>, <span class="str">"Warn"</span>], <span class="num">3</span>: [<span class="str">"danger"</span>, <span class="str">"Error"</span>] };
+      <span class="kw">const</span> [v, l] = map[<span class="fn">Number</span>(row.status)] ?? [<span class="str">"secondary"</span>, <span class="str">"?"</span>];
+      <span class="kw">return</span> <span class="str">`&lt;span class="badge text-bg-</span>${v}<span class="str">"&gt;</span>${l}<span class="str">&lt;/span&gt;`</span>;
+    },
+  },
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="mf-react"><code><span class="kw">const</span> formatters = { money, rel, pill };  <span class="cm">// same fns as the vanilla tab</span>
+
+&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={[
+    { <span class="prop">id</span>: <span class="str">"amount"</span>,   <span class="prop">text</span>: <span class="str">"Amount"</span>,   <span class="prop">formatter</span>: formatters.money },
+    { <span class="prop">id</span>: <span class="str">"received"</span>, <span class="prop">text</span>: <span class="str">"Received"</span>, <span class="prop">formatter</span>: formatters.rel   },
+    { <span class="prop">id</span>: <span class="str">"status"</span>,   <span class="prop">text</span>: <span class="str">"Status"</span>,   <span class="prop">formatter</span>: formatters.pill  },
+  ]}
+/&gt;</code></pre>
+</section>
