@@ -13,7 +13,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="../dist/boostgrid.css" />
-  <link rel="stylesheet" href="assets/site.css?v=9" />
+  <link rel="stylesheet" href="assets/site.css?v=17" />
 
   <!-- import map: lets the React wrapper bundle resolve `react`, `react-dom`,
        and `boostgrid` in the browser without a build step -->
@@ -24,8 +24,11 @@
       "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
       "react-dom":         "https://esm.sh/react-dom@18.3.1",
       "react-dom/client":  "https://esm.sh/react-dom@18.3.1/client",
-      "boostgrid":         "../dist/boostgrid.js",
-      "react-boostgrid":   "../packages/react-boostgrid/dist/react-boostgrid.js"
+      "vue":               "https://esm.sh/vue@3.4.38",
+      "boostgrid":         "../dist/boostgrid.js?v=2.4.6",
+      "react-boostgrid":   "../packages/react-boostgrid/dist/react-boostgrid.js?v=2.4.1",
+      "vue-boostgrid":     "../packages/vue-boostgrid/dist/vue-boostgrid.js?v=2.4.1",
+      "boostgrid-export":  "../packages/boostgrid-export/dist/boostgrid-export.js?v=2.4.1"
     }
   }
   </script>
@@ -53,7 +56,7 @@
       </a>
 
       <ul class="ribbon-meta">
-        <li><span class="ribbon-key">VERSION</span><span class="ribbon-val">02.0.0</span></li>
+        <li><span class="ribbon-key">VERSION</span><span class="ribbon-val">02.4.0</span></li>
         <li><span class="ribbon-key">SIZE</span><span class="ribbon-val">5.51&nbsp;KB</span></li>
         <li class="hide-md"><span class="ribbon-key">LICENSE</span><span class="ribbon-val">MIT</span></li>
         <li class="ribbon-status"><span class="pulse"></span><span class="ribbon-val">stable</span></li>
@@ -86,8 +89,13 @@
           </button>
         </li>
         <li class="tab-item">
+          <button class="tab-link" data-bs-toggle="tab" data-bs-target="#tab-changelog" type="button">
+            <span class="tab-num">04</span><span class="tab-label">Changelog</span>
+          </button>
+        </li>
+        <li class="tab-item">
           <button class="tab-link" data-bs-toggle="tab" data-bs-target="#tab-about" type="button">
-            <span class="tab-num">04</span><span class="tab-label">About&nbsp;me</span>
+            <span class="tab-num">05</span><span class="tab-label">About&nbsp;me</span>
           </button>
         </li>
       </ul>
@@ -376,11 +384,347 @@
       </section>
 
       <!-- ────────────────────────────────────────────────────────── -->
-      <!-- 04 · ABOUT ME                                              -->
+      <!-- 04 · CHANGELOG                                             -->
+      <!-- ────────────────────────────────────────────────────────── -->
+      <section class="tab-pane fade" id="tab-changelog">
+        <header class="hero hero--small">
+          <div class="hero-meta">
+            <span class="caps">↳&nbsp;chapter&nbsp;04&nbsp;/&nbsp;changelog</span>
+            <span class="caps muted">release&nbsp;notes&nbsp;·&nbsp;reverse-chronological</span>
+          </div>
+          <h1 class="hero-title hero-title--small">
+            <span class="hero-line">Every&nbsp;line</span>
+            <span class="hero-line"><em>that&nbsp;shipped.</em></span>
+          </h1>
+          <p class="hero-lede" style="margin-top: 1.5rem">
+            A running log of every release. Versions follow
+            <a href="https://semver.org/">semver</a>: major bumps are breaking,
+            minor bumps add features, patches are bug fixes only.
+          </p>
+        </header>
+
+        <div class="examples">
+          <aside class="examples-rail">
+            <p class="rail-cap">releases&nbsp;/</p>
+            <div class="list" id="changelogList" role="tablist">
+              <a href="#cl-2-4-0" data-doc-target="cl-2-4-0">2.4.0 — i18n &amp; sticky polish</a>
+              <a href="#cl-2-3-0" data-doc-target="cl-2-3-0">2.3.0 — Power-user UX &amp; server-side</a>
+              <a href="#cl-2-2-0" data-doc-target="cl-2-2-0">2.2.0 — Column UX &amp; tree polish</a>
+              <a href="#cl-2-1-0" data-doc-target="cl-2-1-0">2.1.0 — Hierarchical data</a>
+              <a href="#cl-2-0-0" data-doc-target="cl-2-0-0">2.0.0 — Vanilla rewrite</a>
+              <a href="#cl-1-x"   data-doc-target="cl-1-x">1.x — jquery-bootgrid</a>
+              <a href="#cl-roadmap" data-doc-target="cl-roadmap">Roadmap</a>
+            </div>
+            <p class="rail-cap muted rail-cap--bottom">↳ click&nbsp;to&nbsp;jump</p>
+          </aside>
+
+          <div class="examples-stage">
+
+            <!-- ── 2.4.0 ──────────────────────────────────────────── -->
+            <article class="block release" id="cl-2-4-0">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num">02.4.0</span>
+                  <span class="release-status release-status--current">current</span>
+                </div>
+                <div class="release-meta">
+                  <time class="caps muted">spring&nbsp;2026</time>
+                  <span class="caps muted">·&nbsp;minor&nbsp;release</span>
+                </div>
+                <p class="release-tagline">
+                  i18n &amp; polish. Every UI string is now in
+                  <code>options.labels</code>; pagination summaries
+                  digit-group via <code>Intl.NumberFormat</code>; opt-in
+                  sticky <code>&lt;thead&gt;</code>; auto-tooltips on
+                  clipped cells. Bundle unchanged at 14.46&nbsp;KB.
+                </p>
+              </header>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">FEATURE</span>Round&nbsp;7 — i18n hardening</h3>
+                <ul class="release-list">
+                  <li><strong>14 new label keys</strong> covering every UI string introduced in 2.0–2.3 — the column-visibility panel, master/detail chevrons, bulk-action bar count + clear button, tree carets, drag-resize affordances. The legacy keys (<code>all</code>, <code>infos</code>, <code>loading</code>, <code>noResults</code>, <code>refresh</code>, <code>search</code>) are unchanged.</li>
+                  <li><strong>Locale-aware digit grouping.</strong> Pass <code>locale:&nbsp;"de-DE"</code> (or any BCP-47 tag) and the &ldquo;Showing N entries&rdquo; line uses <code>Intl.NumberFormat</code> for thousands separators. Cached per locale so we don't allocate a formatter per render.</li>
+                  <li><strong>Override any subset.</strong> Missing keys fall back to English, so a partial translation works fine while you complete it.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">FEATURE</span>Round&nbsp;7 — Polish</h3>
+                <ul class="release-list">
+                  <li><strong>Sticky header.</strong> <code>stickyHeader:&nbsp;true</code> pins <code>&lt;thead&gt;</code> via <code>position:&nbsp;sticky</code>. Coexists with frozen columns — z-indexes are arranged so the corner cell wins. Override the offset for fixed-nav layouts via <code>--boostgrid-sticky-top: 56px</code>.</li>
+                  <li><strong>Truncated-cell tooltips.</strong> A delegated <code>mouseover</code> listener lazily attaches a <code>title</code> attribute when a cell's <code>scrollWidth&nbsp;&gt;&nbsp;clientWidth</code>. Skips cells that already have a title or carry <code>data-bg-no-tooltip</code>. On by default; <code>truncatedTooltips:&nbsp;false</code> opts out.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--migration">MIGRATION</span>Coming&nbsp;from&nbsp;2.3?</h3>
+                <ul class="release-list release-list--prose">
+                  <li>No breaking changes. The new label keys ship with English defaults; existing translations keep working.</li>
+                  <li>Net-zero bundle impact — the i18n routing replaced inline string literals that were already in the build.</li>
+                  <li><code>stickyHeader</code> is opt-in to avoid surprising layouts on grids embedded inside small overflow containers.</li>
+                </ul>
+              </section>
+            </article>
+
+            <!-- ── 2.3.0 ──────────────────────────────────────────── -->
+            <article class="block release release--archive" id="cl-2-3-0">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num release-num--archive">02.3.0</span>
+                  <span class="release-status">previous</span>
+                </div>
+                <div class="release-meta">
+                  <time class="caps muted">spring&nbsp;2026</time>
+                  <span class="caps muted">·&nbsp;minor&nbsp;release</span>
+                </div>
+                <p class="release-tagline">
+                  Power-user UX &amp; server-side. Master/detail row panels,
+                  spreadsheet-style cell selection with TSV copy, a sticky
+                  bulk-action bar, animated loading skeleton, and an
+                  ajax payload that surfaces grouping + tree state for
+                  server-driven grids.
+                </p>
+              </header>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">FEATURE</span>Round&nbsp;6 — Power-user UX</h3>
+                <ul class="release-list">
+                  <li><strong>Master/detail row expansion.</strong> <code>rowDetail:&nbsp;(row)&nbsp;=&gt;&nbsp;string&nbsp;|&nbsp;HTMLElement</code> renders an expand chevron in a leading affordance cell. The colspan'd panel below the row hosts whatever you return — return <code>null</code> to skip a row's panel.</li>
+                  <li><strong>Cell selection &amp; clipboard.</strong> <code>cellSelection:&nbsp;true</code> turns the body into a spreadsheet — click anchors, shift-click or drag extends the rectangle, <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>C</kbd> copies as tab-separated values, <kbd>Esc</kbd> clears.</li>
+                  <li><strong>Bulk-action bar.</strong> <code>bulkActions</code> renders a sticky toolbar that slides in whenever selection is non-empty, with an auto-prepended count and "Clear" button.</li>
+                  <li><strong>Loading skeleton.</strong> Animated placeholder rows replace the blank body during ajax fetches by default. Numeric override or <code>loadingSkeleton:&nbsp;false</code> for the previous behaviour.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">FEATURE</span>Round&nbsp;6 — Server-side adapters</h3>
+                <ul class="release-list">
+                  <li><strong>AjaxRequest extensions.</strong> <code>groupBy</code> + <code>collapsedGroups</code> are sent on every fetch when grouping is on; <code>treeMode</code> + <code>expandedTreeNodes</code> when the tree is on. Single-string <code>groupBy</code> is normalized to an array. Existing endpoints see the same payload they always did — new fields appear only when their feature is active.</li>
+                  <li><strong>Adapter sketch.</strong> Worked Express example demonstrates how to switch query shape based on the request payload: paginated flat, group-sorted, or root-plus-expanded-children for tree.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--migration">MIGRATION</span>Coming&nbsp;from&nbsp;2.2?</h3>
+                <ul class="release-list release-list--prose">
+                  <li>No breaking changes. <code>cellSelection</code>, <code>rowDetail</code>, <code>bulkActions</code> are all opt-in. The ajax extensions only appear in the request payload when their feature is on.</li>
+                  <li><code>loadingSkeleton</code> defaults to <code>true</code> — set it to <code>false</code> if you have a custom in-flight UI you'd rather keep.</li>
+                  <li><code>cellSelection</code> conflicts with <code>rowSelect</code> (the whole-row click handler). Pick one.</li>
+                </ul>
+              </section>
+            </article>
+
+            <!-- ── 2.2.0 ──────────────────────────────────────────── -->
+            <article class="block release release--archive" id="cl-2-2-0">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num release-num--archive">02.2.0</span>
+                  <span class="release-status">previous</span>
+                </div>
+                <div class="release-meta">
+                  <time class="caps muted">spring&nbsp;2026</time>
+                  <span class="caps muted">·&nbsp;minor&nbsp;release</span>
+                </div>
+                <p class="release-tagline">
+                  Column UX &amp; tree polish. Drag-reorder + drag-resize on
+                  every column, frozen-right pinning, a richer
+                  column-visibility panel, drag-to-reparent on tree rows,
+                  and tree-aware export indentation.
+                </p>
+              </header>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">FEATURE</span>Round&nbsp;5 — Column&nbsp;UX</h3>
+                <ul class="release-list">
+                  <li><strong>Frozen-right columns.</strong> <code>frozen:&nbsp;"right"</code> pins a column to the trailing edge during horizontal scroll. The shadow now reads from both directions when frozen prefixes <em>and</em> suffixes are present.</li>
+                  <li><strong>Column reorder.</strong> Drag any header to rearrange. Frozen-group constrained — dropping a left-frozen column onto a non-frozen target snaps to the end of the frozen run. Persisted in v:3 state.</li>
+                  <li><strong>Column resize.</strong> Drag the right edge of a header to resize. Live-updates body cells without a full re-render. <code>minWidth</code>&nbsp;/ <code>maxWidth</code> per column; persisted as <code>columnWidths</code>.</li>
+                  <li><strong>Visibility panel polish.</strong> Search input, drag-handles for reorder, "Reset to defaults" button. The panel is also a reorder UI — pulling the same <code>reorderColumn()</code> backend.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">FEATURE</span>Round&nbsp;5 — Hierarchical&nbsp;polish</h3>
+                <ul class="release-list">
+                  <li><strong>Tree drag-to-reparent.</strong> Opt-in via <code>treeReparent:&nbsp;true</code>. Drop a row onto another to change <code>parentId</code>. Cycle-guarded; <code>onReparent</code> can return a Promise that resolves <code>false</code> to abort.</li>
+                  <li><strong>Subtotal-on-top option.</strong> <code>groupSubtotalsOnTop:&nbsp;true</code> emits group footers above their member rows, applied at every grouping level uniformly.</li>
+                  <li><strong>Tree-aware export.</strong> The export plugin's new <code>treeExport</code> option indents the tree-column cell by depth, or inserts a leading <code>Path</code> column with slash-joined ancestors. Zero core cost.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--migration">MIGRATION</span>Coming&nbsp;from&nbsp;2.1?</h3>
+                <ul class="release-list release-list--prose">
+                  <li>No breaking changes. Reorder + resize default to <em>on</em> — opt out via <code>columnReorder:&nbsp;false</code> or <code>columnResize:&nbsp;false</code>, or per-column with <code>reorderable:&nbsp;false</code>&nbsp;/ <code>resizable:&nbsp;false</code>.</li>
+                  <li>State schema bumped from v:2 to v:3 to carry <code>columnOrder</code> and <code>columnWidths</code>. v:2 payloads still apply non-column fields cleanly.</li>
+                  <li><code>treeReparent</code> stays <em>off</em> by default — it mutates user data, so it asks for explicit consent.</li>
+                </ul>
+              </section>
+            </article>
+
+            <!-- ── 2.1.0 ──────────────────────────────────────────── -->
+            <article class="block release release--archive" id="cl-2-1-0">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num release-num--archive">02.1.0</span>
+                  <span class="release-status">previous</span>
+                </div>
+                <div class="release-meta">
+                  <time class="caps muted">spring&nbsp;2026</time>
+                  <span class="caps muted">·&nbsp;minor&nbsp;release</span>
+                </div>
+                <p class="release-tagline">
+                  Hierarchical data, end to end. <em>Multi-level grouping</em>
+                  closes the depth gap left in 2.0; <em>tree mode</em> ships
+                  adjacency-list parent/child rows with ancestor-aware search.
+                </p>
+              </header>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">FEATURE</span>Round&nbsp;4 — Hierarchical data</h3>
+                <ul class="release-list">
+                  <li><strong>Multi-level grouping.</strong> <code>groupBy</code> now accepts <code>string&nbsp;|&nbsp;string[]</code>; nested headers indent per depth, and <code>groupAggregators</code> can target a specific tier with the <code>colId@N</code> key syntax.</li>
+                  <li><strong>Tree data mode.</strong> Set <code>treeMode:&nbsp;true</code> with a <code>parentId</code> field on each row — Boostgrid reconstructs the tree, renders DFS with depth-driven indentation, and exposes <code>toggleTreeNode</code>&nbsp;/ <code>expandAllTree</code>&nbsp;/ <code>collapseAllTree</code>.</li>
+                  <li><strong>Ancestor-aware search.</strong> When the search input matches a deeply-nested leaf, its entire ancestor chain stays visible so the path to the hit is never hidden behind a collapsed parent.</li>
+                  <li><strong>State persistence v:2.</strong> Schema bumped from v:1; collapsed group paths and expanded tree nodes round-trip via <code>localStorage</code>. v:1 payloads still apply non-hierarchical fields cleanly.</li>
+                  <li><strong>Cycle &amp; orphan defense.</strong> Tree builder warns and breaks cycles, promotes orphan rows to roots — never crashes on malformed input.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--migration">MIGRATION</span>Coming&nbsp;from&nbsp;2.0?</h3>
+                <ul class="release-list release-list--prose">
+                  <li>No breaking changes. Existing <code>groupBy:&nbsp;"status"</code> code keeps working — the array form is purely additive.</li>
+                  <li>If you persisted state in 2.0, that v:1 payload still applies; new collapse/expand state starts fresh under v:2.</li>
+                  <li>The <code>GroupContext</code> shape gained <code>groupPath</code> + <code>depth</code>; existing aggregators that read only <code>rows</code>&nbsp;/ <code>groupKey</code>&nbsp;/ <code>groupLabel</code> need no change.</li>
+                </ul>
+              </section>
+            </article>
+
+            <!-- ── 2.0.0 ──────────────────────────────────────────── -->
+            <article class="block release release--archive" id="cl-2-0-0">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num release-num--archive">02.0.0</span>
+                  <span class="release-status">previous</span>
+                </div>
+                <div class="release-meta">
+                  <time class="caps muted">spring&nbsp;2026</time>
+                  <span class="caps muted">·&nbsp;major&nbsp;release</span>
+                </div>
+                <p class="release-tagline">
+                  A complete <em>vanilla&nbsp;TypeScript</em> rewrite. Zero runtime
+                  dependencies, ESM&nbsp;+&nbsp;UMD, ~9&nbsp;KB&nbsp;brotli, three
+                  framework wrappers and an export plugin in lockstep.
+                </p>
+              </header>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">FEATURE</span>Round&nbsp;3 — Power&nbsp;features</h3>
+                <ul class="release-list">
+                  <li><strong>Virtual scroll.</strong> Opt-in via <code>virtualScroll:&nbsp;true</code>. Windowed rendering with rAF coalescing — sustained ten&nbsp;thousand rows at sixty&nbsp;frames.</li>
+                  <li><strong>Cell-level edit.</strong> Per-column <code>editable</code> with <code>text&nbsp;/&nbsp;number&nbsp;/&nbsp;select</code> editors, <code>onCellEdit</code> commit hook, and <code>revert()</code> for async-server rollback.</li>
+                  <li><strong>Row grouping with subtotals.</strong> <code>groupBy</code> + <code>groupAggregators</code> render group headers, member rows, and per-group footers. Collapse state persists.</li>
+                  <li><strong>Frozen left columns.</strong> Sticky positioning with cumulative left offsets and a scroll-shadow that fades in only after <code>scrollLeft&nbsp;&gt;&nbsp;0</code>.</li>
+                  <li><strong><code>boostgrid-export</code> plugin.</strong> CSV (RFC 4180), Excel via lazy <code>xlsx-js-style</code>, and Print. Zero bytes added to the core bundle.</li>
+                  <li><strong><code>vue-boostgrid</code> wrapper.</strong> Vue&nbsp;3 + <code>&lt;script&nbsp;setup&gt;</code>; same imperative handle as the React wrapper.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">FEATURE</span>Round&nbsp;2 — Type&nbsp;safety&nbsp;&amp;&nbsp;state</h3>
+                <ul class="release-list">
+                  <li><strong>Generic over <code>TRow</code>.</strong> <code>Boostgrid&lt;TRow&gt;</code> threads your row shape through every formatter, callback, footer and edit hook. Full inference end-to-end.</li>
+                  <li><strong>State persistence.</strong> <code>stateSave:&nbsp;true</code> — sort, search, page, rows-per-page, selection, column visibility and collapsed groups round-trip via localStorage with a versioned schema.</li>
+                  <li><strong>Footer aggregation.</strong> DataTables-style <code>footer:&nbsp;true</code> with per-column <code>footerFormatter</code> or whole-row <code>footerCallback</code>. <code>FooterContext</code> exposes filtered + current-page row sets.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--breaking">BREAKING</span>Round&nbsp;1 — The&nbsp;rewrite</h3>
+                <ul class="release-list">
+                  <li><strong>jQuery removed.</strong> The library is now vanilla TypeScript. The <code>$.fn.bootgrid()</code> entry point is gone; use <code>attach()</code> or <code>data-toggle="boostgrid"</code>.</li>
+                  <li><strong>Modern packaging.</strong> ESM + UMD output, side-effect-free, tree-shakeable formatters. <code>exports</code> map for first-class subpath imports.</li>
+                  <li><strong>Bootstrap&nbsp;5 native.</strong> Pagination, toolbar and badges use BS5 classes and CSS variables. No bespoke theming layer.</li>
+                  <li><strong>React wrapper.</strong> <code>react-boostgrid</code> ships in the same monorepo. Host-div pattern keeps the reconciler off the table DOM.</li>
+                  <li><strong>Single delegated listener.</strong> One click handler per grid; row buttons route through <code>data-bg-action</code>.</li>
+                  <li><strong>Bundle ceiling.</strong> 15&nbsp;KB brotli enforced by <code>size-limit</code>. Currently ~9&nbsp;KB.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--migration">MIGRATION</span>Coming&nbsp;from&nbsp;1.x?</h3>
+                <ul class="release-list release-list--prose">
+                  <li>Replace <code>$("#grid").bootgrid({…})</code> with <code>attach("#grid",&nbsp;{…})</code>.</li>
+                  <li>Column option names are kebab-case in markup (<code>data-column-id</code>, <code>data-identifier</code>) and camelCase in JavaScript (<code>columnId</code>, <code>identifier</code>) — same as before.</li>
+                  <li>Custom formatters are now plain functions <code>(value, row) =&gt; string</code>; no <code>this</code> binding needed.</li>
+                  <li>The <code>loaded</code>, <code>selected</code>, <code>deselected</code> events still fire as DOM events; you can also use <code>grid.on("selected", …)</code>.</li>
+                </ul>
+              </section>
+            </article>
+
+            <!-- ── 1.x ────────────────────────────────────────────── -->
+            <article class="block release release--archive" id="cl-1-x">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num release-num--archive">01.x</span>
+                  <span class="release-status">archive</span>
+                </div>
+                <div class="release-meta">
+                  <time class="caps muted">2014–2023</time>
+                  <span class="caps muted">·&nbsp;jquery-bootgrid&nbsp;era</span>
+                </div>
+                <p class="release-tagline">
+                  The original was <strong>jquery-bootgrid</strong>: a Bootstrap&nbsp;3 / 4
+                  table plugin in jQuery. It served well for nearly a decade.
+                  Boostgrid&nbsp;2 is the spiritual successor — same data-attribute
+                  ergonomics, modern internals.
+                </p>
+              </header>
+              <p class="prose muted">
+                The 1.x line is no longer maintained. Source remains available on the
+                legacy GitHub repository for archival reference. New projects should
+                start on 2.x.
+              </p>
+            </article>
+
+            <!-- ── Roadmap ─────────────────────────────────────────── -->
+            <article class="block release release--roadmap" id="cl-roadmap">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num release-num--next">next</span>
+                  <span class="release-status release-status--planned">planned</span>
+                </div>
+                <div class="release-meta">
+                  <span class="caps muted">no&nbsp;commitments&nbsp;·&nbsp;subject&nbsp;to&nbsp;change</span>
+                </div>
+                <p class="release-tagline">
+                  Items still ahead — listed here so adopters can see where
+                  the road goes, not as promises. Frozen-right, column
+                  reorder + drag-resize, and tree drag-to-reparent all
+                  shipped in 2.2.
+                </p>
+              </header>
+              <ul class="release-list release-list--planned">
+                <li>Variable-row-height virtual scroll (measure-on-mount).</li>
+                <li>PDF export.</li>
+                <li>Accessibility: full ARIA grid pattern + keyboard navigation.</li>
+                <li>i18n — extracted strings, locale-aware formatters.</li>
+                <li>Web-Worker sort/filter for very large in-memory datasets.</li>
+              </ul>
+            </article>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ────────────────────────────────────────────────────────── -->
+      <!-- 05 · ABOUT ME                                              -->
       <!-- ────────────────────────────────────────────────────────── -->
       <section class="tab-pane fade" id="tab-about">
         <header class="block-head block-head--full">
-          <span class="block-num">§&nbsp;04</span>
+          <span class="block-num">§&nbsp;05</span>
           <h2 class="block-title">Colophon</h2>
           <span class="block-rule"></span>
           <span class="caps muted">about&nbsp;the&nbsp;maintainer</span>
@@ -439,11 +783,11 @@
       <span class="cred-sep">·</span>
       <span class="caps muted">MIT</span>
       <span class="cred-spacer"></span>
-      <span class="caps muted cred-build">build&nbsp;v2.0.0&nbsp;·&nbsp;5.51&nbsp;KB</span>
+      <span class="caps muted cred-build">build&nbsp;v2.4.0&nbsp;·&nbsp;14.46&nbsp;KB</span>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script type="module" src="assets/site.js"></script>
+  <script type="module" src="assets/site.js?v=2.4.6"></script>
 </body>
 </html>

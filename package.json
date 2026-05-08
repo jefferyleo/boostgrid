@@ -1,6 +1,6 @@
 {
   "name": "boostgrid",
-  "version": "2.0.0",
+  "version": "2.4.0",
   "description": "A modern, framework-agnostic data grid for Bootstrap 5. Vanilla TypeScript, no jQuery.",
   "type": "module",
   "main": "./dist/boostgrid.umd.cjs",
@@ -23,9 +23,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && tsc -p tsconfig.build.json",
-    "build:all": "npm run build && npm run -w react-boostgrid build",
+    "build:all": "npm run build && npm run -w react-boostgrid build && npm run -w boostgrid-export build && npm run -w vue-boostgrid build",
     "test": "vitest run",
-    "test:all": "vitest run && npm run -w react-boostgrid test",
+    "test:all": "vitest run && npm run -w react-boostgrid test && npm run -w boostgrid-export test && npm run -w vue-boostgrid test",
     "test:watch": "vitest",
     "docs": "npx -y http-server -p 4174 -s -c-1 -o /docs/index.html",
     "lint": "eslint \"src/**/*.ts\"",

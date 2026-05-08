@@ -1,0 +1,66 @@
+<h4>Bulk action bar</h4>
+<p class="text-muted">
+  When at least one row is selected, a sticky toolbar slides in above
+  the table. <code>bulkActions</code> returns the user-defined contents
+  (HTML string or node) — Boostgrid prepends the live count and a "Clear"
+  button. Combine with <code>multiSelect</code> for the canonical inbox
+  / mailbox UX.
+</p>
+
+<table id="ex-bulk" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-width="64" data-align="right">ID</th>
+      <th data-column-id="sender" data-width="220">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="received" data-width="160">Received</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="bulk-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="bulk-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="bulk-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+<span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">selection</span>: <span class="kw">true</span>,
+  <span class="prop">multiSelect</span>: <span class="kw">true</span>,
+  <span class="prop">keepSelection</span>: <span class="kw">true</span>,
+
+  <span class="prop">bulkActions</span>: (rows) =&gt; <span class="str">`
+    &lt;button type="button" class="btn btn-sm btn-outline-primary"
+            data-bg-action="archive"&gt;
+      &lt;i class="bi bi-archive"&gt;&lt;/i&gt; Archive
+    &lt;/button&gt;
+    &lt;button type="button" class="btn btn-sm btn-outline-danger"
+            data-bg-action="delete"&gt;
+      &lt;i class="bi bi-trash"&gt;&lt;/i&gt; Delete
+    &lt;/button&gt;
+    &lt;span class="text-muted small ms-2"&gt;
+      ${rows.reduce((sum, r) =&gt; sum + (r.unread ? 1 : 0), 0)} unread
+    &lt;/span&gt;
+  `</span>,
+});
+
+<span class="cm">// Wire your custom data-bg-action buttons via the grid's wrapper</span>
+grid.element.parentElement?.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, (e) =&gt; {
+  <span class="kw">const</span> t = e.target.<span class="fn">closest</span>(<span class="str">"[data-bg-action]"</span>);
+  <span class="kw">if</span> (t?.dataset.bgAction === <span class="str">"archive"</span>) {
+    grid.<span class="fn">remove</span>(); <span class="cm">// uses current selection</span>
+  }
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="bulk-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={columns}
+  <span class="attr">options</span>={{
+    <span class="prop">selection</span>: <span class="kw">true</span>,
+    <span class="prop">multiSelect</span>: <span class="kw">true</span>,
+    <span class="prop">bulkActions</span>: (selected) =&gt;
+      <span class="str">`&lt;button data-bg-action="archive"&gt;Archive ${selected.length}&lt;/button&gt;`</span>,
+  }}
+/&gt;</code></pre>
+</section>

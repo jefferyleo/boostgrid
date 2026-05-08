@@ -1,0 +1,54 @@
+<h4>Row grouping with subtotals</h4>
+<p class="text-muted">
+  Set <code>groupBy</code> to a column id and the body bucket-renders rows
+  under collapsible group headers. Sorting is applied <em>before</em>
+  grouping, so members within a group respect the user's sort dictionary.
+  Add per-column <code>groupAggregators</code> to render subtotal footer
+  rows.
+</p>
+
+<table id="ex-grp" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="status" data-order="asc" data-width="120" data-formatter="statusBadge" data-align="center">Status</th>
+      <th data-column-id="sender" data-width="240">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="amount" data-type="numeric" data-align="right" data-width="120">Amount</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="gp-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="gp-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="gp-vanilla"><code><span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">groupBy</span>:       <span class="str">"status"</span>,
+  <span class="prop">groupExpanded</span>: <span class="str">"all"</span>,    <span class="cm">// "all" | "none" | { open: true, closed: false }</span>
+  <span class="prop">groupAggregators</span>: {
+    <span class="fn">amount</span>: (_col, ctx) =&gt; {
+      <span class="kw">const</span> sum = ctx.rows.<span class="fn">reduce</span>((s, r) =&gt; s + <span class="fn">Number</span>(r.amount || <span class="num">0</span>), <span class="num">0</span>);
+      <span class="kw">return</span> <span class="str">`&lt;strong&gt;</span>${sum.<span class="fn">toFixed</span>(<span class="num">2</span>)}<span class="str">&lt;/strong&gt;`</span>;
+    },
+  },
+});
+
+<span class="cm">// Toggle programmatically</span>
+grid.<span class="fn">toggleGroup</span>(<span class="str">"open"</span>);
+grid.<span class="fn">isGroupExpanded</span>(<span class="str">"closed"</span>);</code></pre>
+  <pre class="code-samples-panel" data-code-panel="gp-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={cols}
+  <span class="attr">options</span>={{
+    <span class="prop">groupBy</span>:       <span class="str">"status"</span>,
+    <span class="prop">groupExpanded</span>: <span class="str">"all"</span>,
+    <span class="prop">groupAggregators</span>: {
+      <span class="fn">amount</span>: (_col, ctx) =&gt;
+        <span class="str">`&lt;strong&gt;</span>${ctx.rows.<span class="fn">reduce</span>((s, r) =&gt; s + <span class="fn">Number</span>(r.amount || <span class="num">0</span>), <span class="num">0</span>).<span class="fn">toFixed</span>(<span class="num">2</span>)}<span class="str">&lt;/strong&gt;`</span>,
+    },
+  }}
+/&gt;</code></pre>
+</section>

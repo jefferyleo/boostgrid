@@ -1,0 +1,135 @@
+<h4>Multi-level grouping</h4>
+<p class="text-muted">
+  Group rows by one column, two, three — same option, same dataset.
+  This sales-pipeline view nests <strong>Region&nbsp;→&nbsp;Stage&nbsp;→&nbsp;Deal</strong>;
+  each level renders its own header with a row count, and
+  <code>groupAggregators</code> use the <code>colId@N</code> suffix so
+  the regional total reads at the outer tier and the stage subtotal sums
+  inside it. The <em>Subtotals on top</em> toggle flips footer placement
+  via the new <code>groupSubtotalsOnTop</code> option.
+</p>
+
+<div class="d-flex flex-wrap gap-2 mb-3 align-items-center small">
+  <span class="text-muted me-1">Group by:</span>
+  <div class="btn-group btn-group-sm" role="group" aria-label="Group depth">
+    <button type="button" class="btn btn-outline-secondary" data-mg-group="region">Region</button>
+    <button type="button" class="btn btn-outline-secondary active" data-mg-group="region,stage">Region › Stage</button>
+    <button type="button" class="btn btn-outline-secondary" data-mg-group="region,stage,owner">Region › Stage › Owner</button>
+  </div>
+  <div class="vr mx-2"></div>
+  <div class="form-check form-switch m-0">
+    <input class="form-check-input" type="checkbox" id="ex-mgrp-top" />
+    <label class="form-check-label" for="ex-mgrp-top">Subtotals on top</label>
+  </div>
+  <div class="vr mx-2"></div>
+  <button type="button" class="btn btn-sm btn-outline-secondary" data-mg-action="expand-all">
+    <i class="bi bi-arrows-expand"></i> Expand all
+  </button>
+  <button type="button" class="btn btn-sm btn-outline-secondary" data-mg-action="collapse-all">
+    <i class="bi bi-arrows-collapse"></i> Collapse all
+  </button>
+</div>
+
+<table id="ex-mgrp" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="64">ID</th>
+      <th data-column-id="region" data-width="100">Region</th>
+      <th data-column-id="stage" data-formatter="stageBadge" data-width="140">Stage</th>
+      <th data-column-id="deal">Deal</th>
+      <th data-column-id="owner" data-width="160">Owner</th>
+      <th data-column-id="amount" data-formatter="money" data-type="numeric" data-align="right" data-width="140">Amount</th>
+      <th data-column-id="closeDate" data-width="120">Close date</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="mg-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="mg-aggr">Aggregator key syntax</button>
+    <button type="button" class="code-samples-tab" data-code-tab="mg-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="mg-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="mg-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+<span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">groupBy</span>: [<span class="str">"region"</span>, <span class="str">"stage"</span>],
+  <span class="prop">groupExpanded</span>: <span class="str">"all"</span>,
+  <span class="prop">groupSubtotalsOnTop</span>: <span class="kw">false</span>, <span class="cm">// ← flip for headline-first layout</span>
+
+  <span class="prop">groupAggregators</span>: {
+    <span class="cm">// Region tier (depth 0): pipeline count + grand total</span>
+    <span class="str">"deal@0"</span>:   (_col, ctx) =&gt;
+      <span class="str">`&lt;em class="text-muted"&gt;${ctx.rows.length} deals&lt;/em&gt;`</span>,
+    <span class="str">"amount@0"</span>: (_col, ctx) =&gt; {
+      <span class="kw">const</span> total = ctx.rows.<span class="fn">reduce</span>((s, r) =&gt; s + r.amount, <span class="num">0</span>);
+      <span class="kw">return</span> <span class="str">`&lt;strong&gt;${money(total)}&lt;/strong&gt;`</span>;
+    },
+
+    <span class="cm">// Stage tier (depth 1): sum + average within the stage</span>
+    <span class="str">"amount@1"</span>: (_col, ctx) =&gt; {
+      <span class="kw">const</span> sum = ctx.rows.<span class="fn">reduce</span>((s, r) =&gt; s + r.amount, <span class="num">0</span>);
+      <span class="kw">const</span> avg = sum / ctx.rows.length;
+      <span class="kw">return</span> <span class="str">`&lt;span class="text-muted small"&gt;avg ${money(avg)}&lt;/span&gt;
+              &nbsp;&nbsp;&lt;strong&gt;${money(sum)}&lt;/strong&gt;`</span>;
+    },
+  },
+});
+
+<span class="cm">// Switch grouping at runtime — same data, different shape</span>
+grid.options.<span class="prop">groupBy</span> = [<span class="str">"region"</span>, <span class="str">"stage"</span>, <span class="str">"owner"</span>];
+grid.<span class="fn">rerenderBody</span>();</code></pre>
+  <pre class="code-samples-panel" data-code-panel="mg-aggr"><code><span class="cm">// Aggregator key resolution at depth N:
+//   1. "colId@N"  — wins (explicit depth match)
+//   2. "colId"    — fallback (runs at every depth)</span>
+
+<span class="prop">groupAggregators</span>: {
+  <span class="cm">// Runs at depth 0 only — region totals</span>
+  <span class="str">"amount@0"</span>: (col, ctx) =&gt; <span class="str">`&lt;strong&gt;$${sum(ctx.rows)}&lt;/strong&gt;`</span>,
+
+  <span class="cm">// Runs at depth 1 only — per-stage sums</span>
+  <span class="str">"amount@1"</span>: (col, ctx) =&gt; <span class="str">`$${sum(ctx.rows)}`</span>,
+
+  <span class="cm">// Runs at every depth where there's no @N override —
+  //  here, depth 2+ if you nest a third level</span>
+  <span class="str">"amount"</span>:    (col, ctx) =&gt; <span class="str">`&lt;em&gt;$${sum(ctx.rows)}&lt;/em&gt;`</span>,
+}
+
+<span class="cm">// `ctx.rows` always contains every leaf row in this group AND
+// its descendants — so a depth-0 aggregator sees the full
+// regional slice, not just the rows directly below the header.</span></code></pre>
+  <pre class="code-samples-panel" data-code-panel="mg-html"><code><span class="cm">&lt;!-- groupBy reads from the table data attribute too --&gt;</span>
+&lt;<span class="tag">table</span> <span class="attr">id</span>=<span class="str">"grid"</span> <span class="attr">class</span>=<span class="str">"table"</span>
+       <span class="attr">data-group-by</span>=<span class="str">'["region","stage"]'</span>&gt;
+  &lt;<span class="tag">thead</span>&gt;
+    &lt;<span class="tag">tr</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"id"</span> <span class="attr">data-identifier</span>=<span class="str">"true"</span>&gt;ID&lt;/<span class="tag">th</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"region"</span>&gt;Region&lt;/<span class="tag">th</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"stage"</span>&gt;Stage&lt;/<span class="tag">th</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"deal"</span>&gt;Deal&lt;/<span class="tag">th</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"amount"</span> <span class="attr">data-type</span>=<span class="str">"numeric"</span>&gt;Amount&lt;/<span class="tag">th</span>&gt;
+    &lt;/<span class="tag">tr</span>&gt;
+  &lt;/<span class="tag">thead</span>&gt;
+  &lt;<span class="tag">tbody</span>&gt;…&lt;/<span class="tag">tbody</span>&gt;
+&lt;/<span class="tag">table</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="mg-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={deals}
+  <span class="attr">columns</span>={[
+    { <span class="prop">id</span>: <span class="str">"id"</span>,     <span class="prop">text</span>: <span class="str">"ID"</span>,     <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span> },
+    { <span class="prop">id</span>: <span class="str">"region"</span>, <span class="prop">text</span>: <span class="str">"Region"</span> },
+    { <span class="prop">id</span>: <span class="str">"stage"</span>,  <span class="prop">text</span>: <span class="str">"Stage"</span> },
+    { <span class="prop">id</span>: <span class="str">"deal"</span>,   <span class="prop">text</span>: <span class="str">"Deal"</span> },
+    { <span class="prop">id</span>: <span class="str">"amount"</span>, <span class="prop">text</span>: <span class="str">"Amount"</span>, <span class="prop">type</span>: <span class="str">"numeric"</span> },
+  ]}
+  <span class="attr">options</span>={{
+    <span class="prop">groupBy</span>: [<span class="str">"region"</span>, <span class="str">"stage"</span>],
+    <span class="prop">groupSubtotalsOnTop</span>: <span class="kw">true</span>,
+    <span class="prop">groupAggregators</span>: {
+      <span class="str">"amount@0"</span>: (_c, ctx) =&gt; <span class="str">`&lt;strong&gt;$${sum(ctx.rows)}&lt;/strong&gt;`</span>,
+      <span class="str">"amount@1"</span>: (_c, ctx) =&gt; <span class="str">`$${sum(ctx.rows)}`</span>,
+    },
+  }}
+/&gt;</code></pre>
+</section>

@@ -1,0 +1,54 @@
+{
+  "name": "vue-boostgrid",
+  "version": "2.4.0",
+  "description": "Vue 3 wrapper for boostgrid — a vanilla TypeScript data grid for Bootstrap 5.",
+  "type": "module",
+  "main": "./dist/vue-boostgrid.umd.cjs",
+  "module": "./dist/vue-boostgrid.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vue-boostgrid.js",
+      "require": "./dist/vue-boostgrid.umd.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json --emitDeclarationOnly && vite build",
+    "test": "vitest run",
+    "clean": "rimraf dist"
+  },
+  "peerDependencies": {
+    "boostgrid": "^2.4.0",
+    "vue": ">=3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "@vue/test-utils": "^2.4.0",
+    "boostgrid": "file:../..",
+    "jsdom": "^24.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0",
+    "vue": "^3.4.0"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "boostgrid",
+    "bootstrap5",
+    "datagrid",
+    "table"
+  ],
+  "author": "Jeffery Leo <jeffery.leo@ogglobal.net>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JefferyLeo/boostgrid.git",
+    "directory": "packages/vue-boostgrid"
+  }
+}

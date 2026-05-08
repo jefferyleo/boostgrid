@@ -1,0 +1,77 @@
+<h4>State persistence (localStorage)</h4>
+<p class="text-muted">
+  With <code>stateSave: true</code>, Boostgrid mirrors the table's view —
+  page, page-size, search, sort, column visibility, and (optionally)
+  selection — to <code>localStorage</code> on every change. Reload the page
+  or revisit later and the grid restores itself before the first paint.
+</p>
+<p class="text-muted">
+  Try this: search for <em>"alpha"</em>, jump to page&nbsp;2, hide a column
+  via the toolbar dropdown, then refresh the browser. Everything snaps back.
+</p>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+  <button id="ex-state-clear" type="button" class="btn btn-sm btn-outline-danger">
+    <i class="bi bi-trash"></i> Wipe saved state
+  </button>
+  <span class="form-text small ms-2">
+    Storage key: <code id="ex-state-key">boostgrid:ex-state</code>
+  </span>
+</div>
+
+<table id="ex-state" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="sender" data-width="240">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="received" data-width="160">Received</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="st-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="st-shape">Storage shape</button>
+    <button type="button" class="code-samples-tab" data-code-tab="st-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="st-vanilla"><code><span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">stateSave</span>: <span class="kw">true</span>,
+  <span class="cm">// Default key is `boostgrid:&lt;table-id&gt;` (or a column-id hash if no id)</span>
+  <span class="prop">stateKey</span>:  <span class="str">"my-grid"</span>,
+});
+
+<span class="cm">// Wipe the persisted payload (does NOT reset the live grid)</span>
+grid.<span class="fn">clearSavedState</span>();
+
+<span class="cm">// To roll the live state back too:</span>
+grid.<span class="fn">clearSavedState</span>().<span class="fn">reload</span>();</code></pre>
+  <pre class="code-samples-panel" data-code-panel="st-shape"><code><span class="cm">// localStorage["boostgrid:my-grid"]</span>
+{
+  <span class="prop">"v"</span>: <span class="num">1</span>,
+  <span class="prop">"current"</span>:        <span class="num">2</span>,
+  <span class="prop">"rowsPerPage"</span>:    <span class="num">10</span>,
+  <span class="prop">"searchPhrase"</span>:   <span class="str">"alpha"</span>,
+  <span class="prop">"sortDictionary"</span>: { <span class="prop">"sender"</span>: <span class="str">"asc"</span> },
+  <span class="prop">"columnVisibility"</span>: {
+    <span class="prop">"id"</span>:       <span class="kw">true</span>,
+    <span class="prop">"sender"</span>:   <span class="kw">true</span>,
+    <span class="prop">"subject"</span>:  <span class="kw">false</span>,
+    <span class="prop">"received"</span>: <span class="kw">true</span>
+  },
+  <span class="cm">// "selected" is only populated when keepSelection: true</span>
+  <span class="prop">"selected"</span>: []
+}
+
+<span class="cm">// Schema is versioned; older payloads (different `v`) are silently discarded.</span></code></pre>
+  <pre class="code-samples-panel" data-code-panel="st-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={cols}
+  <span class="attr">options</span>={{
+    <span class="prop">stateSave</span>: <span class="kw">true</span>,
+    <span class="prop">stateKey</span>:  <span class="str">"my-grid"</span>,
+  }}
+/&gt;</code></pre>
+</section>

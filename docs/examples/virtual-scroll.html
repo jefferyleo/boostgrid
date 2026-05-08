@@ -1,0 +1,53 @@
+<h4>Virtual scroll · 10,000 rows</h4>
+<p class="text-muted">
+  Set <code>virtualScroll: true</code> with a fixed <code>rowHeight</code> and
+  Boostgrid will render only the rows in the viewport plus an
+  <code>overscan</code> on each side. Pad <code>&lt;tr&gt;</code>s above and below
+  the slice keep the scrollbar shape correct.
+</p>
+
+<div class="d-flex flex-wrap gap-3 align-items-center mb-3 small text-muted">
+  <span><strong id="ex-vs-count">10,000</strong> rows in the dataset</span>
+  <span>·</span>
+  <span>row height <code>32px</code> · overscan <code>5</code></span>
+</div>
+
+<table id="ex-vs" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="80">ID</th>
+      <th data-column-id="sender" data-width="240">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="received" data-width="160">Received</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="vs-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="vs-css">CSS hint</button>
+    <button type="button" class="code-samples-tab" data-code-tab="vs-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="vs-vanilla"><code><span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">virtualScroll</span>: <span class="kw">true</span>,
+  <span class="prop">rowHeight</span>:     <span class="num">32</span>,    <span class="cm">// must match the actual row height</span>
+  <span class="prop">overscan</span>:      <span class="num">5</span>,     <span class="cm">// rows rendered above + below the viewport</span>
+});
+
+<span class="cm">// `rowsPerPage` is forced to -1 internally — virtual scroll is the slicing layer.</span></code></pre>
+  <pre class="code-samples-panel" data-code-panel="vs-css"><code><span class="cm">/* Override the default 480px viewport via the wrapper class: */</span>
+.boostgrid--virtual .boostgrid-table tbody {
+  --boostgrid-vh: 600px;
+}</code></pre>
+  <pre class="code-samples-panel" data-code-panel="vs-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={tenThousandRows}
+  <span class="attr">columns</span>={cols}
+  <span class="attr">options</span>={{
+    <span class="prop">virtualScroll</span>: <span class="kw">true</span>,
+    <span class="prop">rowHeight</span>:     <span class="num">32</span>,
+    <span class="prop">overscan</span>:      <span class="num">5</span>,
+  }}
+/&gt;</code></pre>
+</section>

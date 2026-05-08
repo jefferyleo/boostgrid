@@ -1,0 +1,55 @@
+<h4>Cell selection &amp; copy</h4>
+<p class="text-muted">
+  Set <code>cellSelection: true</code> and the body becomes
+  spreadsheet-friendly. <strong>Click</strong> a cell to anchor;
+  <strong>shift-click</strong> or <strong>drag</strong> to extend the
+  rectangle; <strong>Ctrl/Cmd + C</strong> copies the selection as
+  tab-separated values (one row per <code>\n</code>).
+  <strong>Esc</strong> clears.
+</p>
+
+<div class="alert alert-light border py-2 small mb-3" role="status">
+  <i class="bi bi-clipboard"></i>
+  Try selecting a few cells below, then press <kbd>Ctrl</kbd>+<kbd>C</kbd> and paste into your spreadsheet of choice.
+</div>
+
+<table id="ex-cs" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="quarter" data-width="100">Quarter</th>
+      <th data-column-id="region" data-width="120">Region</th>
+      <th data-column-id="revenue" data-align="right" data-width="140">Revenue</th>
+      <th data-column-id="growth" data-align="right" data-width="120">YoY %</th>
+      <th data-column-id="rep">Account exec</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="cs-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="cs-tsv">TSV format</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="cs-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+<span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">cellSelection</span>: <span class="kw">true</span>, <span class="cm">// off by default</span>
+});
+
+<span class="cm">// Conflicts with rowSelect (the whole-row click handler) —
+// pick one or the other.</span></code></pre>
+  <pre class="code-samples-panel" data-code-panel="cs-tsv"><code><span class="cm">// Copy output is tab-separated values, newline-separated rows.
+// Pasted into Excel / Google Sheets / Numbers, the columns line
+// up with the source rectangle.
+
+// Selecting (Q1 NA, Q1 EMEA, Q1 APAC) over the Revenue column
+// produces:</span>
+
+Q1<span class="str">\t</span>NA<span class="str">\t</span>$1.24M
+Q1<span class="str">\t</span>EMEA<span class="str">\t</span>$0.96M
+Q1<span class="str">\t</span>APAC<span class="str">\t</span>$0.71M
+
+<span class="cm">// Tabs and newlines inside cell values are flattened to single
+// spaces so the TSV stays one-row-per-line.</span></code></pre>
+</section>

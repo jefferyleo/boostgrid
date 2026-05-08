@@ -1,0 +1,80 @@
+<h4>Tree data</h4>
+<p class="text-muted">
+  Set <code>treeMode: true</code> and give each row a
+  <code>parentId</code> field. Boostgrid reconstructs the adjacency-list
+  tree, renders rows depth-first with an indentation per level, and adds
+  an expand/collapse caret on the column you mark as <code>treeColumn</code>.
+  Search reveals matched leaves <em>and</em> their ancestor chain so the
+  path to a hit is always visible. State persistence remembers which
+  branches you've collapsed.
+</p>
+
+<div class="d-flex gap-2 mb-3">
+  <button type="button" class="btn btn-sm btn-outline-secondary" id="ex-tree-expand">
+    <i class="bi bi-arrows-expand"></i> Expand all
+  </button>
+  <button type="button" class="btn btn-sm btn-outline-secondary" id="ex-tree-collapse">
+    <i class="bi bi-arrows-collapse"></i> Collapse all
+  </button>
+</div>
+
+<table id="ex-tree" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-visible="false">ID</th>
+      <th data-column-id="name" data-tree-column="true">Name</th>
+      <th data-column-id="size" data-type="numeric" data-align="right" data-width="120">Size</th>
+      <th data-column-id="modified" data-width="160">Modified</th>
+      <th data-column-id="parentId" data-type="numeric" data-visible="false">Parent</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="tr-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="tr-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="tr-api">API</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="tr-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+<span class="cm">// Each row has an id (from the identifier column) and a parentId.</span>
+<span class="cm">// Roots use parentId === null.</span>
+<span class="kw">const</span> rows = [
+  { <span class="prop">id</span>: <span class="num">1</span>, <span class="prop">name</span>: <span class="str">"src"</span>,        <span class="prop">parentId</span>: <span class="kw">null</span> },
+  { <span class="prop">id</span>: <span class="num">2</span>, <span class="prop">name</span>: <span class="str">"core.ts"</span>,    <span class="prop">parentId</span>: <span class="num">1</span> },
+  { <span class="prop">id</span>: <span class="num">3</span>, <span class="prop">name</span>: <span class="str">"render"</span>,     <span class="prop">parentId</span>: <span class="num">1</span> },
+  { <span class="prop">id</span>: <span class="num">4</span>, <span class="prop">name</span>: <span class="str">"body.ts"</span>,    <span class="prop">parentId</span>: <span class="num">3</span> },
+  { <span class="prop">id</span>: <span class="num">5</span>, <span class="prop">name</span>: <span class="str">"tree.ts"</span>,    <span class="prop">parentId</span>: <span class="num">3</span> },
+];
+
+<span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">treeMode</span>: <span class="kw">true</span>,
+  <span class="prop">treeParentField</span>: <span class="str">"parentId"</span>,   <span class="cm">// default</span>
+  <span class="prop">treeIndentPx</span>: <span class="num">22</span>,             <span class="cm">// default 24</span>
+  <span class="prop">treeExpanded</span>: <span class="str">"all"</span>,         <span class="cm">// or "none" / Record&lt;id, bool&gt;</span>
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="tr-html"><code><span class="cm">&lt;!-- Mark the column that should carry the caret --&gt;</span>
+&lt;<span class="tag">table</span> <span class="attr">id</span>=<span class="str">"grid"</span> <span class="attr">class</span>=<span class="str">"table"</span>
+       <span class="attr">data-tree-mode</span>=<span class="str">"true"</span>&gt;
+  &lt;<span class="tag">thead</span>&gt;
+    &lt;<span class="tag">tr</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"id"</span> <span class="attr">data-identifier</span>=<span class="str">"true"</span> <span class="attr">data-type</span>=<span class="str">"numeric"</span>&gt;ID&lt;/<span class="tag">th</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"name"</span> <span class="attr">data-tree-column</span>=<span class="str">"true"</span>&gt;Name&lt;/<span class="tag">th</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"parentId"</span> <span class="attr">data-type</span>=<span class="str">"numeric"</span>
+          <span class="attr">data-visible</span>=<span class="str">"false"</span>&gt;Parent&lt;/<span class="tag">th</span>&gt;
+    &lt;/<span class="tag">tr</span>&gt;
+  &lt;/<span class="tag">thead</span>&gt;
+  &lt;<span class="tag">tbody</span>&gt;…&lt;/<span class="tag">tbody</span>&gt;
+&lt;/<span class="tag">table</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="tr-api"><code><span class="cm">// Imperative API for tree mode</span>
+grid.<span class="fn">toggleTreeNode</span>(<span class="num">3</span>);            <span class="cm">// flip the "render" subtree</span>
+grid.<span class="fn">isTreeExpanded</span>(<span class="num">3</span>);            <span class="cm">// → boolean</span>
+grid.<span class="fn">expandAllTree</span>();
+grid.<span class="fn">collapseAllTree</span>();
+
+<span class="cm">// Search across all visible columns; ancestors of matches stay visible</span>
+grid.<span class="fn">search</span>(<span class="str">"body"</span>);
+<span class="cm">// → only "body.ts" matches, but "src" and "render" stay visible too</span></code></pre>
+</section>

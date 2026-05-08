@@ -1,0 +1,85 @@
+<h4>Column UX — reorder, resize, frozen-right</h4>
+<p class="text-muted">
+  Headers are draggable and resizable by default. Drag a column header
+  left/right to rearrange, or drag the right edge of any header to resize
+  the column. The two trailing columns (<code>Status</code>,
+  <code>Actions</code>) are pinned with <code>frozen: "right"</code> — they
+  stay anchored when the table scrolls horizontally. The new column-toggle
+  panel (top-right) doubles as a reorder UI: drag the grip handle next to
+  any item to reshuffle, and "Reset to defaults" reverts everything.
+</p>
+
+<div class="d-flex gap-2 mb-3">
+  <button type="button" class="btn btn-sm btn-outline-secondary" id="ex-cux-reset">
+    <i class="bi bi-arrow-counterclockwise"></i> Reset columns
+  </button>
+  <span class="small text-muted align-self-center" id="ex-cux-log"></span>
+</div>
+
+<div class="table-responsive">
+  <table id="ex-cux" class="table table-hover">
+    <thead>
+      <tr>
+        <th data-column-id="id" data-identifier="true" data-type="numeric"
+            data-frozen="left" data-width="80">ID</th>
+        <th data-column-id="sender" data-width="220" data-order="asc">Sender</th>
+        <th data-column-id="subject" data-width="320">Subject</th>
+        <th data-column-id="received" data-width="160">Received</th>
+        <th data-column-id="status" data-formatter="statusBadge"
+            data-frozen="right" data-width="120" data-align="center">Status</th>
+        <th data-column-id="actions" data-formatter="commands"
+            data-frozen="right" data-width="120" data-align="center"
+            data-sortable="false" data-resizable="false">Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="cux-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="cux-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="cux-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="cux-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+<span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="cm">// Reorder + resize default to true; turn off per-column with</span>
+  <span class="cm">// `reorderable: false` / `resizable: false`.</span>
+  <span class="prop">columnReorder</span>: <span class="kw">true</span>,
+  <span class="prop">columnResize</span>: <span class="kw">true</span>,
+  <span class="prop">onColumnReorder</span>: (ids) =&gt; <span class="fn">console.log</span>(<span class="str">"new order"</span>, ids),
+  <span class="prop">onColumnResize</span>: (id, px) =&gt; <span class="fn">console.log</span>(<span class="str">"resized"</span>, id, px),
+});
+
+<span class="cm">// Programmatic equivalents</span>
+grid.<span class="fn">reorderColumn</span>(<span class="str">"sender"</span>, <span class="str">"subject"</span>, <span class="str">"after"</span>);
+grid.<span class="fn">resetColumnState</span>();</code></pre>
+  <pre class="code-samples-panel" data-code-panel="cux-html"><code><span class="cm">&lt;!-- Frozen-right via data-frozen="right" --&gt;</span>
+&lt;<span class="tag">table</span> <span class="attr">id</span>=<span class="str">"grid"</span> <span class="attr">class</span>=<span class="str">"table"</span>&gt;
+  &lt;<span class="tag">thead</span>&gt;
+    &lt;<span class="tag">tr</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"id"</span> <span class="attr">data-identifier</span>=<span class="str">"true"</span>&gt;ID&lt;/<span class="tag">th</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"subject"</span>&gt;Subject&lt;/<span class="tag">th</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"status"</span> <span class="attr">data-frozen</span>=<span class="str">"right"</span>&gt;Status&lt;/<span class="tag">th</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"actions"</span> <span class="attr">data-frozen</span>=<span class="str">"right"</span>
+          <span class="attr">data-resizable</span>=<span class="str">"false"</span>&gt;Actions&lt;/<span class="tag">th</span>&gt;
+    &lt;/<span class="tag">tr</span>&gt;
+  &lt;/<span class="tag">thead</span>&gt;
+&lt;/<span class="tag">table</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="cux-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={[
+    { <span class="prop">id</span>: <span class="str">"id"</span>,      <span class="prop">text</span>: <span class="str">"ID"</span>,      <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">frozen</span>: <span class="str">"left"</span> },
+    { <span class="prop">id</span>: <span class="str">"sender"</span>,  <span class="prop">text</span>: <span class="str">"Sender"</span> },
+    { <span class="prop">id</span>: <span class="str">"subject"</span>, <span class="prop">text</span>: <span class="str">"Subject"</span> },
+    { <span class="prop">id</span>: <span class="str">"status"</span>,  <span class="prop">text</span>: <span class="str">"Status"</span>,  <span class="prop">frozen</span>: <span class="str">"right"</span> },
+    { <span class="prop">id</span>: <span class="str">"actions"</span>, <span class="prop">text</span>: <span class="str">"Actions"</span>, <span class="prop">frozen</span>: <span class="str">"right"</span>, <span class="prop">resizable</span>: <span class="kw">false</span> },
+  ]}
+  <span class="attr">options</span>={{
+    <span class="prop">columnReorder</span>: <span class="kw">true</span>,
+    <span class="prop">columnResize</span>: <span class="kw">true</span>,
+  }}
+/&gt;</code></pre>
+</section>

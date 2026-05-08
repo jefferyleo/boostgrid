@@ -1,0 +1,53 @@
+{
+  "name": "boostgrid-export",
+  "version": "2.4.0",
+  "description": "CSV / Excel / Print export plugin for boostgrid.",
+  "type": "module",
+  "main": "./dist/boostgrid-export.umd.cjs",
+  "module": "./dist/boostgrid-export.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/boostgrid-export.js",
+      "require": "./dist/boostgrid-export.umd.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && vite build",
+    "test": "vitest run",
+    "clean": "rimraf dist"
+  },
+  "peerDependencies": {
+    "boostgrid": "^2.4.0"
+  },
+  "peerDependenciesMeta": {
+    "xlsx-js-style": { "optional": true }
+  },
+  "devDependencies": {
+    "boostgrid": "file:../..",
+    "jsdom": "^24.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  },
+  "keywords": [
+    "boostgrid",
+    "export",
+    "csv",
+    "excel",
+    "xlsx",
+    "print"
+  ],
+  "author": "Jeffery Leo <jeffery.leo@ogglobal.net>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JefferyLeo/boostgrid.git",
+    "directory": "packages/boostgrid-export"
+  }
+}

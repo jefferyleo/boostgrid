@@ -19,9 +19,48 @@
     }
   }
 
+  // Bulk-action bar: a sticky toolbar that slides in below the regular
+  // toolbar when at least one row is selected. The wrapping `.boostgrid`
+  // keeps it scoped — multiple grids on one page each get their own bar.
+  &-bulkbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--bs-primary-border-subtle, rgba(13, 110, 253, 0.35));
+    background: var(--bs-primary-bg-subtle, rgba(13, 110, 253, 0.08));
+    border-radius: 0.375rem;
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    animation: boostgrid-bulkbar-in 140ms ease-out;
+  }
+  &-bulkbar-count {
+    font-weight: 600;
+    color: var(--bs-primary, #0d6efd);
+    white-space: nowrap;
+  }
+  &-bulkbar-slot {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+}
+
+@keyframes boostgrid-bulkbar-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.boostgrid {
+
   &-th {
     user-select: none;
     white-space: nowrap;
+    // Anchors the absolutely-positioned resize grip on the right edge.
+    position: relative;
 
     .boostgrid-sort {
       color: inherit;
@@ -34,6 +73,85 @@
 
       i { font-size: 0.85em; opacity: 0.7; }
     }
+
+    &--draggable {
+      cursor: grab;
+    }
+    &--draggable:active,
+    &[data-dragging="true"] {
+      cursor: grabbing;
+    }
+    // Drop indicators while a header is being dragged. Two narrow stripes
+    // — left (insert-before) or right (insert-after) — drawn via the
+    // pseudo-elements so we don't fight the grip's own absolute positioning.
+    &[data-drop-side="before"]::before,
+    &[data-drop-side="after"]::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--bs-primary, #0d6efd);
+      pointer-events: none;
+      z-index: 3;
+    }
+    &[data-drop-side="before"]::before { left: -1px; }
+    &[data-drop-side="after"]::after { right: -1px; }
+  }
+
+  // Column-visibility panel: a richer dropdown that doubles as the
+  // reorder UX (drag handles call into the same reorderColumn machinery
+  // used by header drags). Items are simple flex rows.
+  .boostgrid-columns-menu {
+    .boostgrid-columns-item {
+      border-radius: 0.25rem;
+      cursor: default;
+      position: relative;
+
+      &:hover {
+        background: var(--bs-tertiary-bg, #f8f9fa);
+      }
+      &[data-dragging="true"] {
+        opacity: 0.5;
+      }
+      &[data-drop-side="before"]::before,
+      &[data-drop-side="after"]::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--bs-primary, #0d6efd);
+        pointer-events: none;
+      }
+      &[data-drop-side="before"]::before { top: -1px; }
+      &[data-drop-side="after"]::after { bottom: -1px; }
+    }
+    .boostgrid-columns-handle {
+      cursor: grab;
+      &:active { cursor: grabbing; }
+    }
+  }
+
+  // Resize grip: 6px hit zone on the right edge of every resizable header.
+  // Sits half-outside the cell on the right so the visual edge feels right
+  // without the grip eating clicks on adjacent text.
+  .boostgrid-resize-grip {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: -3px;
+    width: 6px;
+    cursor: col-resize;
+    user-select: none;
+    z-index: 3;
+    background: transparent;
+    transition: background 100ms ease;
+
+    &:hover,
+    &[data-active="true"] {
+      background: var(--bs-primary-bg-subtle, rgba(13, 110, 253, 0.25));
+    }
   }
 
   tbody > tr {
@@ -41,7 +159,8 @@
     cursor: default;
   }
 
-  .bg-select-cell {
+  .bg-select-cell,
+  .bg-detail-cell {
     width: 2.5rem;
     text-align: center;
     vertical-align: middle;
@@ -53,5 +172,246 @@
 
   .boostgrid-no-results {
     font-style: italic;
+  }
+
+  // Cell selection: highlight every cell in the active rectangle, plus a
+  // crisp outline on the rectangle's edges via inset shadows so it reads
+  // as a single shape (not a grid of independently-tinted cells).
+  .boostgrid-cell-selected {
+    background: var(--bs-primary-bg-subtle, rgba(13, 110, 253, 0.12));
+    box-shadow: inset 0 0 0 1px var(--bs-primary-border-subtle, rgba(13, 110, 253, 0.4));
+  }
+
+  // Loading skeleton: animated placeholder bars fill each cell during ajax
+  // fetches. The shimmer travels left → right via a CSS gradient + keyframes.
+  .boostgrid-skeleton-row > td {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+  .boostgrid-skeleton-bar {
+    display: block;
+    height: 0.85rem;
+    width: 80%;
+    border-radius: 0.25rem;
+    background: linear-gradient(
+      90deg,
+      var(--bs-secondary-bg, #e9ecef) 0%,
+      var(--bs-tertiary-bg, #f8f9fa) 50%,
+      var(--bs-secondary-bg, #e9ecef) 100%
+    );
+    background-size: 200% 100%;
+    animation: boostgrid-skeleton-shimmer 1.4s ease-in-out infinite;
+  }
+  // Vary widths a little so the placeholder doesn't look like a barcode.
+  .boostgrid-skeleton-row:nth-child(2n) .boostgrid-skeleton-bar { width: 65%; }
+  .boostgrid-skeleton-row:nth-child(3n) .boostgrid-skeleton-bar { width: 90%; }
+}
+
+@keyframes boostgrid-skeleton-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boostgrid-skeleton-bar { animation: none; }
+}
+
+// Sticky header: pin <thead> cells to the viewport top while the body
+// scrolls past. Coexists with frozen columns — `position: sticky` on the
+// same cell with both `top` and `left` (or `right`) offsets, and a higher
+// z-index so the header sits above body cells AND frozen body cells.
+// Customize the offset (e.g. for a page-level fixed nav) by setting
+// `--boostgrid-sticky-top: 56px;` on the wrapper or any ancestor.
+.boostgrid--sticky-head {
+  > table > thead > tr > th {
+    position: sticky;
+    top: var(--boostgrid-sticky-top, 0);
+    z-index: 3;
+    background: var(--bs-body-bg, #fff);
+  }
+  // Frozen header cells need to outrank both regular header cells AND
+  // frozen body cells, so they sit at the top-left/top-right corner.
+  > table > thead > tr > th.boostgrid-frozen {
+    z-index: 4;
+  }
+}
+
+// Frozen columns (left or right): pure CSS sticky positioning. Inline
+// `left: <Npx>` or `right: <Npx>` on each frozen cell carries the
+// cumulative offset; this rule supplies the rest. Edge shadows appear
+// only once the table-responsive parent has been scrolled — toggled via
+// JS on the wrapper. Left and right shadows point in opposite directions.
+.boostgrid-frozen {
+  position: sticky;
+  background: var(--bs-body-bg, #fff);
+  z-index: 2;
+}
+.boostgrid--scrolled-x {
+  // Right edge of the LEFT-frozen prefix: the rightmost left-frozen cell
+  // is the one whose next sibling is NOT left-frozen.
+  [data-frozen-side="left"]:has(+ :not([data-frozen-side="left"])) {
+    box-shadow: 4px 0 4px -2px rgba(0, 0, 0, 0.08);
+  }
+  // Left edge of the RIGHT-frozen suffix: the leftmost right-frozen cell
+  // is the one whose previous sibling is NOT right-frozen. CSS has no
+  // backwards-sibling combinator, so we shadow every right-frozen cell
+  // and use a sibling rule to clear it on inner ones.
+  [data-frozen-side="right"] {
+    box-shadow: -4px 0 4px -2px rgba(0, 0, 0, 0.08);
+  }
+  [data-frozen-side="right"] + [data-frozen-side="right"] {
+    box-shadow: none;
+  }
+}
+
+// Row grouping: header row sits on a sunken-paper background, footer row
+// sits a notch above body rows so subtotals read.  Multi-level grouping
+// adds `data-depth="N"` and a `--bg-group-depth` custom property on the
+// header cell so deeper levels can read as visually nested without code
+// changes per depth.
+.boostgrid-group-row {
+  cursor: pointer;
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  font-weight: 600;
+  user-select: none;
+
+  &:hover {
+    background: var(--bs-secondary-bg, #e9ecef);
+  }
+
+  // Outer level keeps the original feel; deeper levels lean a touch lighter
+  // so the hierarchy reads at a glance without overpowering the row content.
+  &[data-depth="1"] { background: var(--bs-secondary-bg, #e9ecef); }
+  &[data-depth="2"] { background: var(--bs-tertiary-bg, #f8f9fa); font-weight: 500; }
+  &[data-depth="3"] { background: rgba(0, 0, 0, 0.025); font-weight: 500; }
+}
+.boostgrid-group-cell {
+  // The header cell is colspan'd; ensure padding feels chunkier than body cells.
+  padding-top: 0.65rem;
+  padding-bottom: 0.65rem;
+  // Per-depth left indent driven by the inline custom property the renderer sets.
+  padding-left: calc(0.75rem + (var(--bg-group-depth, 0) * 1.25rem));
+}
+.boostgrid-group-footer {
+  background: var(--bs-tertiary-bg, #f8f9fa);
+  font-style: italic;
+  border-top: 2px solid var(--bs-border-color, #dee2e6);
+}
+
+// Master/detail row expansion: chevron in the leading detail cell flips
+// between right (collapsed) and down (open); the panel row that follows
+// the data row is colspan'd and gets a soft inset background to read as
+// "child of the row above".
+.boostgrid-detail-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  cursor: pointer;
+  color: var(--bs-secondary-color, #6c757d);
+  border-radius: 0.25rem;
+  transition: background-color 120ms ease, color 120ms ease;
+
+  &:hover {
+    background: var(--bs-secondary-bg, #e9ecef);
+    color: var(--bs-emphasis-color, inherit);
+  }
+
+  i { transition: transform 120ms ease; }
+}
+.boostgrid-detail-row {
+  background: var(--bs-tertiary-bg, #f8f9fa);
+
+  > .boostgrid-detail-cell {
+    padding: 1rem 1.25rem;
+    border-top: 0;
+  }
+}
+
+// Tree mode: the caret-bearing cell carries inline `padding-left` per
+// depth (set by the renderer), and the caret itself rotates between the
+// closed (▸) and open (▾) states. The leaf marker is a same-width spacer
+// so leaf rows align with their siblings.
+.boostgrid-tree-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.4rem;
+  cursor: pointer;
+  color: var(--bs-secondary-color, #6c757d);
+  border-radius: 0.25rem;
+  vertical-align: middle;
+  transition: background-color 120ms ease, color 120ms ease;
+
+  &:hover {
+    background: var(--bs-secondary-bg, #e9ecef);
+    color: var(--bs-emphasis-color, inherit);
+  }
+}
+.boostgrid-tree-leaf {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+.boostgrid-tree-label {
+  vertical-align: middle;
+}
+
+// Tree drag-to-reparent: a soft outline highlights the prospective new
+// parent while the user hovers a row mid-drag. Cleared on drop / dragend.
+.boostgrid-tree-row[draggable="true"] {
+  cursor: grab;
+}
+.boostgrid-tree-row[data-drop-target="true"] {
+  outline: 2px dashed var(--bs-primary, #0d6efd);
+  outline-offset: -2px;
+  background: var(--bs-primary-bg-subtle, rgba(13, 110, 253, 0.08));
+}
+
+// Cell edit: the inline input swaps in flush with the cell padding.
+.boostgrid-edit-input {
+  width: 100%;
+  margin: 0;
+  // BS5's form-control already has padding/border; we just need to remove
+  // any extra cell-side margin so the editor visually lines up with the
+  // sibling rendered cells.
+}
+
+// Virtual scroll: <tbody> becomes a block-level y-scroll container with a
+// fixed height. The pad <tr>s above/below the rendered slice keep the
+// scrollbar shape correct. Apply table-layout: fixed so columns line up
+// between thead/tbody once tbody is display: block.
+.boostgrid--virtual {
+  .boostgrid-table {
+    table-layout: fixed;
+    display: block;
+
+    > thead, > tfoot {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    > tbody {
+      display: block;
+      max-height: var(--boostgrid-vh, 480px);
+      overflow-y: auto;
+
+      > tr {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+      }
+
+      > tr.boostgrid-pad {
+        display: block;
+        // padding: 0; border: 0; already inline on the cell
+      }
+    }
   }
 }

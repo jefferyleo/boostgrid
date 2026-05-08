@@ -1,0 +1,64 @@
+<h4>Cell-level edit</h4>
+<p class="text-muted">
+  Mark a column with <code>data-editable="true"</code>. Double-click any cell
+  in that column to swap an editor in. Press <kbd>Enter</kbd> or click out
+  to commit, <kbd>Esc</kbd> to cancel. The
+  <code>onCellEdit</code> callback fires after every commit and exposes a
+  <code>revert()</code> escape hatch for async server rejections.
+</p>
+
+<table id="ex-edit-cell" class="table table-hover align-middle">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="sender" data-editable="true" data-width="240">Sender</th>
+      <th data-column-id="subject" data-editable="true">Subject</th>
+      <th data-column-id="status" data-editable="true" data-edit-type="select"
+          data-edit-options='[{"value":0,"label":"OK"},{"value":1,"label":"Info"},{"value":2,"label":"Warn"},{"value":3,"label":"Error"}]'
+          data-formatter="statusBadge" data-align="center" data-width="100">Status</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<div class="mt-3">
+  <p class="small text-muted mb-1">Commit log:</p>
+  <div id="ex-edit-cell-log" class="border rounded p-2 small bg-body-tertiary"
+       style="font-family: SFMono-Regular, Menlo, Consolas, monospace; max-height: 9rem; overflow:auto;"></div>
+</div>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="ce-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ce-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ce-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="ce-html"><code><span class="cm">&lt;!-- Mark editable columns --&gt;</span>
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"sender"</span>  <span class="attr">data-editable</span>=<span class="str">"true"</span>&gt;Sender&lt;/<span class="tag">th</span>&gt;
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"subject"</span> <span class="attr">data-editable</span>=<span class="str">"true"</span>&gt;Subject&lt;/<span class="tag">th</span>&gt;
+
+<span class="cm">&lt;!-- Select editor with inline options (JSON in a data-attr) --&gt;</span>
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"status"</span>
+    <span class="attr">data-editable</span>=<span class="str">"true"</span>
+    <span class="attr">data-edit-type</span>=<span class="str">"select"</span>
+    <span class="attr">data-edit-options</span>=<span class="str">'[{"value":0,"label":"OK"}, …]'</span>&gt;Status&lt;/<span class="tag">th</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ce-vanilla"><code><span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">onCellEdit</span>: <span class="kw">async</span> ({ row, column, oldValue, newValue, revert }) =&gt; {
+    <span class="kw">try</span> {
+      <span class="kw">await</span> savePatch(row.id, { [column.id]: newValue });
+    } <span class="kw">catch</span> {
+      revert();   <span class="cm">// roll the cell back if the server rejects</span>
+    }
+  },
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ce-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={cols}
+  <span class="attr">options</span>={{
+    <span class="prop">onCellEdit</span>: <span class="kw">async</span> (commit) =&gt; {
+      <span class="kw">try</span> { <span class="kw">await</span> savePatch(commit.row.id, { [commit.column.id]: commit.newValue }); }
+      <span class="kw">catch</span> { commit.revert(); }
+    },
+  }}
+/&gt;</code></pre>
+</section>

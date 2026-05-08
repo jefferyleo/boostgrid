@@ -1,0 +1,102 @@
+<h4>Server-side grouping &amp; tree</h4>
+<p class="text-muted">
+  When <code>ajax: true</code> is paired with <code>groupBy</code> or
+  <code>treeMode</code>, Boostgrid surfaces the active state in the
+  request payload so your server can return the matching slice. Below
+  is the actual JSON body sent on each fetch — toggle the controls and
+  watch the request update.
+</p>
+
+<div class="d-flex flex-wrap gap-2 mb-3 align-items-center small">
+  <span class="text-muted">Mode:</span>
+  <div class="btn-group btn-group-sm" role="group">
+    <button type="button" class="btn btn-outline-secondary active" data-ss-mode="flat">Flat</button>
+    <button type="button" class="btn btn-outline-secondary" data-ss-mode="grouped">Grouped (status)</button>
+    <button type="button" class="btn btn-outline-secondary" data-ss-mode="tree">Tree</button>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <table id="ex-ss" class="table table-hover">
+      <thead>
+        <tr>
+          <th data-column-id="id" data-identifier="true" data-type="numeric" data-width="64" data-align="right">ID</th>
+          <th data-column-id="status" data-width="100">Status</th>
+          <th data-column-id="name" data-tree-column="true">Name</th>
+          <th data-column-id="parentId" data-type="numeric" data-visible="false">Parent</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div class="col-lg-5">
+    <p class="caps muted small mb-1">Last request → /api/rows</p>
+    <pre id="ex-ss-req" class="border rounded p-2 small mb-3" style="background: var(--bs-tertiary-bg)"></pre>
+    <p class="caps muted small mb-1">Adapter response shape</p>
+    <pre id="ex-ss-res" class="border rounded p-2 small" style="background: var(--bs-tertiary-bg)"></pre>
+  </div>
+</div>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="ss-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ss-req">Request payload</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ss-server">Server adapter</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="ss-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+<span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">ajax</span>: <span class="kw">true</span>,
+  <span class="prop">url</span>: <span class="str">"/api/rows"</span>,
+
+  <span class="cm">// Either or both — Boostgrid surfaces the active state in the
+  // request body so your endpoint can return the matching slice.</span>
+  <span class="prop">groupBy</span>: [<span class="str">"status"</span>],
+  <span class="prop">treeMode</span>: <span class="kw">false</span>,
+
+  <span class="cm">// Skeleton placeholder rows render automatically while the
+  // fetch is in flight.</span>
+  <span class="prop">loadingSkeleton</span>: <span class="kw">true</span>,
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ss-req"><code><span class="cm">// AjaxRequest — fields are present only when their feature is on,
+// so existing servers keep seeing the same shape.</span>
+{
+  <span class="prop">"current"</span>: <span class="num">1</span>,
+  <span class="prop">"rowCount"</span>: <span class="num">25</span>,
+  <span class="prop">"sort"</span>: { <span class="prop">"received"</span>: <span class="str">"desc"</span> },
+  <span class="prop">"searchPhrase"</span>: <span class="str">""</span>,
+
+  <span class="cm">// Only when groupBy is set:</span>
+  <span class="prop">"groupBy"</span>: [<span class="str">"status"</span>, <span class="str">"region"</span>],
+  <span class="prop">"collapsedGroups"</span>: [<span class="str">"active//us"</span>],
+
+  <span class="cm">// Only when treeMode is on:</span>
+  <span class="prop">"treeMode"</span>: <span class="kw">true</span>,
+  <span class="prop">"expandedTreeNodes"</span>: [<span class="num">1</span>, <span class="num">4</span>, <span class="num">42</span>]
+}</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ss-server"><code><span class="cm">// Express adapter sketch — adapt to your stack.</span>
+app.<span class="fn">post</span>(<span class="str">"/api/rows"</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> { current, rowCount, sort, groupBy, treeMode, expandedTreeNodes } = req.body;
+
+  <span class="kw">let</span> rows;
+  <span class="kw">if</span> (treeMode) {
+    <span class="cm">// Return roots PLUS direct children of every expanded node.
+    // Boostgrid re-builds the adjacency tree client-side.</span>
+    rows = <span class="kw">await</span> db.<span class="fn">query</span>(
+      <span class="str">"SELECT * FROM nodes WHERE parent_id IS NULL OR parent_id = ANY($1)"</span>,
+      [expandedTreeNodes ?? []],
+    );
+  } <span class="kw">else if</span> (groupBy?.length) {
+    <span class="cm">// Sort by groupBy fields first so the client's adjacency-based
+    // bucketing produces correct headers in one pass.</span>
+    <span class="kw">const</span> orderBy = [...groupBy, ...<span class="fn">Object.keys</span>(sort)].<span class="fn">join</span>(<span class="str">", "</span>);
+    rows = <span class="kw">await</span> db.<span class="fn">query</span>(<span class="str">`SELECT * FROM deals ORDER BY ${orderBy}`</span>);
+  } <span class="kw">else</span> {
+    <span class="kw">const</span> offset = (current - <span class="num">1</span>) * rowCount;
+    rows = <span class="kw">await</span> db.<span class="fn">query</span>(<span class="str">"SELECT * FROM deals LIMIT $1 OFFSET $2"</span>, [rowCount, offset]);
+  }
+
+  res.<span class="fn">json</span>({ current, rowCount, rows, total: rows.length });
+});</code></pre>
+</section>

@@ -1,0 +1,51 @@
+<h4>Tree drag-to-reparent</h4>
+<p class="text-muted">
+  Set <code>treeReparent: true</code> and rows become draggable. Drop one
+  row onto another to make it the new parent. Cycle attempts (dragging a
+  parent onto its own descendant) are silently rejected. The
+  <code>onReparent</code> callback fires before the move commits — return
+  <code>false</code> (or a Promise resolving false) to veto. The example
+  below logs every move into the status banner.
+</p>
+
+<div class="alert alert-info py-2 small mb-3" id="ex-trep-banner">
+  Drag any folder onto another to reparent it.
+</div>
+
+<table id="ex-trep" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-visible="false">ID</th>
+      <th data-column-id="name" data-tree-column="true">Name</th>
+      <th data-column-id="size" data-type="numeric" data-align="right" data-width="120">Size</th>
+      <th data-column-id="parentId" data-type="numeric" data-visible="false">Parent</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="trep-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="trep-api">API</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="trep-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+<span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">treeMode</span>: <span class="kw">true</span>,
+  <span class="prop">treeReparent</span>: <span class="kw">true</span>,
+  <span class="prop">onReparent</span>: <span class="kw">async</span> (child, newParent, oldParent) =&gt; {
+    <span class="cm">// Optional async validation — return false to abort the move.</span>
+    <span class="kw">const</span> ok = <span class="kw">await</span> <span class="fn">verifyMoveOnServer</span>(child.id, newParent?.id);
+    <span class="kw">return</span> ok;
+  },
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="trep-api"><code><span class="cm">// Programmatic moves — same cycle/self-guard as the drag path.</span>
+grid.<span class="fn">reparentTreeNode</span>(<span class="num">42</span>, <span class="num">7</span>);     <span class="cm">// move 42 under 7</span>
+grid.<span class="fn">reparentTreeNode</span>(<span class="num">42</span>, <span class="kw">null</span>);  <span class="cm">// promote 42 to a root</span>
+
+<span class="cm">// Inspectors</span>
+grid.<span class="fn">getTreeDepth</span>(<span class="num">42</span>);             <span class="cm">// 0 for roots, depth for children</span>
+grid.<span class="fn">getTreeAncestors</span>(<span class="num">42</span>);         <span class="cm">// [root, …, parent] in DFS order</span>
+grid.<span class="fn">getTreeColumnId</span>();             <span class="cm">// id of the caret-bearing column</span></code></pre>
+</section>

@@ -1,0 +1,66 @@
+<h4>Sticky header &amp; truncated-cell tooltips</h4>
+<p class="text-muted">
+  <code>stickyHeader: true</code> pins the <code>&lt;thead&gt;</code> to
+  the viewport top while you scroll the body. Pure CSS via
+  <code>position: sticky</code> — coexists with frozen columns
+  (z-indexes are arranged so the corner cell wins). Hover any clipped
+  cell below to see the auto-generated <code>title</code> tooltip
+  that <code>truncatedTooltips</code> adds when content overflows.
+</p>
+
+<p class="text-muted small mb-3">
+  Scroll the table body — the header stays put. The
+  <code>--boostgrid-sticky-top</code> CSS variable lets you offset for
+  a fixed page nav (handy on a long-form page).
+</p>
+
+<div style="max-height: 320px; overflow: auto;" class="border rounded">
+  <table id="ex-sticky" class="table table-hover mb-0" style="table-layout: fixed; width: 100%;">
+    <thead>
+      <tr>
+        <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" style="width: 70px;">ID</th>
+        <th data-column-id="sender" style="width: 220px;">Sender</th>
+        <th data-column-id="subject" style="width: 360px;">Subject</th>
+        <th data-column-id="received" style="width: 140px;">Received</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<style>
+  /* Truncated tooltips need cells that actually clip — scope it to this
+     example so the rest of the showcase keeps its default wrapping. */
+  #ex-sticky tbody td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="sticky-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="sticky-css">CSS</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="sticky-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+<span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">stickyHeader</span>: <span class="kw">true</span>,
+  <span class="prop">truncatedTooltips</span>: <span class="kw">true</span>, <span class="cm">// default</span>
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="sticky-css"><code><span class="cm">/* The viewport top isn't always (0). If you have a fixed page nav,
+   tell Boostgrid where the sticky header should anchor: */</span>
+.boostgrid {
+  <span class="prop">--boostgrid-sticky-top</span>: <span class="num">56px</span>;
+}
+
+<span class="cm">/* Truncated tooltips fire only when the cell actually clips, so
+   pair with the standard CSS-truncation idiom on whichever cells
+   you want clipped: */</span>
+.my-grid <span class="tag">td</span> {
+  <span class="prop">white-space</span>: nowrap;
+  <span class="prop">overflow</span>: hidden;
+  <span class="prop">text-overflow</span>: ellipsis;
+}</code></pre>
+</section>

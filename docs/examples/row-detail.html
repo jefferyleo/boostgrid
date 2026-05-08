@@ -1,0 +1,74 @@
+<h4>Master/detail row expansion</h4>
+<p class="text-muted">
+  Set <code>rowDetail</code> to a function returning HTML or a node, and
+  Boostgrid adds an expand chevron in a leading affordance cell. The
+  panel that follows the row is colspan'd across every column — perfect
+  for a deep-link summary, a nested chart, or a related-rows mini-table.
+</p>
+
+<div class="d-flex gap-2 mb-3">
+  <button type="button" class="btn btn-sm btn-outline-secondary" id="ex-rd-expand">
+    <i class="bi bi-arrows-expand"></i> Expand all
+  </button>
+  <button type="button" class="btn btn-sm btn-outline-secondary" id="ex-rd-collapse">
+    <i class="bi bi-arrows-collapse"></i> Collapse all
+  </button>
+</div>
+
+<table id="ex-rd" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-width="64" data-align="right">ID</th>
+      <th data-column-id="sender" data-width="220">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="received" data-width="160">Received</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="rd-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="rd-api">API</button>
+    <button type="button" class="code-samples-tab" data-code-tab="rd-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="rd-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+<span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">rowDetail</span>: (row) =&gt; <span class="str">`
+    &lt;div class="row g-3"&gt;
+      &lt;div class="col-md-6"&gt;
+        &lt;h6&gt;${row.subject}&lt;/h6&gt;
+        &lt;p class="text-muted small mb-0"&gt;
+          From &lt;strong&gt;${row.sender}&lt;/strong&gt; on ${row.received}.
+        &lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class="col-md-6"&gt;
+        &lt;dl class="row mb-0 small"&gt;
+          &lt;dt class="col-sm-4"&gt;Status&lt;/dt&gt;
+          &lt;dd class="col-sm-8"&gt;${row.status ?? "—"}&lt;/dd&gt;
+        &lt;/dl&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  `</span>,
+  <span class="prop">rowDetailExpanded</span>: <span class="str">"none"</span>, <span class="cm">// "all" | record</span>
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="rd-api"><code><span class="cm">// Programmatic control</span>
+grid.<span class="fn">toggleRowDetail</span>(<span class="num">42</span>);
+grid.<span class="fn">isRowDetailExpanded</span>(<span class="num">42</span>);  <span class="cm">// → boolean</span>
+grid.<span class="fn">expandAllRowDetails</span>();
+grid.<span class="fn">collapseAllRowDetails</span>();
+
+<span class="cm">// Return null from rowDetail to skip the panel for that row.
+// The chevron then renders inert (clicking it does nothing).</span>
+<span class="prop">rowDetail</span>: (row) =&gt; row.archived ? <span class="kw">null</span> : <span class="str">`...`</span>;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="rd-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={columns}
+  <span class="attr">options</span>={{
+    <span class="prop">rowDetail</span>: (row) =&gt; <span class="str">`&lt;p&gt;Detail for #${row.id}&lt;/p&gt;`</span>,
+    <span class="prop">rowDetailExpanded</span>: <span class="str">"none"</span>,
+  }}
+/&gt;</code></pre>
+</section>

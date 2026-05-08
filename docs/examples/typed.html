@@ -1,0 +1,79 @@
+<h4>Typed rows (TypeScript generics)</h4>
+<p class="text-muted">
+  <code>Boostgrid&lt;TRow&gt;</code> threads your row interface through every row-shaped
+  getter, input, and footer context — no casts at the call site. The grid
+  below renders the same five rows, but the consuming code is fully typed
+  against an explicit <code>Message</code> interface.
+</p>
+
+<table id="ex-typed" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="sender" data-width="240" data-order="asc">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="received" data-width="160">Received</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="tg-ts">TypeScript</button>
+    <button type="button" class="code-samples-tab" data-code-tab="tg-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="tg-class">Class form</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="tg-ts"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+<span class="kw">interface</span> Message {
+  <span class="prop">id</span>:       <span class="kw">number</span>;
+  <span class="prop">sender</span>:   <span class="kw">string</span>;
+  <span class="prop">subject</span>:  <span class="kw">string</span>;
+  <span class="prop">received</span>: <span class="kw">string</span>;
+}
+
+<span class="kw">const</span> [grid] = <span class="fn">attach</span>&lt;Message&gt;(<span class="str">"#grid"</span>);
+
+<span class="cm">// All row-shaped APIs are typed as Message[]:</span>
+<span class="kw">const</span> rows = grid.<span class="fn">getCurrentRows</span>();    <span class="cm">// Message[]</span>
+<span class="kw">const</span> all  = grid.<span class="fn">getAllRows</span>();        <span class="cm">// Message[]</span>
+<span class="kw">const</span> filt = grid.<span class="fn">getFilteredRows</span>();   <span class="cm">// Message[]</span>
+
+<span class="cm">// IntelliSense knows about every Message field — no casts:</span>
+<span class="kw">const</span> latest = rows[<span class="num">0</span>].subject;        <span class="cm">// string</span>
+grid.<span class="fn">append</span>([{ <span class="prop">id</span>: <span class="num">99</span>, <span class="prop">sender</span>: <span class="str">"x@y.z"</span>, <span class="prop">subject</span>: <span class="str">"Hi"</span>, <span class="prop">received</span>: <span class="str">"2026-01-01"</span> }]);</code></pre>
+  <pre class="code-samples-panel" data-code-panel="tg-react"><code><span class="kw">import</span> { ReactBoostgrid, <span class="kw">type</span> ReactBoostgridHandle } <span class="kw">from</span> <span class="str">"react-boostgrid"</span>;
+
+<span class="kw">interface</span> Message {
+  <span class="prop">id</span>: <span class="kw">number</span>; <span class="prop">sender</span>: <span class="kw">string</span>; <span class="prop">subject</span>: <span class="kw">string</span>; <span class="prop">received</span>: <span class="kw">string</span>;
+}
+
+<span class="kw">const</span> [rows, setRows] = <span class="fn">useState</span>&lt;Message[]&gt;(initial);
+<span class="kw">const</span> ref = <span class="fn">useRef</span>&lt;ReactBoostgridHandle&gt;(<span class="kw">null</span>);
+
+&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={cols}
+  <span class="attr">onSelected</span>={(rs) =&gt; {
+    <span class="cm">// rs is typed as the rows you pass — no `as Message[]` cast needed</span>
+    <span class="kw">const</span> ids = rs.<span class="fn">map</span>((r) =&gt; r.id);
+  }}
+/&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="tg-class"><code><span class="kw">import</span> { Boostgrid } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+<span class="kw">interface</span> Order {
+  <span class="prop">id</span>:     <span class="kw">number</span>;
+  <span class="prop">sku</span>:    <span class="kw">string</span>;
+  <span class="prop">qty</span>:    <span class="kw">number</span>;
+  <span class="prop">total</span>:  <span class="kw">number</span>;
+}
+
+<span class="kw">const</span> grid = <span class="kw">new</span> Boostgrid&lt;Order&gt;(table, {
+  <span class="prop">footerFormatters</span>: {
+    <span class="cm">// ctx.filteredRows is Order[] — `r.total` resolves to number with no cast</span>
+    <span class="fn">grandTotal</span>: (_col, ctx) =&gt;
+      ctx.filteredRows.<span class="fn">reduce</span>((s, r) =&gt; s + r.total, <span class="num">0</span>).<span class="fn">toFixed</span>(<span class="num">2</span>),
+  },
+});</code></pre>
+</section>

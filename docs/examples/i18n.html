@@ -1,0 +1,94 @@
+<h4>Internationalization</h4>
+<p class="text-muted">
+  <code>options.labels</code> holds every UI string Boostgrid renders;
+  <code>options.locale</code> drives <code>Intl</code>-formatted numbers
+  and dates. <strong>Row data stays as-is</strong> — i18n translates the
+  <em>chrome</em> (search placeholder, page-size dropdown, pagination
+  summary, column-toggle button, tree carets, etc.). Switch the locale
+  below and watch the toolbar, the &ldquo;Showing N&rdquo; line, the
+  date column, and the side panel update.
+</p>
+
+<div class="d-flex flex-wrap gap-2 mb-3 align-items-center small">
+  <span class="text-muted me-1">Locale:</span>
+  <div class="btn-group btn-group-sm" role="group" aria-label="Locale">
+    <button type="button" class="btn btn-outline-secondary active" data-i18n-locale="en-US">English (US)</button>
+    <button type="button" class="btn btn-outline-secondary" data-i18n-locale="de-DE">Deutsch</button>
+    <button type="button" class="btn btn-outline-secondary" data-i18n-locale="ja-JP">日本語</button>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <table id="ex-i18n" class="table table-hover">
+      <thead>
+        <tr>
+          <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="80">ID</th>
+          <th data-column-id="sender">Sender</th>
+          <th data-column-id="subject">Subject</th>
+          <th data-column-id="received" data-formatter="localeDate" data-width="180">Received</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div class="col-lg-4">
+    <p class="caps muted small mb-1">Active labels &amp; locale</p>
+    <dl id="ex-i18n-labels" class="small mb-0 border rounded p-2" style="background: var(--bs-tertiary-bg); display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 0.75rem;"></dl>
+  </div>
+</div>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="i18n-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="i18n-keys">Label keys</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="i18n-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+
+<span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">locale</span>: <span class="str">"de-DE"</span>,
+  <span class="prop">labels</span>: {
+    <span class="prop">infos</span>: <span class="str">"Zeige {start} bis {end} von {total} Einträgen"</span>,
+    <span class="prop">search</span>: <span class="str">"Suche"</span>,
+    <span class="prop">noResults</span>: <span class="str">"Keine Treffer."</span>,
+    <span class="prop">all</span>: <span class="str">"Alle"</span>,
+    <span class="prop">refresh</span>: <span class="str">"Aktualisieren"</span>,
+    <span class="prop">columns</span>: <span class="str">"Spalten"</span>,
+    <span class="prop">searchColumns</span>: <span class="str">"Spalten suchen"</span>,
+    <span class="prop">resetColumns</span>: <span class="str">"Zurücksetzen"</span>,
+    <span class="prop">bulkSelected</span>: <span class="str">"{n} ausgewählt"</span>,
+    <span class="prop">bulkClear</span>: <span class="str">"Aufheben"</span>,
+    <span class="prop">treeExpand</span>: <span class="str">"Aufklappen"</span>,
+    <span class="prop">treeCollapse</span>: <span class="str">"Zuklappen"</span>,
+    <span class="cm">// …everything you don't override stays English.</span>
+  },
+});</code></pre>
+  <pre class="code-samples-panel" data-code-panel="i18n-keys"><code><span class="cm">// Every translatable label, with its default value.</span>
+<span class="prop">all</span>:               <span class="str">"All"</span>
+<span class="prop">infos</span>:             <span class="str">"Showing {start} to {end} of {total} entries"</span>
+<span class="prop">loading</span>:           <span class="str">"Loading…"</span>
+<span class="prop">noResults</span>:         <span class="str">"No results found."</span>
+<span class="prop">refresh</span>:           <span class="str">"Refresh"</span>
+<span class="prop">search</span>:            <span class="str">"Search"</span>
+
+<span class="cm">// Column-visibility panel</span>
+<span class="prop">columns</span>:           <span class="str">"Columns"</span>
+<span class="prop">resetColumns</span>:      <span class="str">"Reset to defaults"</span>
+<span class="prop">searchColumns</span>:     <span class="str">"Search columns"</span>
+<span class="prop">dragToReorder</span>:     <span class="str">"Drag to reorder"</span>
+<span class="prop">resizeColumn</span>:      <span class="str">"Resize {column}"</span>
+
+<span class="cm">// Master/detail rows</span>
+<span class="prop">rowDetailsHeader</span>:  <span class="str">"Row details"</span>
+<span class="prop">showDetails</span>:       <span class="str">"Show details"</span>
+<span class="prop">hideDetails</span>:       <span class="str">"Hide details"</span>
+
+<span class="cm">// Bulk-action bar</span>
+<span class="prop">bulkActions</span>:       <span class="str">"Bulk actions"</span>
+<span class="prop">bulkSelected</span>:      <span class="str">"{n} selected"</span>
+<span class="prop">bulkClear</span>:         <span class="str">"Clear"</span>
+
+<span class="cm">// Tree-row caret</span>
+<span class="prop">treeExpand</span>:        <span class="str">"Expand"</span>
+<span class="prop">treeCollapse</span>:      <span class="str">"Collapse"</span></code></pre>
+</section>

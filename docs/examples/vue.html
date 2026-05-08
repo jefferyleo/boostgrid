@@ -1,0 +1,66 @@
+<h4>Vue 3 wrapper</h4>
+<p class="text-muted">
+  <code>vue-boostgrid</code> mirrors the React wrapper's host-div pattern
+  for Vue 3. Vue owns the `<code>&lt;div&gt;</code>` host; the
+  `<code>&lt;table&gt;</code>` is built imperatively from the
+  <code>columns</code> prop on mount, so Vue's reactivity layer never
+  collides with the grid's DOM mutations.
+</p>
+
+<div class="alert alert-secondary">
+  <strong>Heads-up:</strong> the live demo below mounts a real Vue 3 app
+  scoped to the host div. Vue is loaded lazily via <a href="https://esm.sh">esm.sh</a>
+  through the page's <code>importmap</code>, so the rest of the docs site
+  pays no Vue cost.
+</div>
+
+<div id="ex-vue-host"></div>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="vu-sfc">Vue SFC</button>
+    <button type="button" class="code-samples-tab" data-code-tab="vu-install">Install</button>
+    <button type="button" class="code-samples-tab" data-code-tab="vu-imperative">Imperative</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="vu-sfc"><code><span class="cm">&lt;!-- App.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { ref } <span class="kw">from</span> <span class="str">"vue"</span>;
+<span class="kw">import</span> { VueBoostgrid } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+<span class="kw">import</span> <span class="str">"boostgrid/style.css"</span>;
+
+<span class="kw">const</span> data = <span class="fn">ref</span>([
+  { <span class="prop">id</span>: <span class="num">1</span>, <span class="prop">sender</span>: <span class="str">"alpha@x.com"</span>, <span class="prop">subject</span>: <span class="str">"Welcome"</span> },
+  { <span class="prop">id</span>: <span class="num">2</span>, <span class="prop">sender</span>: <span class="str">"beta@x.com"</span>,  <span class="prop">subject</span>: <span class="str">"Hello"</span> },
+]);
+<span class="kw">const</span> cols = [
+  { <span class="prop">id</span>: <span class="str">"id"</span>,      <span class="prop">text</span>: <span class="str">"ID"</span>,      <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span> },
+  { <span class="prop">id</span>: <span class="str">"sender"</span>,  <span class="prop">text</span>: <span class="str">"Sender"</span>,  <span class="prop">order</span>: <span class="str">"asc"</span> },
+  { <span class="prop">id</span>: <span class="str">"subject"</span>, <span class="prop">text</span>: <span class="str">"Subject"</span> },
+];
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span>
+    <span class="attr">:data</span>=<span class="str">"data"</span>
+    <span class="attr">:columns</span>=<span class="str">"cols"</span>
+    <span class="attr">:options</span>=<span class="str">"{ stateSave: true, selection: true }"</span>
+    <span class="attr">@selected</span>=<span class="str">"(rs) =&gt; console.log(rs)"</span>
+  /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="vu-install"><code><span class="prompt">$</span> npm install boostgrid vue-boostgrid
+
+<span class="cm">// In your bundler (Vite, etc.):</span>
+<span class="kw">import</span> <span class="str">"boostgrid/style.css"</span>;
+<span class="kw">import</span> { VueBoostgrid } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="vu-imperative"><code><span class="kw">import</span> { ref } <span class="kw">from</span> <span class="str">"vue"</span>;
+<span class="kw">import</span> { VueBoostgrid, <span class="kw">type</span> VueBoostgridHandle } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> handle = <span class="fn">ref</span>&lt;VueBoostgridHandle | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+<span class="cm">// Same imperative API as the React wrapper:</span>
+handle.value?.<span class="fn">search</span>(<span class="str">"alpha"</span>);
+handle.value?.<span class="fn">sort</span>({ <span class="prop">received</span>: <span class="str">"desc"</span> });
+handle.value?.<span class="fn">reload</span>();
+handle.value?.<span class="fn">getSelectedRows</span>();
+handle.value?.grid;   <span class="cm">// raw Boostgrid instance escape hatch</span></code></pre>
+</section>

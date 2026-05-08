@@ -1,0 +1,82 @@
+<h4>Footer / column totals</h4>
+<p class="text-muted">
+  Two ways to render a <code>&lt;tfoot&gt;</code> &mdash; declaratively, with a per-column
+  <code>footerFormatter</code>, or imperatively, with a single
+  <code>footerCallback(tfootRow, ctx)</code> that runs after every draw.
+  The grid below uses both: the <em>Amount</em> column auto-sums via
+  <code>footerFormatter</code>, and a callback overrides the <em>Subject</em>
+  cell with a row-count summary.
+</p>
+
+<table id="ex-foot" class="table table-hover align-middle">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="70">ID</th>
+      <th data-column-id="sender" data-width="240">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="amount" data-formatter="money" data-footer-formatter="sumAmount" data-align="right" data-width="140">Amount</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="ft-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ft-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ft-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="ft-html"><code><span class="cm">&lt;!-- A column with data-footer-formatter resolves through options.footerFormatters --&gt;</span>
+&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"amount"</span>
+    <span class="attr">data-formatter</span>=<span class="str">"money"</span>
+    <span class="attr">data-footer-formatter</span>=<span class="str">"sumAmount"</span>
+    <span class="attr">data-align</span>=<span class="str">"right"</span>&gt;Amount&lt;/<span class="tag">th</span>&gt;
+
+<span class="cm">&lt;!-- &lt;tfoot&gt; is auto-created when any footer signal is set; you may also</span>
+<span class="cm">     author one explicitly to keep static cells. --&gt;</span></code></pre>
+  <pre class="code-samples-panel" data-code-panel="ft-vanilla"><code><span class="kw">const</span> money = <span class="kw">new</span> <span class="fn">Intl</span>.<span class="fn">NumberFormat</span>(<span class="str">"en-US"</span>, {
+  <span class="prop">style</span>: <span class="str">"currency"</span>, <span class="prop">currency</span>: <span class="str">"USD"</span>,
+});
+
+<span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <span class="prop">formatters</span>: {
+    <span class="fn">money</span>: (_col, row) =&gt; money.<span class="fn">format</span>(<span class="fn">Number</span>(row.amount) || <span class="num">0</span>),
+  },
+  <span class="prop">footerFormatters</span>: {
+    <span class="fn">sumAmount</span>: (_col, ctx) =&gt; {
+      <span class="kw">const</span> total = ctx.filteredRows.<span class="fn">reduce</span>((s, r) =&gt; s + <span class="fn">Number</span>(r.amount || <span class="num">0</span>), <span class="num">0</span>);
+      <span class="kw">return</span> <span class="str">`&lt;strong&gt;</span>${money.<span class="fn">format</span>(total)}<span class="str">&lt;/strong&gt;`</span>;
+    },
+  },
+  <span class="cm">// Runs last; can read ctx and overwrite anything the formatters wrote.</span>
+  <span class="prop">footerCallback</span>: (tr, ctx) =&gt; {
+    <span class="kw">const</span> subjectCell = tr.<span class="fn">querySelector</span>(<span class="str">'[data-column-id="subject"]'</span>);
+    <span class="kw">if</span> (subjectCell) {
+      subjectCell.innerHTML = <span class="str">`&lt;span class="text-muted small"&gt;</span>
+        <span class="str">  Showing </span>${ctx.start}<span class="str">–</span>${ctx.end}<span class="str"> of </span>${ctx.filteredRows.length}<span class="str">&lt;/span&gt;`</span>;
+    }
+  },
+});
+
+<span class="cm">// Public accessor (analog of DataTables column().footer())</span>
+grid.<span class="fn">getFooterCell</span>(<span class="str">"amount"</span>);   <span class="cm">// → &lt;th data-column-id="amount"&gt;…</span></code></pre>
+  <pre class="code-samples-panel" data-code-panel="ft-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">data</span>={rows}
+  <span class="attr">columns</span>={[
+    { <span class="prop">id</span>: <span class="str">"id"</span>,      <span class="prop">text</span>: <span class="str">"ID"</span>,      <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span> },
+    { <span class="prop">id</span>: <span class="str">"sender"</span>,  <span class="prop">text</span>: <span class="str">"Sender"</span> },
+    { <span class="prop">id</span>: <span class="str">"subject"</span>, <span class="prop">text</span>: <span class="str">"Subject"</span> },
+    { <span class="prop">id</span>: <span class="str">"amount"</span>,  <span class="prop">text</span>: <span class="str">"Amount"</span>,
+      <span class="prop">formatter</span>: (_c, r) =&gt; money.<span class="fn">format</span>(<span class="fn">Number</span>(r.amount) || <span class="num">0</span>),
+      <span class="prop">footerFormatter</span>: (_c, ctx) =&gt;
+        money.<span class="fn">format</span>(ctx.filteredRows.<span class="fn">reduce</span>((s, r) =&gt; s + <span class="fn">Number</span>(r.amount || <span class="num">0</span>), <span class="num">0</span>)),
+    },
+  ]}
+  <span class="attr">options</span>={{
+    <span class="prop">footerCallback</span>: (tr, ctx) =&gt; {
+      <span class="kw">const</span> cell = tr.<span class="fn">querySelector</span>(<span class="str">'[data-column-id="subject"]'</span>);
+      <span class="kw">if</span> (cell) cell.textContent = <span class="str">`Showing </span>${ctx.start}<span class="str">–</span>${ctx.end}<span class="str"> of </span>${ctx.filteredRows.length}<span class="str">`</span>;
+    },
+  }}
+/&gt;</code></pre>
+</section>

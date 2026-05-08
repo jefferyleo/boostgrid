@@ -1,0 +1,66 @@
+<h4>Frozen left columns</h4>
+<p class="text-muted">
+  Pin one or more leading columns to the viewport edge while the rest
+  scroll horizontally. Frozen columns must come first in column order;
+  Boostgrid computes their cumulative left offsets at render time and
+  applies <code>position: sticky</code>. A drop-shadow appears on the
+  rightmost frozen cell only after the user scrolls.
+</p>
+
+<div class="table-responsive border rounded">
+  <table id="ex-frozen" class="table table-bordered mb-0" style="min-width: 1300px">
+    <thead>
+      <tr>
+        <th data-column-id="id"       data-identifier="true" data-type="numeric"
+            data-frozen="left" data-align="right" data-width="80">ID</th>
+        <th data-column-id="sender"   data-frozen="left" data-width="220">Sender</th>
+        <th data-column-id="subject"  data-width="320">Subject</th>
+        <th data-column-id="received" data-width="160">Received</th>
+        <th data-column-id="status"   data-formatter="statusBadge" data-align="center" data-width="120">Status</th>
+        <th data-column-id="region"   data-width="160">Region</th>
+        <th data-column-id="priority" data-width="120">Priority</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="fz-html">HTML</button>
+    <button type="button" class="code-samples-tab" data-code-tab="fz-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="fz-react">React</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="fz-html"><code><span class="cm">&lt;!-- The .table-responsive parent is what gives the sticky cells something to scroll under --&gt;</span>
+&lt;<span class="tag">div</span> <span class="attr">class</span>=<span class="str">"table-responsive"</span>&gt;
+  &lt;<span class="tag">table</span> <span class="attr">id</span>=<span class="str">"grid"</span> <span class="attr">class</span>=<span class="str">"table table-bordered"</span>
+         <span class="attr">style</span>=<span class="str">"min-width: 1300px"</span>&gt;
+    &lt;<span class="tag">thead</span>&gt;&lt;<span class="tag">tr</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"id"</span>     <span class="attr">data-frozen</span>=<span class="str">"left"</span> <span class="attr">data-width</span>=<span class="str">"80"</span>&gt;ID&lt;/<span class="tag">th</span>&gt;
+      &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"sender"</span> <span class="attr">data-frozen</span>=<span class="str">"left"</span> <span class="attr">data-width</span>=<span class="str">"220"</span>&gt;Sender&lt;/<span class="tag">th</span>&gt;
+      …
+    &lt;/<span class="tag">tr</span>&gt;&lt;/<span class="tag">thead</span>&gt;
+    &lt;<span class="tag">tbody</span>&gt;…&lt;/<span class="tag">tbody</span>&gt;
+  &lt;/<span class="tag">table</span>&gt;
+&lt;/<span class="tag">div</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="fz-vanilla"><code><span class="fn">attach</span>(<span class="str">"#grid"</span>);
+
+<span class="cm">// `frozen` is a per-column flag — programmatically:</span>
+<span class="fn">attach</span>(<span class="str">"#grid2"</span>, {
+  <span class="cm">// columns parsed from data-attrs already, but you could also assert in code:</span>
+});
+
+<span class="cm">// data-width on a frozen column should be a px value so the sticky-left math</span>
+<span class="cm">// stays accurate. Em / % widths fall back to a default of 120px each.</span></code></pre>
+  <pre class="code-samples-panel" data-code-panel="fz-react"><code>&lt;<span class="tag">div</span> <span class="attr">className</span>=<span class="str">"table-responsive"</span>&gt;
+  &lt;<span class="tag">ReactBoostgrid</span>
+    <span class="attr">data</span>={rows}
+    <span class="attr">columns</span>={[
+      { <span class="prop">id</span>: <span class="str">"id"</span>,     <span class="prop">text</span>: <span class="str">"ID"</span>,     <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span>, <span class="prop">frozen</span>: <span class="str">"left"</span>, <span class="prop">width</span>: <span class="str">"80"</span> },
+      { <span class="prop">id</span>: <span class="str">"sender"</span>, <span class="prop">text</span>: <span class="str">"Sender"</span>, <span class="prop">frozen</span>: <span class="str">"left"</span>, <span class="prop">width</span>: <span class="str">"220"</span> },
+      { <span class="prop">id</span>: <span class="str">"subject"</span>, <span class="prop">text</span>: <span class="str">"Subject"</span>, <span class="prop">width</span>: <span class="str">"320"</span> },
+      …
+    ]}
+  /&gt;
+&lt;/<span class="tag">div</span>&gt;</code></pre>
+</section>

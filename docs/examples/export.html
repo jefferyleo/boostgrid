@@ -1,0 +1,58 @@
+<h4>Export · CSV / Excel / Print</h4>
+<p class="text-muted">
+  The <code>boostgrid-export</code> companion package adds CSV, Excel, and
+  Print export. Excel uses the optional peer dependency
+  <code>xlsx-js-style</code> via a runtime dynamic import — install it
+  only if you need <code>.xlsx</code> output.
+</p>
+
+<div class="d-flex flex-wrap gap-2 mb-3">
+  <button class="btn btn-sm btn-outline-primary"  data-bg-export="csv">
+    <i class="bi bi-filetype-csv"></i> Export CSV
+  </button>
+  <button class="btn btn-sm btn-outline-success" data-bg-export="xlsx">
+    <i class="bi bi-file-earmark-excel"></i> Export Excel
+  </button>
+  <button class="btn btn-sm btn-outline-secondary" data-bg-export="print">
+    <i class="bi bi-printer"></i> Print
+  </button>
+</div>
+
+<table id="ex-export" class="table table-hover">
+  <thead>
+    <tr>
+      <th data-column-id="id" data-identifier="true" data-type="numeric" data-align="right" data-width="80">ID</th>
+      <th data-column-id="sender" data-width="240">Sender</th>
+      <th data-column-id="subject">Subject</th>
+      <th data-column-id="received" data-width="160">Received</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<section class="code-samples">
+  <div class="code-samples-tabs">
+    <button type="button" class="code-samples-tab" data-code-tab="ex-install">Install</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ex-vanilla">Vanilla JS</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ex-html">Buttons</button>
+  </div>
+  <pre class="code-samples-panel" data-code-panel="ex-install"><code><span class="prompt">$</span> npm install boostgrid boostgrid-export
+<span class="cm"># Optional — only needed if you call xlsx()</span>
+<span class="prompt">$</span> npm install xlsx-js-style</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ex-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
+<span class="kw">import</span> { attachExport } <span class="kw">from</span> <span class="str">"boostgrid-export"</span>;
+
+<span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>);
+<span class="kw">const</span> exporter = <span class="fn">attachExport</span>(grid, {
+  <span class="prop">filename</span>: <span class="str">"messages"</span>,
+  <span class="prop">include</span>:  <span class="str">"filtered"</span>,    <span class="cm">// "current" | "filtered" | "all"</span>
+});
+
+exporter.<span class="fn">csv</span>();
+<span class="kw">await</span> exporter.<span class="fn">xlsx</span>();
+exporter.<span class="fn">print</span>();</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ex-html"><code><span class="cm">&lt;!-- attachExport also adds a delegated click listener for declarative buttons --&gt;</span>
+&lt;<span class="tag">button</span> <span class="attr">data-bg-export</span>=<span class="str">"csv"</span>&gt;Export CSV&lt;/<span class="tag">button</span>&gt;
+&lt;<span class="tag">button</span> <span class="attr">data-bg-export</span>=<span class="str">"xlsx"</span>&gt;Export Excel&lt;/<span class="tag">button</span>&gt;
+&lt;<span class="tag">button</span> <span class="attr">data-bg-export</span>=<span class="str">"print"</span>&gt;Print&lt;/<span class="tag">button</span>&gt;</code></pre>
+</section>
