@@ -39,6 +39,7 @@ describe("Boostgrid state persistence", () => {
   it("writes state under boostgrid:<id> key when stateSave is on", () => {
     const g = new Boostgrid(makeTable(), { stateSave: true, rowCount: 2, navigation: 0 });
     g.goToPage(2);
+    g.flushState();
     const raw = localStorage.getItem("boostgrid:state-grid");
     expect(raw).not.toBeNull();
     const state = JSON.parse(raw!);
@@ -88,6 +89,7 @@ describe("Boostgrid state persistence", () => {
       navigation: 0,
     });
     g.goToPage(2);
+    g.flushState();
     expect(localStorage.getItem("my-custom-key")).not.toBeNull();
     expect(localStorage.getItem("boostgrid:state-grid")).toBeNull();
     g.destroy();
@@ -96,6 +98,7 @@ describe("Boostgrid state persistence", () => {
   it("clearSavedState removes the persisted payload", () => {
     const g = new Boostgrid(makeTable(), { stateSave: true, rowCount: 2, navigation: 0 });
     g.goToPage(2);
+    g.flushState();
     expect(localStorage.getItem("boostgrid:state-grid")).not.toBeNull();
     g.clearSavedState();
     expect(localStorage.getItem("boostgrid:state-grid")).toBeNull();
@@ -178,6 +181,7 @@ describe("Boostgrid state persistence", () => {
       navigation: 0,
     });
     g1.select([1, 3]);
+    g1.flushState();
     const raw1 = JSON.parse(localStorage.getItem("boostgrid:state-grid")!);
     expect(raw1.selected).toEqual([]);
     g1.destroy();
@@ -194,6 +198,7 @@ describe("Boostgrid state persistence", () => {
       navigation: 0,
     });
     g2.select([1, 3]);
+    g2.flushState();
     const raw2 = JSON.parse(localStorage.getItem("boostgrid:state-grid")!);
     expect(raw2.selected.sort()).toEqual([1, 3]);
     g2.destroy();

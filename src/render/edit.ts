@@ -52,6 +52,10 @@ interface ActiveEditor<TRow extends Row> {
   grid: Boostgrid<TRow>;
   closed: boolean;
   onClose: () => void;
+  /** Removes the keydown/blur listeners attached to `input`. Called from
+   *  commit/cancel before swapping the input out of the DOM so a delayed
+   *  blur from focus-stealing UA behavior cannot re-trigger commit. */
+  detach: () => void;
 }
 
 function openEditor<TRow extends Row>(
@@ -96,6 +100,7 @@ function openEditor<TRow extends Row>(
 
   const editor: ActiveEditor<TRow> = {
     td, input, column, row, oldValue, oldHtml, grid, closed: false, onClose,
+    detach: () => { /* assigned below */ },
   };
 
   const onKey = (e: Event) => {
@@ -103,8 +108,13 @@ function openEditor<TRow extends Row>(
     if (ke.key === "Enter") { e.preventDefault(); commit(editor, false); }
     else if (ke.key === "Escape") { e.preventDefault(); cancel(editor); }
   };
+  const onBlur = () => commit(editor, false);
   input.addEventListener("keydown", onKey);
-  input.addEventListener("blur", () => commit(editor, false));
+  input.addEventListener("blur", onBlur);
+  editor.detach = () => {
+    input.removeEventListener("keydown", onKey);
+    input.removeEventListener("blur", onBlur);
+  };
 
   return editor;
 }
@@ -112,6 +122,10 @@ function openEditor<TRow extends Row>(
 function commit<TRow extends Row>(editor: ActiveEditor<TRow>, silent: boolean): void {
   if (editor.closed) return;
   editor.closed = true;
+  // Detach BEFORE swapping the input out — innerHTML/textContent
+  // mutations dispatch a synthetic blur on the now-removed input which
+  // would re-enter commit if the listener were still wired up.
+  editor.detach();
   const raw = editor.input.value;
   const newValue = editor.column.editType === "number" ? Number(raw) : raw;
 
@@ -138,6 +152,7 @@ function commit<TRow extends Row>(editor: ActiveEditor<TRow>, silent: boolean): 
 function cancel<TRow extends Row>(editor: ActiveEditor<TRow>): void {
   if (editor.closed) return;
   editor.closed = true;
+  editor.detach();
   editor.td.innerHTML = editor.oldHtml;
   editor.onClose();
 }

@@ -40,7 +40,13 @@ export function mountVirtualScroll<TRow extends Row = Row>(grid: Boostgrid<TRow>
     if (frame) return;
     frame = requestAnimationFrame(() => {
       frame = 0;
+      // Capture the previous window before recomputing so we can skip
+      // the render entirely when the scrolled-to position covers the
+      // same slice (small scrolls within overscan).
+      const prev = grid.virtualWindow;
       refreshVirtualWindow(grid);
+      const cur = grid.virtualWindow;
+      if (prev && cur && prev.start === cur.start && prev.end === cur.end) return;
       grid.rerenderBody();
     });
   };
@@ -100,7 +106,10 @@ export function recomputeWindow<TRow extends Row = Row>(
   visibleCount: number,
 ): void {
   const opts = grid.options;
-  const total = grid.getFilteredRows().length || grid.getCurrentRows().length;
+  // Read .length directly off the internal arrays — avoids the .slice()
+  // allocation that getFilteredRows() / getCurrentRows() would do per
+  // scroll event.
+  const total = grid.filtered.length || grid.currentRows.length;
   const overscan = Math.max(0, opts.overscan);
   const start = Math.max(0, firstVisible - overscan);
   const end = Math.min(total, firstVisible + visibleCount + overscan);

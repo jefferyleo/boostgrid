@@ -37,7 +37,20 @@ function resolveKey<TRow extends Row>(grid: Boostgrid<TRow>): string {
   return grid.options.stateKey ?? defaultStateKey(grid);
 }
 
-export function saveState<TRow extends Row = Row>(grid: Boostgrid<TRow>): void {
+/** Trailing-edge debounce window (ms) for `saveState`. Picked to be long
+ *  enough to coalesce the burst of state changes during column-resize
+ *  drag (60Hz pointermove) and short enough to feel instant for a tab
+ *  close after a discrete action like sort/page. */
+const SAVE_DEBOUNCE_MS = 200;
+
+/** One pending-save timer per grid. WeakMap so the entry is GC'd alongside
+ *  the grid instance — no leak when grids are destroyed without an
+ *  explicit flush. */
+const saveTimers = new WeakMap<Boostgrid<Row>, ReturnType<typeof setTimeout>>();
+
+/** Synchronous serializer — invoked by the debounced `saveState` and by
+ *  `flushSaveState` on `destroy()`. */
+function writeState<TRow extends Row = Row>(grid: Boostgrid<TRow>): void {
   if (!grid.options.stateSave) return;
   const store = safeStorage();
   if (!store) return;
@@ -64,6 +77,35 @@ export function saveState<TRow extends Row = Row>(grid: Boostgrid<TRow>): void {
     store.setItem(resolveKey(grid), JSON.stringify(state));
   } catch {
     /* quota exceeded, etc. — silent */
+  }
+}
+
+export function saveState<TRow extends Row = Row>(grid: Boostgrid<TRow>): void {
+  if (!grid.options.stateSave) return;
+  const key = grid as unknown as Boostgrid<Row>;
+  const existing = saveTimers.get(key);
+  if (existing) clearTimeout(existing);
+  saveTimers.set(
+    key,
+    setTimeout(() => {
+      saveTimers.delete(key);
+      writeState(grid);
+    }, SAVE_DEBOUNCE_MS),
+  );
+}
+
+/**
+ * Synchronously flush any pending debounced save. Called from `destroy()`
+ * so the user's last interaction (which may have happened mid-debounce)
+ * still lands in localStorage instead of being silently dropped.
+ */
+export function flushSaveState<TRow extends Row = Row>(grid: Boostgrid<TRow>): void {
+  const key = grid as unknown as Boostgrid<Row>;
+  const t = saveTimers.get(key);
+  if (t) {
+    clearTimeout(t);
+    saveTimers.delete(key);
+    writeState(grid);
   }
 }
 

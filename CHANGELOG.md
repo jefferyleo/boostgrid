@@ -1,0 +1,105 @@
+# Changelog
+
+All notable changes to Boostgrid are documented here.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/).
+
+## [2.4.2] — 2026-05-09
+
+### Performance
+- **Diffed selection toggle.** Single-row `select([id])` / `deselect([id])`
+  now updates only the affected row's `<tr>` instead of walking every
+  visible row to re-evaluate selection state. Select-all / deselect-all
+  (no rowIds argument) keep the full-table refresh path. Wins scale with
+  visible row count.
+- **Column-resize drag throttled to rAF + cached cell list.** The live
+  width sync used to call `querySelectorAll("tbody > tr > td")` and
+  iterate it on every pointermove (60–240 Hz). Now we resolve the
+  matching `<td>`s once at drag start (rows can't change mid-drag) and
+  coalesce moves into one width write per animation frame. Synchronous
+  flush on mouseup so the final position is exact.
+
+### Added
+- `performanceMarks: boolean` option (default `false`). When on, brackets
+  `renderHeader` / `renderBody` / `renderFooter` with `performance.mark()`
+  + `performance.measure()` entries (User Timing API). Mark name is
+  `boostgrid:<id>:<phase>`. Lets app authors profile grid renders in
+  production via Chrome DevTools' Performance panel without touching
+  any production code paths.
+
+### Changed
+- Bundle: 15.09 → 15.46 KB brotli (+~370 B for the three additions; new
+  `mark()` helper, the diff-path branch, and the rAF coalescer for resize).
+
+## [2.4.1] — 2026-05-09
+
+### Fixed
+- AJAX request sequencing now drops stale responses. Rapid search typing
+  or sort clicks could previously trigger overlapping fetches where a
+  later-resolving older response would overwrite a fresher one. A
+  monotonic id + `AbortController` makes this impossible. `destroy()`
+  aborts in-flight requests too.
+- Cell-edit listener cleanup. The inline `<input>`'s `keydown` and
+  `blur` handlers were never removed when the editor closed; the
+  synthetic blur dispatched by `innerHTML` mutation re-entered `commit()`.
+  Fixed via explicit detach before swap.
+
+### Performance
+- Frozen-offset arrays cached per render (`computeFrozenOffsets`):
+  O(n²) → O(n). 50 cols × 100 rows = 5000 walks → 1.
+- Selection refresh uses `rowIndex: Map` instead of `currentRows.find()`.
+- Search regex cached on `grid.searchRegex` per phrase.
+- Sort comparator cached, invalidated when `sortDictionary` mutates.
+- Visible-cols + columnById Maps memoized inside body / group / footer
+  / column-visibility paths.
+- Tree `markUp` short-circuits on already-walked ancestors.
+- Virtual scroll skips re-render when the windowed slice is unchanged.
+- Virtual scroll length read direct from internal arrays (no `.slice()`).
+- `saveState` debounced 200 ms; column-resize drag at 60 Hz no longer
+  pays `JSON.stringify` per pointermove.
+
+### Added
+- `grid.flushState()` — synchronously flush any pending debounced save.
+  Useful in `beforeunload` handlers or tests reading `localStorage`
+  mid-flight. `destroy()` flushes automatically.
+
+### Changed
+- Bundle ceiling raised from 15 KB → 18 KB brotli to accommodate the
+  AJAX-abort plumbing + frozen-offset cache arrays. Current size: 15.09 KB.
+
+### Tests
+- 144 → 151 specs. New `test/quality.test.ts` covers race conditions,
+  listener hygiene, debounce coalescing, locale validation, double-destroy.
+
+## [2.4.0] — 2026-04
+i18n hardening — every UI string routes through `options.labels` (14 new keys).
+Locale-aware digit grouping via `Intl.NumberFormat`. Sticky `<thead>`
+(`stickyHeader: true`). Auto-tooltips on truncated cells.
+
+## [2.3.0] — 2026-04
+Power-user UX & server-side. Master/detail row expansion, cell selection
+with TSV clipboard copy, sticky bulk-action bar, animated loading
+skeleton, ajax payload surfaces grouping + tree state.
+
+## [2.2.0] — 2026-03
+Column UX & tree polish. Frozen-right columns, header drag-reorder,
+edge drag-resize, polished column-visibility panel, tree
+drag-to-reparent, indented tree export, multi-level subtotal-on-top.
+
+## [2.1.0] — 2026-03
+Hierarchical data. Multi-level grouping (`groupBy: string[]`), tree
+data mode (`treeMode: true`), ancestor-aware search, state schema v:2,
+cycle + orphan defenses.
+
+## [2.0.0] — 2026-02
+Vanilla rewrite. No jQuery. ESM + UMD output. Virtual scroll,
+cell-level edit, row grouping + subtotals, frozen-left columns,
+companion packages (React / Vue / Export), state persistence.
+
+[2.4.2]: https://github.com/JefferyLeo/boostgrid/releases/tag/v2.4.2
+[2.4.1]: https://github.com/JefferyLeo/boostgrid/releases/tag/v2.4.1
+[2.4.0]: https://github.com/JefferyLeo/boostgrid/releases/tag/v2.4.0
+[2.3.0]: https://github.com/JefferyLeo/boostgrid/releases/tag/v2.3.0
+[2.2.0]: https://github.com/JefferyLeo/boostgrid/releases/tag/v2.2.0
+[2.1.0]: https://github.com/JefferyLeo/boostgrid/releases/tag/v2.1.0
+[2.0.0]: https://github.com/JefferyLeo/boostgrid/releases/tag/v2.0.0

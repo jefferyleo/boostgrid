@@ -414,6 +414,20 @@ export interface BoostgridOptions<TRow extends Row = Row> {
    */
   locale: string | null;
   /**
+   * When `true`, bracket each render pass with `performance.mark()` +
+   * `performance.measure()` entries (User Timing API). Lets app authors
+   * profile grid renders in production via Chrome DevTools' Performance
+   * panel — the entries appear under the Timings track without changing
+   * any production code paths.
+   *
+   * Mark names are namespaced as `boostgrid:<id>:<phase>:start|end` and
+   * the measure as `boostgrid:<id>:<phase>` where `<phase>` is one of
+   * `render`, `header`, `body`, `footer`. `<id>` is the table's id
+   * (or a hash if unset). Default `false` so we don't pay any overhead
+   * by default — even cheap marks add up at 60Hz scroll.
+   */
+  performanceMarks: boolean;
+  /**
    * Initial expand state for detail panels. `"all"` opens every row's
    * panel on first render; `"none"` (default) opens none. A
    * `Record<id, boolean>` lets you set per-row defaults — `true` means

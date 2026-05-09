@@ -12,7 +12,7 @@ import { renderPagination, renderInfos } from "./render/pagination.js";
 import { mountVirtualScroll, refreshVirtualWindow, type VirtualWindow } from "./render/virtual.js";
 import { mountCellEdit } from "./render/edit.js";
 import { mountCellSelection } from "./render/cell-select.js";
-import { saveState, restoreState, clearState } from "./state.js";
+import { saveState, restoreState, clearState, flushSaveState } from "./state.js";
 
 /** Normalize a tree id-or-parent-id (mirrors `normalizeId` in tree.ts so
  *  the reparent path matches what the tree builder produces). */
@@ -52,9 +52,20 @@ export class Boostgrid<TRow extends Row = Row> {
   current = 1;
   private rowsPerPage: number;
   searchPhrase = "";
+  /** Cached compiled regex for `searchPhrase`. Invalidated whenever
+   *  `executeSearch` mutates the phrase. Avoids re-compiling per row
+   *  inside `applyFilter`. */
+  private searchRegex: RegExp | null = null;
   sortDictionary: SortDictionary = {};
+  /** Cached comparator built from `sortDictionary`. Cleared by `sort()` /
+   *  the action handler whenever the dictionary mutates. Avoids paying
+   *  `Object.entries` + closure allocation per `applySort` call. */
+  private sortComparator: ((a: TRow, b: TRow) => number) | null = null;
 
-  private filtered: TRow[] = [];
+  /** Filtered (pre-sort, pre-page) view. Public so render/virtual.ts can
+   *  read its `.length` without paying for a `.slice()` allocation per
+   *  scroll event via the public getter. Treat as read-only. */
+  filtered: TRow[] = [];
   private sorted: TRow[] = [];
   /** rows on the current page after filter+sort */
   currentRows: TRow[] = [];
@@ -110,6 +121,14 @@ export class Boostgrid<TRow extends Row = Row> {
   /** Public so `attach()` can detect a stale registry entry and replace it. */
   destroyed = false;
   private debouncedSearch: (phrase: string) => void;
+
+  /** Monotonic counter so an out-of-order ajax response (later request,
+   *  earlier landing) cannot overwrite a fresher one. Each `fetchAjax`
+   *  bumps this and bails if its captured value no longer matches. */
+  private ajaxRequestId = 0;
+  /** AbortController for the in-flight ajax request; lets us cancel the
+   *  network slot when a newer call starts. Null when no fetch is pending. */
+  private ajaxAbort: AbortController | null = null;
 
   constructor(table: HTMLTableElement, options?: Partial<BoostgridOptions<TRow>>) {
     this.element = table;
@@ -290,6 +309,7 @@ export class Boostgrid<TRow extends Row = Row> {
 
   sort(dictionary?: SortDictionary): this {
     this.sortDictionary = dictionary ? { ...dictionary } : {};
+    this.sortComparator = null;
     this.invalidate("sort");
     this.renderHeader();
     this.loadData();
@@ -299,8 +319,14 @@ export class Boostgrid<TRow extends Row = Row> {
 
   select(rowIds?: unknown[]): this {
     if (!this.options.selection || !this.identifier) return this;
+    // Distinguish "select all visible rows" (caller passed nothing) from
+    // "select these specific rows" — the former gets the full-table
+    // refresh; the latter takes the fast diffed path that only touches
+    // the changed rows' <tr>s.
+    const fullRefresh = rowIds == null;
     const ids = rowIds ?? this.currentRows.map((r) => r[this.identifier!]);
     const newly: TRow[] = [];
+    const changedIds: unknown[] = [];
     for (const id of ids) {
       if (this.selected.has(id)) continue;
       if (!this.options.multiSelect && this.selected.size >= 1) break;
@@ -308,10 +334,12 @@ export class Boostgrid<TRow extends Row = Row> {
       if (row) {
         this.selected.add(id);
         newly.push(row);
+        changedIds.push(id);
       }
     }
     if (newly.length) {
-      this.refreshSelectionVisuals();
+      if (fullRefresh) this.refreshSelectionVisuals();
+      else this.refreshSelectionForIds(changedIds);
       saveState(this);
       this.emit("selected", newly);
     }
@@ -320,15 +348,21 @@ export class Boostgrid<TRow extends Row = Row> {
 
   deselect(rowIds?: unknown[]): this {
     if (!this.options.selection || !this.identifier) return this;
+    const fullRefresh = rowIds == null;
     const ids = rowIds ?? Array.from(this.selected);
     const removed: TRow[] = [];
+    const changedIds: unknown[] = [];
     for (const id of ids) {
       if (!this.selected.delete(id)) continue;
       const row = this.rowIndex.get(id);
-      if (row) removed.push(row);
+      if (row) {
+        removed.push(row);
+        changedIds.push(id);
+      }
     }
     if (removed.length) {
-      this.refreshSelectionVisuals();
+      if (fullRefresh) this.refreshSelectionVisuals();
+      else this.refreshSelectionForIds(changedIds);
       saveState(this);
       this.emit("deselected", removed);
     }
@@ -345,6 +379,15 @@ export class Boostgrid<TRow extends Row = Row> {
   destroy(): this {
     if (this.destroyed) return this;
     this.destroyed = true;
+    // Flush any pending debounced state save BEFORE we tear DOM down —
+    // a user's last interaction in the debounce window must still land
+    // in localStorage.
+    flushSaveState(this);
+    // Bump the request id so any in-flight ajax response is silently
+    // dropped instead of trying to render into a torn-down DOM. Abort
+    // the actual fetch too, when supported.
+    this.ajaxRequestId++;
+    if (this.ajaxAbort) { this.ajaxAbort.abort(); this.ajaxAbort = null; }
     this.cleanupFns.forEach((fn) => fn());
     this.cleanupFns = [];
     this.toolbarTop?.remove();
@@ -394,6 +437,20 @@ export class Boostgrid<TRow extends Row = Row> {
    */
   clearSavedState(): this {
     clearState(this);
+    return this;
+  }
+
+  /**
+   * Synchronously flush any pending debounced state save. State writes
+   * are debounced (~200ms) so a burst of mutations during a column
+   * resize drag doesn't pay 60Hz of `JSON.stringify`. Call this from a
+   * `beforeunload` handler, before reading `localStorage` in a test, or
+   * any other moment you need the latest state on disk *now*.
+   * `destroy()` flushes automatically, so this is only needed when the
+   * grid stays alive.
+   */
+  flushState(): this {
+    flushSaveState(this);
     return this;
   }
 
@@ -686,6 +743,7 @@ export class Boostgrid<TRow extends Row = Row> {
   private executeSearch(phrase: string): void {
     if (phrase === this.searchPhrase) return;
     this.searchPhrase = phrase;
+    this.searchRegex = null;
     this.current = 1;
     this.invalidate("filter");
     const input = this.searchInput();
@@ -772,12 +830,31 @@ export class Boostgrid<TRow extends Row = Row> {
         this.rowsPerPage > 0 ? Math.min(this.rowsPerPage, 10) : 5;
       renderSkeleton(this, count);
     }
-    const res = await fetch(url, {
-      method: this.options.ajaxSettings.method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(transformed),
-    });
+    // Race-condition guard: bump the request id, abort any pending older
+    // request, and capture the new id locally so we can detect being
+    // superseded after the await.
+    const myId = ++this.ajaxRequestId;
+    if (this.ajaxAbort) this.ajaxAbort.abort();
+    const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    this.ajaxAbort = ctrl;
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method: this.options.ajaxSettings.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(transformed),
+        signal: ctrl ? ctrl.signal : undefined,
+      });
+    } catch (err) {
+      // A newer call aborted us — silently drop. Anything else rethrows so
+      // callers / global handlers see real network failures.
+      if (myId !== this.ajaxRequestId) return;
+      throw err;
+    }
+    if (myId !== this.ajaxRequestId) return;
     const json = (await res.json()) as AjaxResponse;
+    if (myId !== this.ajaxRequestId) return;
+    if (this.ajaxAbort === ctrl) this.ajaxAbort = null;
     const final = this.options.responseHandler(json);
     this.rows = final.rows as TRow[];
     this.reindex();
@@ -804,29 +881,41 @@ export class Boostgrid<TRow extends Row = Row> {
     // happens inside render/tree.ts's walkTree().
     if (this.options.treeMode) return rows.slice();
     if (!this.searchPhrase) return rows.slice();
-    const flags = this.options.caseSensitive ? "" : "i";
-    const re = new RegExp(escapeRegExp(this.searchPhrase), flags);
+    // Compile the search regex once per phrase, reuse across rows + columns.
+    let re = this.searchRegex;
+    if (!re) {
+      const flags = this.options.caseSensitive ? "" : "i";
+      re = new RegExp(escapeRegExp(this.searchPhrase), flags);
+      this.searchRegex = re;
+    }
     const cols = this.columns.filter((c) => c.searchable && c.visible);
     return rows.filter((row) => {
       for (const col of cols) {
-        if (re.test(col.converter.to(row[col.id]))) return true;
+        if (re!.test(col.converter.to(row[col.id]))) return true;
       }
       return false;
     });
   }
 
   private applySort(rows: TRow[]): TRow[] {
-    const entries = Object.entries(this.sortDictionary);
-    if (entries.length === 0) return rows.slice();
-    return rows.slice().sort((a, b) => {
-      for (const [col, dir] of entries) {
-        const av = a[col];
-        const bv = b[col];
-        const cmp = compare(av, bv);
-        if (cmp !== 0) return dir === "asc" ? cmp : -cmp;
-      }
-      return 0;
-    });
+    let cmp = this.sortComparator;
+    if (!cmp) {
+      const entries = Object.entries(this.sortDictionary);
+      if (entries.length === 0) return rows.slice();
+      // Pre-compile the comparator once. Each subsequent applySort with
+      // the same sortDictionary reuses this closure rather than rebuilding
+      // `entries` and the multi-key fallback chain.
+      cmp = (a: TRow, b: TRow) => {
+        for (let i = 0; i < entries.length; i++) {
+          const [col, dir] = entries[i];
+          const c = compare(a[col], b[col]);
+          if (c !== 0) return dir === "asc" ? c : -c;
+        }
+        return 0;
+      };
+      this.sortComparator = cmp;
+    }
+    return rows.slice().sort(cmp);
   }
 
   // -------- rendering glue --------
@@ -923,14 +1012,30 @@ export class Boostgrid<TRow extends Row = Row> {
     return out;
   }
 
-  private renderHeader(): void {
-    renderHeader(this);
-  }
-  private renderBody(): void {
-    renderBody(this);
-  }
-  private renderFooter(): void {
-    renderFooter(this);
+  private renderHeader(): void { this.mark("header", () => renderHeader(this)); }
+  private renderBody(): void   { this.mark("body",   () => renderBody(this)); }
+  private renderFooter(): void { this.mark("footer", () => renderFooter(this)); }
+
+  /**
+   * Wrap a render phase with `performance.mark()` + `performance.measure()`
+   * entries when `performanceMarks` is on. The measure name is namespaced
+   * by table id so multiple grids on the same page surface as distinct
+   * Timings entries in DevTools. No-ops (zero overhead) by default.
+   */
+  private mark<T>(phase: string, fn: () => T): T {
+    if (!this.options.performanceMarks || typeof performance === "undefined" || !performance.mark) {
+      return fn();
+    }
+    const id = this.element.id || "boostgrid";
+    const start = `boostgrid:${id}:${phase}:start`;
+    const end = `boostgrid:${id}:${phase}:end`;
+    performance.mark(start);
+    try { return fn(); }
+    finally {
+      performance.mark(end);
+      try { performance.measure(`boostgrid:${id}:${phase}`, start, end); }
+      catch { /* mark cleared between calls — silent */ }
+    }
   }
   private renderInfo(): void {
     [this.toolbarTop, this.toolbarBottom].forEach((bar) => {
@@ -956,14 +1061,49 @@ export class Boostgrid<TRow extends Row = Row> {
     const rows = $$("tbody > tr", this.element);
     rows.forEach((tr) => {
       const id = (tr as HTMLElement).dataset.rowId;
-      // dataset is always string; compare via column converter "to"
-      const match = this.currentRows.find((r) => String(r[idCol]) === id);
+      if (id == null) return;
+      // O(1) lookup via the row index instead of a per-row .find() walk
+      // over currentRows. Identifier values may be numeric, so coerce
+      // both sides to string for the keyed lookup.
+      let match = this.rowIndex.get(id) as TRow | undefined;
+      if (!match && /^-?\d+(\.\d+)?$/.test(id)) match = this.rowIndex.get(Number(id));
       if (!match) return;
       const isSelected = this.selected.has(match[idCol]);
       tr.classList.toggle("table-active", isSelected);
       const cb = $<HTMLInputElement>("input.bg-select-row", tr);
       if (cb) cb.checked = isSelected;
     });
+    const head = $<HTMLInputElement>("thead input.bg-select-all", this.element);
+    if (head) {
+      const all = this.currentRows.length > 0
+        && this.currentRows.every((r) => this.selected.has(r[idCol]));
+      head.checked = all;
+    }
+  }
+
+  /**
+   * Fast path: only touch the rows whose selection state actually changed.
+   * Avoids walking every visible <tr> for single-row toggle events. The
+   * caller passes the ids it just added to / removed from `this.selected`.
+   * The header select-all checkbox is cheap (an `every()` over currentRows)
+   * and is re-evaluated on every call so it stays in sync.
+   */
+  private refreshSelectionForIds(changedIds: unknown[]): void {
+    this.renderBulkBar();
+    if (!this.identifier || !this.options.selection) return;
+    const idCol = this.identifier;
+    const tbody = this.element.querySelector<HTMLTableSectionElement>(":scope > tbody");
+    if (tbody) {
+      for (const id of changedIds) {
+        const sel = `tr[data-row-id="${cssEscape(String(id))}"]`;
+        const tr = tbody.querySelector<HTMLTableRowElement>(sel);
+        if (!tr) continue;
+        const isSelected = this.selected.has(id);
+        tr.classList.toggle("table-active", isSelected);
+        const cb = tr.querySelector<HTMLInputElement>("input.bg-select-row");
+        if (cb) cb.checked = isSelected;
+      }
+    }
     const head = $<HTMLInputElement>("thead input.bg-select-all", this.element);
     if (head) {
       const all = this.currentRows.length > 0
@@ -1099,9 +1239,12 @@ export class Boostgrid<TRow extends Row = Row> {
         const q = (t as HTMLInputElement).value.trim().toLowerCase();
         const list = t.closest(".boostgrid-columns-menu")?.querySelector(".boostgrid-columns-list");
         if (!list) return;
+        // Build the id->column map once instead of doing .find() per item.
+        const byId = new Map<string, Column<TRow>>();
+        for (const c of this.columns) byId.set(c.id, c);
         list.querySelectorAll<HTMLElement>(".boostgrid-columns-item").forEach((item) => {
           const id = item.getAttribute("data-column-id") ?? "";
-          const col = this.columns.find((c) => c.id === id);
+          const col = byId.get(id);
           const text = (col?.text ?? id).toLowerCase();
           const match = !q || text.includes(q) || id.toLowerCase().includes(q);
           item.classList.toggle("d-none", !match);
@@ -1427,27 +1570,46 @@ export class Boostgrid<TRow extends Row = Row> {
     th.setAttribute("data-resizing", "true");
     document.body.style.cursor = "col-resize";
 
+    // Pre-resolve matching <td>s once at drag start. Rows can't change
+    // while the drag is in flight (no other inputs are processing), so
+    // re-querying every mousemove was pure waste. Walk manually rather
+    // than using a CSS selector because column ids may contain characters
+    // that need escaping.
+    const matchingTds: HTMLTableCellElement[] = [];
+    const allTds = this.element.querySelectorAll<HTMLTableCellElement>("tbody > tr > td");
+    for (const td of allTds) {
+      if (td.getAttribute("data-column-id") === col.id) matchingTds.push(td);
+    }
+
     const apply = (px: number): number => {
       const clamped = Math.max(col.minWidth, Math.min(col.maxWidth, px));
-      th.style.width = `${clamped}px`;
-      // Live-update body cells in the same column so the user sees the
-      // change without paying for a full re-render mid-drag. We walk the
-      // tbody manually rather than using a CSS selector because column
-      // ids may contain characters that need escaping.
-      const tds = this.element.querySelectorAll<HTMLTableCellElement>("tbody > tr > td");
-      tds.forEach((td) => {
-        if (td.getAttribute("data-column-id") === col.id) {
-          td.style.width = `${clamped}px`;
-        }
-      });
+      const wpx = `${clamped}px`;
+      th.style.width = wpx;
+      for (const td of matchingTds) td.style.width = wpx;
       return clamped;
     };
 
     let last = startWidth;
+    // rAF-throttle the move handler — high-frame-rate pointers fire
+    // mousemove 120-240 Hz, but we only need one width write per
+    // animation frame. Coalesce: the latest cursor X wins.
+    let pendingX: number | null = null;
+    let frame = 0;
+    const flushMove = () => {
+      frame = 0;
+      if (pendingX == null) return;
+      last = apply(startWidth + (pendingX - startX));
+      pendingX = null;
+    };
     const onMove = (e: MouseEvent) => {
-      last = apply(startWidth + (e.clientX - startX));
+      pendingX = e.clientX;
+      if (!frame) frame = requestAnimationFrame(flushMove);
     };
     const onUp = () => {
+      if (frame) { cancelAnimationFrame(frame); frame = 0; }
+      // Apply any pending coalesced move synchronously so `last` reflects
+      // the final cursor position, not the previous frame's.
+      if (pendingX != null) last = apply(startWidth + (pendingX - startX));
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseup", onUp);
       grip.removeAttribute("data-active");

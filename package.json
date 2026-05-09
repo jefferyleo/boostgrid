@@ -1,6 +1,6 @@
 {
   "name": "boostgrid",
-  "version": "2.4.0",
+  "version": "2.4.2",
   "description": "A modern, framework-agnostic data grid for Bootstrap 5. Vanilla TypeScript, no jQuery.",
   "type": "module",
   "main": "./dist/boostgrid.umd.cjs",
@@ -18,6 +18,7 @@
     "dist",
     "src",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
@@ -70,6 +71,6 @@
     "packages/*"
   ],
   "size-limit": [
-    { "path": "dist/boostgrid.js", "limit": "15 KB" }
+    { "path": "dist/boostgrid.js", "limit": "18 KB" }
   ]
 }

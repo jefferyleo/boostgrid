@@ -25,7 +25,7 @@
       "react-dom":         "https://esm.sh/react-dom@18.3.1",
       "react-dom/client":  "https://esm.sh/react-dom@18.3.1/client",
       "vue":               "https://esm.sh/vue@3.4.38",
-      "boostgrid":         "../dist/boostgrid.js?v=2.4.6",
+      "boostgrid":         "../dist/boostgrid.js?v=2.4.8",
       "react-boostgrid":   "../packages/react-boostgrid/dist/react-boostgrid.js?v=2.4.1",
       "vue-boostgrid":     "../packages/vue-boostgrid/dist/vue-boostgrid.js?v=2.4.1",
       "boostgrid-export":  "../packages/boostgrid-export/dist/boostgrid-export.js?v=2.4.1"
@@ -56,8 +56,8 @@
       </a>
 
       <ul class="ribbon-meta">
-        <li><span class="ribbon-key">VERSION</span><span class="ribbon-val">02.4.0</span></li>
-        <li><span class="ribbon-key">SIZE</span><span class="ribbon-val">5.51&nbsp;KB</span></li>
+        <li><span class="ribbon-key">VERSION</span><span class="ribbon-val">02.4.2</span></li>
+        <li><span class="ribbon-key">SIZE</span><span class="ribbon-val">15.46&nbsp;KB</span></li>
         <li class="hide-md"><span class="ribbon-key">LICENSE</span><span class="ribbon-val">MIT</span></li>
         <li class="ribbon-status"><span class="pulse"></span><span class="ribbon-val">stable</span></li>
       </ul>
@@ -407,6 +407,8 @@
           <aside class="examples-rail">
             <p class="rail-cap">releases&nbsp;/</p>
             <div class="list" id="changelogList" role="tablist">
+              <a href="#cl-2-4-2" data-doc-target="cl-2-4-2">2.4.2 — Selection diff, resize throttle, perf marks</a>
+              <a href="#cl-2-4-1" data-doc-target="cl-2-4-1">2.4.1 — Stability &amp; perf patch</a>
               <a href="#cl-2-4-0" data-doc-target="cl-2-4-0">2.4.0 — i18n &amp; sticky polish</a>
               <a href="#cl-2-3-0" data-doc-target="cl-2-3-0">2.3.0 — Power-user UX &amp; server-side</a>
               <a href="#cl-2-2-0" data-doc-target="cl-2-2-0">2.2.0 — Column UX &amp; tree polish</a>
@@ -420,12 +422,140 @@
 
           <div class="examples-stage">
 
-            <!-- ── 2.4.0 ──────────────────────────────────────────── -->
-            <article class="block release" id="cl-2-4-0">
+            <!-- ── 2.4.2 ──────────────────────────────────────────── -->
+            <article class="block release" id="cl-2-4-2">
               <header class="release-head">
                 <div class="release-tag">
-                  <span class="release-num">02.4.0</span>
+                  <span class="release-num">02.4.2</span>
                   <span class="release-status release-status--current">current</span>
+                </div>
+                <div class="release-meta">
+                  <time class="caps muted">spring&nbsp;2026</time>
+                  <span class="caps muted">·&nbsp;patch&nbsp;release</span>
+                </div>
+                <p class="release-tagline">
+                  Performance follow-up to 2.4.1. Single-row selection
+                  toggles only touch the affected <code>&lt;tr&gt;</code>;
+                  column-resize drag is rAF-throttled with a cached cell
+                  list; new opt-in <code>performanceMarks</code> emits
+                  User Timing entries so you can profile renders in
+                  Chrome DevTools. Drop-in patch &mdash; no public API
+                  surface change beyond the new option.
+                </p>
+              </header>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">PERF</span>Diffed selection toggle</h3>
+                <ul class="release-list">
+                  <li><strong>Single-row select / deselect updates only the affected row.</strong> Calling <code>grid.select([id])</code> or clicking a row checkbox used to walk every visible <code>&lt;tr&gt;</code> via <code>refreshSelectionVisuals</code>, even though only one row's state changed. <code>select(rowIds)</code> / <code>deselect(rowIds)</code> now route through a new <code>refreshSelectionForIds()</code> fast path that mutates exactly the changed rows. Bigger wins on bigger pages.</li>
+                  <li><strong>Select-all / deselect-all keep the full-table path.</strong> When the caller passes no <code>rowIds</code>, we fall through to the existing whole-table refresh — every row legitimately changed.</li>
+                  <li>The header <code>select-all</code> checkbox is re-evaluated every call (cheap <code>every()</code> over <code>currentRows</code>) so it stays in sync.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">PERF</span>Column-resize live sync</h3>
+                <ul class="release-list">
+                  <li><strong>Pre-resolved matching <code>&lt;td&gt;</code> list.</strong> The live width sync used to call <code>querySelectorAll("tbody&nbsp;&gt;&nbsp;tr&nbsp;&gt;&nbsp;td")</code> and iterate it on every pointermove. Rows can't change mid-drag, so we now resolve the matching cells once at drag start and reuse them.</li>
+                  <li><strong>rAF-throttled.</strong> High-frame-rate pointers fire <code>mousemove</code> 120-240&nbsp;Hz; we only need one width write per animation frame. The latest cursor X wins; intermediates are coalesced.</li>
+                  <li><strong>Synchronous flush on mouseup.</strong> If <code>mouseup</code> arrives before the next rAF tick, we apply the pending move sync so the final committed width is exact.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">FEATURE</span>Performance marks (opt-in)</h3>
+                <ul class="release-list">
+                  <li><strong>New option:</strong> <code>performanceMarks: true</code>. When on, every <code>renderHeader</code> / <code>renderBody</code> / <code>renderFooter</code> pass emits <code>performance.mark()</code> + <code>performance.measure()</code> entries via the User Timing API. Mark name namespaced as <code>boostgrid:&lt;table-id&gt;:&lt;phase&gt;</code>.</li>
+                  <li><strong>Profile in production.</strong> Open Chrome DevTools &rarr; Performance &rarr; Record &rarr; interact with the grid &rarr; the entries surface under the Timings track. Lets app authors find slow formatters or measure the impact of their own customizations.</li>
+                  <li><strong>Zero overhead by default.</strong> Off unless explicitly enabled — even <code>performance.mark</code> calls add up at 60&nbsp;Hz scroll, so we don't pay for what most users don't profile.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--migration">MIGRATION</span>Coming&nbsp;from&nbsp;2.4.1?</h3>
+                <ul class="release-list release-list--prose">
+                  <li><strong>Drop-in.</strong> No behavior changes for code that doesn't use <code>performanceMarks</code>.</li>
+                  <li><strong>Selection events unchanged.</strong> <code>onSelected</code> / <code>onDeselected</code> still fire with the same row arrays in the same order.</li>
+                  <li><strong>Bundle</strong>: 15.09&nbsp;KB &rarr; 15.46&nbsp;KB brotli (+~370&nbsp;B). Hard ceiling stays at 18&nbsp;KB.</li>
+                </ul>
+              </section>
+            </article>
+
+            <!-- ── 2.4.1 ──────────────────────────────────────────── -->
+            <article class="block release release--archive" id="cl-2-4-1">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num release-num--archive">02.4.1</span>
+                  <span class="release-status">previous</span>
+                </div>
+                <div class="release-meta">
+                  <time class="caps muted">spring&nbsp;2026</time>
+                  <span class="caps muted">·&nbsp;patch&nbsp;release</span>
+                </div>
+                <p class="release-tagline">
+                  Stability + performance patch. Out-of-order ajax responses can
+                  no longer overwrite fresher ones; the cell-edit listener leak
+                  is closed; render hot paths are cached for a 15&ndash;30&nbsp;%
+                  speed-up on large datasets; state writes are debounced.
+                  No public API changes &mdash; drop-in replacement for 2.4.0.
+                </p>
+              </header>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--fix">FIX</span>Stability</h3>
+                <ul class="release-list">
+                  <li><strong>AJAX request sequencing.</strong> Rapid search typing or sort clicks used to fire overlapping fetches; if the later request resolved first the older response would silently overwrite it. A monotonic <code>ajaxRequestId</code> + <code>AbortController</code> drops stale responses and frees the network slot. <code>destroy()</code> aborts in-flight requests too.</li>
+                  <li><strong>Cell-edit listener cleanup.</strong> The inline <code>&lt;input&gt;</code>'s <code>keydown</code> + <code>blur</code> handlers were never removed when the editor closed. Setting the cell's <code>innerHTML</code> dispatched a synthetic blur on the now-detached input which re-entered <code>commit()</code>. Fixed via explicit <code>detach()</code> before swapping the input out.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">PERF</span>Render hot paths</h3>
+                <ul class="release-list">
+                  <li><strong>Frozen-offset arrays cached per render.</strong> The legacy <code>frozenLeftPx</code> / <code>frozenRightPx</code> walked the visible-columns array per cell, per row &mdash; quadratic in column count. Replaced by <code>computeFrozenOffsets()</code>, a single O(n) pass at render entry. 50&nbsp;cols&nbsp;&times;&nbsp;100&nbsp;rows = 5000 walks &rarr; 1.</li>
+                  <li><strong>Selection refresh via row-index Map.</strong> <code>refreshSelectionVisuals</code> used <code>currentRows.find()</code> per visible row; now reads from the existing <code>rowIndex: Map&lt;id, Row&gt;</code> in O(1).</li>
+                  <li><strong>Search regex compiled once per phrase.</strong> Was rebuilt inside <code>applyFilter</code> on every call; cached on <code>grid.searchRegex</code> and invalidated whenever the phrase changes.</li>
+                  <li><strong>Sort comparator cached.</strong> <code>applySort</code> rebuilt <code>Object.entries(sortDictionary)</code> + a closure each call; now compiled once and reused until the sort dictionary changes.</li>
+                  <li><strong>Visible-cols + columnById Maps memoized per render.</strong> Eliminates repeated <code>.filter()</code> and <code>.find()</code> walks in the body / group / footer / column-visibility paths.</li>
+                  <li><strong>Tree <code>markUp</code> dedup.</strong> Walking ancestors per matched leaf used to re-walk the chain N times for N matching leaves; now short-circuits once an ancestor is in the seen-set.</li>
+                  <li><strong>Virtual scroll: skip render when the slice is unchanged.</strong> Small scrolls within the overscan window no longer re-render the body. The <code>requestAnimationFrame</code> coalescer remains.</li>
+                  <li><strong>Virtual length read direct.</strong> The scroll handler used to call <code>getFilteredRows().length</code>, which sliced the entire filtered array every event. Now reads the internal <code>length</code> directly.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">PERF</span>State persistence debounced</h3>
+                <ul class="release-list">
+                  <li><strong>200&nbsp;ms trailing-edge debounce.</strong> A column-resize drag at 60&nbsp;Hz no longer pays <code>JSON.stringify</code> per pointermove &mdash; writes coalesce into a single localStorage hit at the end of the burst.</li>
+                  <li><strong>New <code>grid.flushState()</code> helper.</strong> Synchronously writes any pending save. Useful in <code>beforeunload</code> handlers and tests that read <code>localStorage</code> mid-flight. <code>destroy()</code> flushes automatically.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">TEST</span>Coverage</h3>
+                <ul class="release-list">
+                  <li><strong>+7 specs in <code>test/quality.test.ts</code></strong> covering: out-of-order ajax &rarr; newest wins, destroy-during-fetch is silent, stale-input keydown is a no-op, debounce coalescing, <code>destroy()</code> flush, invalid BCP-47 locale doesn't crash, double <code>destroy()</code> is a no-op.</li>
+                  <li>Total: <strong>151 specs across 4 packages</strong> (was 144).</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--migration">MIGRATION</span>Coming&nbsp;from&nbsp;2.4.0?</h3>
+                <ul class="release-list release-list--prose">
+                  <li><strong>Drop-in.</strong> No public API changes; all options, methods, and events keep their signatures.</li>
+                  <li><strong>One additive method:</strong> <code>grid.flushState()</code> for code that needs synchronous state writes. Optional.</li>
+                  <li><strong>State save is now async.</strong> Reads of <code>localStorage</code> immediately after a mutation may not see the latest payload until ~200&nbsp;ms later. Call <code>grid.flushState()</code> first if you need to read it sync (rare outside tests).</li>
+                  <li><strong>Bundle ceiling raised 15&nbsp;KB &rarr; 18&nbsp;KB</strong> brotli to make room for the AJAX-abort plumbing + frozen-offset arrays. Current size: 15.09&nbsp;KB. The hard ceiling is enforced by <code>size-limit</code>.</li>
+                </ul>
+              </section>
+            </article>
+
+            <!-- ── 2.4.0 ──────────────────────────────────────────── -->
+            <article class="block release release--archive" id="cl-2-4-0">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num release-num--archive">02.4.0</span>
+                  <span class="release-status">previous</span>
                 </div>
                 <div class="release-meta">
                   <time class="caps muted">spring&nbsp;2026</time>
@@ -783,11 +913,11 @@
       <span class="cred-sep">·</span>
       <span class="caps muted">MIT</span>
       <span class="cred-spacer"></span>
-      <span class="caps muted cred-build">build&nbsp;v2.4.0&nbsp;·&nbsp;14.46&nbsp;KB</span>
+      <span class="caps muted cred-build">build&nbsp;v2.4.2&nbsp;·&nbsp;15.46&nbsp;KB</span>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script type="module" src="assets/site.js?v=2.4.6"></script>
+  <script type="module" src="assets/site.js?v=2.4.8"></script>
 </body>
 </html>

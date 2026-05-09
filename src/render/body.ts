@@ -2,7 +2,7 @@ import type { Boostgrid } from "../core.js";
 import type { Column, Row } from "../types.js";
 import { $, clearChildren, el } from "../dom.js";
 import { walkGroups, renderGroupHeader, renderGroupFooter } from "./group.js";
-import { frozenLeftPx, frozenRightPx } from "./header.js";
+import { computeFrozenOffsets, type FrozenOffsets } from "./header.js";
 import { buildTree, walkTree, resolveTreeColumnId, type TreeNode } from "./tree.js";
 import { paint as paintCellSelection, type CellSelectState } from "./cell-select.js";
 
@@ -32,6 +32,10 @@ export function renderBody<TRow extends Row = Row>(grid: Boostgrid<TRow>): void 
   const visibleCols = grid.columns.filter((c) => c.visible);
   const leadingCells = (grid.options.selection ? 1 : 0) + (grid.options.rowDetail ? 1 : 0);
   const colSpan = visibleCols.length + leadingCells;
+  // Precompute frozen-side offsets once per render. Without this, every
+  // cell in every row would re-walk the visible-columns array via
+  // frozenLeftPx / frozenRightPx — quadratic in column count.
+  const offsets = computeFrozenOffsets(grid, visibleCols);
 
   if (grid.currentRows.length === 0) {
     const tr = el("tr");
@@ -78,7 +82,7 @@ export function renderBody<TRow extends Row = Row>(grid: Boostgrid<TRow>): void 
           indentPx: indent,
           isExpanded: grid.isTreeExpanded(node.id),
         };
-        frag.appendChild(buildRow(grid, node.row, visibleCols, meta));
+        frag.appendChild(buildRow(grid, node.row, visibleCols, offsets, meta));
       }
       tbody.appendChild(frag);
       return;
@@ -96,7 +100,7 @@ export function renderBody<TRow extends Row = Row>(grid: Boostgrid<TRow>): void 
         if (d.type === "header") {
           frag.appendChild(renderGroupHeader(grid, d.ctx, colSpan, d.expanded));
         } else if (d.type === "row") {
-          frag.appendChild(buildRow(grid, d.row, visibleCols));
+          frag.appendChild(buildRow(grid, d.row, visibleCols, offsets));
         } else {
           const footer = renderGroupFooter(grid, d.ctx, visibleCols);
           if (footer) frag.appendChild(footer);
@@ -114,7 +118,7 @@ export function renderBody<TRow extends Row = Row>(grid: Boostgrid<TRow>): void 
     const slice = grid.currentRows.slice(win.start, win.end);
     const frag = document.createDocumentFragment();
     if (win.padTop > 0) frag.appendChild(padRow(colSpan, win.padTop));
-    for (const row of slice) frag.appendChild(buildRow(grid, row, visibleCols));
+    for (const row of slice) frag.appendChild(buildRow(grid, row, visibleCols, offsets));
     if (win.padBottom > 0) frag.appendChild(padRow(colSpan, win.padBottom));
     tbody.appendChild(frag);
     return;
@@ -122,7 +126,7 @@ export function renderBody<TRow extends Row = Row>(grid: Boostgrid<TRow>): void 
 
   const frag = document.createDocumentFragment();
   for (const row of grid.currentRows) {
-    frag.appendChild(buildRow(grid, row, visibleCols));
+    frag.appendChild(buildRow(grid, row, visibleCols, offsets));
     const detail = buildDetailRow(grid, row, visibleCols, colSpan);
     if (detail) frag.appendChild(detail);
   }
@@ -205,6 +209,7 @@ function buildRow<TRow extends Row>(
   grid: Boostgrid<TRow>,
   row: TRow,
   visibleCols: Column<TRow>[],
+  offsets: FrozenOffsets,
   treeMeta?: TreeRowMeta<TRow>,
 ): HTMLTableRowElement {
   const idCol = grid.identifier;
@@ -270,9 +275,9 @@ function buildRow<TRow extends Row>(
     ].filter(Boolean).join(" ");
     const styleParts: string[] = [];
     if (col.frozen === "left") {
-      styleParts.push(`left: ${frozenLeftPx(grid, visibleIndex)}px;`);
+      styleParts.push(`left: ${offsets.left[visibleIndex]}px;`);
     } else if (col.frozen === "right") {
-      styleParts.push(`right: ${frozenRightPx(grid, visibleIndex)}px;`);
+      styleParts.push(`right: ${offsets.right[visibleIndex]}px;`);
     }
     const isTreeCell = treeMeta && col.id === treeMeta.treeColumnId;
     if (isTreeCell) {

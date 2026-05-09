@@ -71,6 +71,7 @@ describe("Boostgrid column-visibility panel", () => {
     subjectItem.dispatchEvent(fakeDrag("drop", 105));
     expect(g.columns.map((c) => c.id)).toEqual(["id", "sender", "subject", "status"]);
     // Persisted columnOrder should reflect the new order
+    g.flushState();
     const raw = JSON.parse(localStorage.getItem("boostgrid:vgrid")!);
     expect(raw.columnOrder).toEqual(["id", "sender", "subject", "status"]);
     g.destroy();

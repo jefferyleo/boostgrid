@@ -11,3 +11,7 @@ coverage/
 Boostgrid.nuspec
 PUBLISHING.md
 .claude/settings.local.json
+.nuget-key.local
+*.local
+publish.bat
+CLAUDE.md

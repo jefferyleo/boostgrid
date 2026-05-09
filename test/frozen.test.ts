@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { Boostgrid } from "../src/core";
-import { frozenLeftPx, frozenRightPx, widthAsPx } from "../src/render/header";
+import { computeFrozenOffsets, widthAsPx } from "../src/render/header";
 
 function makeWideTable(): HTMLTableElement {
   document.body.innerHTML = `
@@ -67,7 +67,7 @@ describe("Boostgrid frozen columns", () => {
     g.destroy();
   });
 
-  it("frozenLeftPx accumulates correctly with selection cell", () => {
+  it("computeFrozenOffsets accumulates left correctly with selection cell", () => {
     document.body.innerHTML = `
       <table id="g" class="table">
         <thead><tr>
@@ -84,10 +84,12 @@ describe("Boostgrid frozen columns", () => {
       selection: true,
       multiSelect: true,
     });
+    const visible = g.columns.filter((c) => c.visible);
+    const offsets = computeFrozenOffsets(g, visible);
     // index 0 → just selection cell (40px)
-    expect(frozenLeftPx(g, 0)).toBe(40);
+    expect(offsets.left[0]).toBe(40);
     // index 1 → selection + id (40 + 80)
-    expect(frozenLeftPx(g, 1)).toBe(120);
+    expect(offsets.left[1]).toBe(120);
     g.destroy();
   });
 
@@ -124,7 +126,7 @@ describe("Boostgrid frozen columns", () => {
     g.destroy();
   });
 
-  it("frozenRightPx accumulates trailing right-frozen widths only", () => {
+  it("computeFrozenOffsets accumulates right trailing widths only", () => {
     document.body.innerHTML = `
       <table id="rg" class="table">
         <thead><tr>
@@ -140,12 +142,14 @@ describe("Boostgrid frozen columns", () => {
       rowCount: -1,
       navigation: 0,
     });
+    const visible = g.columns.filter((c) => c.visible);
+    const offsets = computeFrozenOffsets(g, visible);
     // index 0 (id) → status (120) + actions (80) trailing
-    expect(frozenRightPx(g, 0)).toBe(200);
+    expect(offsets.right[0]).toBe(200);
     // index 2 (status) → only actions (80) trailing
-    expect(frozenRightPx(g, 2)).toBe(80);
+    expect(offsets.right[2]).toBe(80);
     // index 3 (actions, last) → nothing trailing
-    expect(frozenRightPx(g, 3)).toBe(0);
+    expect(offsets.right[3]).toBe(0);
     g.destroy();
   });
 

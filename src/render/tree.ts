@@ -170,11 +170,14 @@ export function walkTree<TRow extends Row>(
   const searching = result.matchedIds.size > 0;
 
   // Pre-compute "subtree contains a match" for visibility filtering.
+  // Short-circuit when an ancestor was already walked: if 100 leaves match
+  // a deep subtree, the chain to the root used to be re-walked 100 times.
   const subtreeMatches = new Set<string | number>();
   if (searching) {
     const markUp = (id: string | number) => {
       let cur = result.byId.get(id);
       while (cur) {
+        if (subtreeMatches.has(cur.id)) break; // already walked from a sibling
         subtreeMatches.add(cur.id);
         if (cur.parentId == null) break;
         cur = result.byId.get(cur.parentId);

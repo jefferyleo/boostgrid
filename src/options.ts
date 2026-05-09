@@ -69,6 +69,7 @@ export const defaults: BoostgridOptions<Row> = {
   stickyHeader: false,
   truncatedTooltips: true,
   locale: null,
+  performanceMarks: false,
   stateSave: false,
   stateKey: null,
   labels: {

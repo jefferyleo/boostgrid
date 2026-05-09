@@ -1,7 +1,7 @@
 import type { Boostgrid } from "../core.js";
 import type { FooterContext, Row } from "../types.js";
 import { $, clearChildren, el } from "../dom.js";
-import { frozenLeftPx } from "./header.js";
+import { computeFrozenOffsets } from "./header.js";
 
 const ALIGN: Record<string, string> = {
   left: "text-start",
@@ -44,6 +44,7 @@ export function renderFooter<TRow extends Row = Row>(grid: Boostgrid<TRow>): voi
   if (auto) tfoot.dataset.boostgridAuto = "true";
 
   const visibleCols = grid.columns.filter((c) => c.visible);
+  const offsets = computeFrozenOffsets(grid, visibleCols);
   const tr = el("tr");
 
   if (opts.selection) {
@@ -63,7 +64,7 @@ export function renderFooter<TRow extends Row = Row>(grid: Boostgrid<TRow>): voi
     const styleParts: string[] = [];
     if (col.width) styleParts.push(`width: ${col.width};`);
     if (col.frozen === "left") {
-      styleParts.push(`left: ${frozenLeftPx(grid, visibleIndex)}px;`);
+      styleParts.push(`left: ${offsets.left[visibleIndex]}px;`);
     }
     const th = el("th", {
       class: classes,

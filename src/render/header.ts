@@ -29,42 +29,43 @@ export function widthAsPx(width: string | null): number | null {
 }
 
 /**
- * Cumulative left offset (px) for sticky positioning of the *next* frozen
- * column. Walks visible columns in order, summing widths for each
- * frozen-prefix column up to but not including the target index. Adds the
- * leading selection cell's width when selection is on.
+ * Precomputed sticky-position offsets for one render pass.
+ * `left[i]` and `right[i]` are the px offsets to apply to the i-th visible
+ * column (whose `frozen` is "left" or "right" respectively). Cells that
+ * aren't frozen on that side may still read these arrays harmlessly — the
+ * caller gates on `col.frozen` before using the value.
  */
-export function frozenLeftPx<TRow extends Row>(grid: Boostgrid<TRow>, targetIndex: number): number {
-  let sum = grid.options.selection ? SELECTION_WIDTH_PX : 0;
-  if (grid.options.rowDetail) sum += DETAIL_WIDTH_PX;
-  let i = 0;
-  for (const col of grid.columns) {
-    if (!col.visible) continue;
-    if (i >= targetIndex) break;
-    if (col.frozen === "left") {
-      sum += widthAsPx(col.width) ?? DEFAULT_FROZEN_WIDTH_PX;
-    }
-    i++;
-  }
-  return sum;
+export interface FrozenOffsets {
+  left: number[];
+  right: number[];
 }
 
 /**
- * Cumulative right offset (px) for sticky positioning. Mirrors
- * {@link frozenLeftPx} but walks visible columns from the right, summing
- * widths of right-frozen columns trailing the target. The target itself
- * contributes 0; only columns *after* it (closer to the right edge) count.
+ * Compute both offset arrays in a single O(n) pass. Selection + row-detail
+ * cell widths are added to the leading-left baseline so the first
+ * frozen-left column sticks past them.
  */
-export function frozenRightPx<TRow extends Row>(grid: Boostgrid<TRow>, targetIndex: number): number {
-  let sum = 0;
-  const visible = grid.columns.filter((c) => c.visible);
-  for (let i = visible.length - 1; i > targetIndex; i--) {
-    const col = visible[i];
-    if (col.frozen === "right") {
-      sum += widthAsPx(col.width) ?? DEFAULT_FROZEN_WIDTH_PX;
-    }
+export function computeFrozenOffsets<TRow extends Row>(
+  grid: Boostgrid<TRow>,
+  visibleCols: ReadonlyArray<{ frozen: "left" | "right" | null; width: string | null }>,
+): FrozenOffsets {
+  const baseLeft = (grid.options.selection ? SELECTION_WIDTH_PX : 0)
+    + (grid.options.rowDetail ? DETAIL_WIDTH_PX : 0);
+  const left = new Array<number>(visibleCols.length);
+  const right = new Array<number>(visibleCols.length);
+  let leftAcc = baseLeft;
+  for (let i = 0; i < visibleCols.length; i++) {
+    left[i] = leftAcc;
+    const col = visibleCols[i];
+    if (col.frozen === "left") leftAcc += widthAsPx(col.width) ?? DEFAULT_FROZEN_WIDTH_PX;
   }
-  return sum;
+  let rightAcc = 0;
+  for (let i = visibleCols.length - 1; i >= 0; i--) {
+    right[i] = rightAcc;
+    const col = visibleCols[i];
+    if (col.frozen === "right") rightAcc += widthAsPx(col.width) ?? DEFAULT_FROZEN_WIDTH_PX;
+  }
+  return { left, right };
 }
 
 export function renderHeader<TRow extends Row = Row>(grid: Boostgrid<TRow>): void {
@@ -95,9 +96,11 @@ export function renderHeader<TRow extends Row = Row>(grid: Boostgrid<TRow>): voi
     tr.appendChild(th);
   }
 
+  const visibleCols = grid.columns.filter((c) => c.visible);
+  const offsets = computeFrozenOffsets(grid, visibleCols);
+
   let visibleIndex = 0;
-  for (const col of grid.columns) {
-    if (!col.visible) continue;
+  for (const col of visibleCols) {
     const classes = [
       "boostgrid-th",
       ALIGN[col.headerAlign] ?? "",
@@ -107,9 +110,9 @@ export function renderHeader<TRow extends Row = Row>(grid: Boostgrid<TRow>): voi
     const styleParts: string[] = [];
     if (col.width) styleParts.push(`width: ${col.width};`);
     if (col.frozen === "left") {
-      styleParts.push(`left: ${frozenLeftPx(grid, visibleIndex)}px;`);
+      styleParts.push(`left: ${offsets.left[visibleIndex]}px;`);
     } else if (col.frozen === "right") {
-      styleParts.push(`right: ${frozenRightPx(grid, visibleIndex)}px;`);
+      styleParts.push(`right: ${offsets.right[visibleIndex]}px;`);
     }
     const th = el("th", {
       class: classes,
