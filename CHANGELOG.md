@@ -4,6 +4,35 @@ All notable changes to Boostgrid are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.4.3] — 2026-05-10
+
+### Performance
+- **Diffed column-visibility toggle.** Hiding / showing a non-frozen column
+  from the visibility menu now flips the `hidden` attribute on the existing
+  cells in that column instead of rebuilding `<thead>`, `<tbody>`, and
+  `<tfoot>`. Frozen columns retain the full-render path because their
+  sticky offsets need to reflow. Wins scale with row count.
+- **Pre-resolved per-column paint pipeline.** The cell-paint branch
+  (`col.formatter ? td.innerHTML = … : td.textContent = …`) used to fire
+  N rows × M cols times per render. Now resolved once per column at render
+  entry as a `paint[]` array of closures; the inner cell loop is
+  branch-free.
+- **Virtual scroll: skip body rebuild on pad-only changes.** When new
+  rows arrive but the visible window's slice didn't move (e.g. user is
+  scrolled at the top while ajax delivers more rows), the pad row heights
+  are mutated in place. The data `<tr>`s keep their identity — preserving
+  cell-selection rectangles and any focus the user had inside the body.
+
+### Changed
+- Bundle: 15.46 KB → 15.68 KB brotli (+~220 bytes for the three diff
+  branches and the `lastRenderedVirtualWindow` snapshot field). Hard
+  ceiling stays at 18 KB.
+
+### Tests
+- 140 → 144 specs (+4 new in `test/quality.test.ts` covering the paint
+  pipeline closure capture, the diffed visibility toggle's identity
+  preservation, the toggle un-flip, and the virtual pad-only fast path).
+
 ## [2.4.2] — 2026-05-09
 
 ### Performance

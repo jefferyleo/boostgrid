@@ -1,6 +1,6 @@
 {
   "name": "boostgrid",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "description": "A modern, framework-agnostic data grid for Bootstrap 5. Vanilla TypeScript, no jQuery.",
   "type": "module",
   "main": "./dist/boostgrid.umd.cjs",
@@ -45,7 +45,7 @@
   ],
   "author": "Jeffery Leo <jeffery.leo@ogglobal.net>",
   "license": "MIT",
-  "homepage": "https://github.com/JefferyLeo/boostgrid",
+  "homepage": "https://jefferyleo.github.io/boostgrid/docs",
   "repository": {
     "type": "git",
     "url": "https://github.com/JefferyLeo/boostgrid.git"

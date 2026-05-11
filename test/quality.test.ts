@@ -299,3 +299,167 @@ describe("2.4.2 — Performance marks", () => {
     g.destroy();
   });
 });
+
+// ---- 2.4.3 regression coverage ---------------------------------------------
+describe("2.4.3 — Pre-resolved cell-paint pipeline", () => {
+  beforeEach(() => { document.body.innerHTML = ""; });
+
+  it("formatter and non-formatter columns paint correctly via the pipeline", () => {
+    document.body.innerHTML = `
+      <table id="ppgrid" class="table">
+        <thead><tr>
+          <th data-column-id="id" data-identifier="true" data-type="numeric">ID</th>
+          <th data-column-id="name">Name</th>
+          <th data-column-id="badge">Badge</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    `;
+    const g = new Boostgrid(document.getElementById("ppgrid") as HTMLTableElement, {
+      navigation: 0,
+      rowCount: -1,
+      formatters: {
+        // Formatter for the "badge" column — distinguishes innerHTML vs textContent
+        // path. Must produce HTML so the test catches a textContent mistake.
+        badge: (col, row) => `<span class="badge bg-success">${row.name}</span>`,
+      },
+    });
+    // Wire the formatter onto the column at attach (mimics what real usage does).
+    g.columns.find((c) => c.id === "badge")!.formatter = (col, row) =>
+      `<span class="badge bg-success" data-formatted="${row.name}">${row.name}</span>`;
+    g.append([{ id: 1, name: "Alice" }, { id: 2, name: "Bob" }]);
+    const tbl = document.getElementById("ppgrid") as HTMLTableElement;
+    const aliceRow = tbl.querySelector('tr[data-row-id="1"]')!;
+    const bobRow = tbl.querySelector('tr[data-row-id="2"]')!;
+    const aliceName = aliceRow.querySelector('td[data-column-id="name"]')!;
+    const aliceBadge = aliceRow.querySelector('td[data-column-id="badge"] .badge') as HTMLElement;
+    const bobBadge = bobRow.querySelector('td[data-column-id="badge"] .badge') as HTMLElement;
+    // Non-formatter column: textContent path
+    expect(aliceName.textContent).toBe("Alice");
+    // Formatter column: innerHTML path produced an actual <span>, not text
+    expect(aliceBadge).not.toBeNull();
+    expect(aliceBadge.dataset.formatted).toBe("Alice");
+    // Closure captures the COLUMN (not the loop index) → second row's
+    // formatter still sees the same column and uses row 2's data
+    expect(bobBadge).not.toBeNull();
+    expect(bobBadge.dataset.formatted).toBe("Bob");
+    g.destroy();
+  });
+});
+
+describe("2.4.3 — Diffed column-visibility toggle", () => {
+  beforeEach(() => { document.body.innerHTML = ""; });
+
+  function makeVisTable(): HTMLTableElement {
+    document.body.innerHTML = `
+      <table id="vgrid" class="table">
+        <thead><tr>
+          <th data-column-id="id" data-identifier="true" data-type="numeric">ID</th>
+          <th data-column-id="name">Name</th>
+          <th data-column-id="role">Role</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    `;
+    return document.getElementById("vgrid") as HTMLTableElement;
+  }
+
+  it("hiding a non-frozen column flips the hidden attribute on its cells in place", () => {
+    const t = makeVisTable();
+    const g = new Boostgrid(t, { navigation: 0, rowCount: -1 });
+    g.append([{ id: 1, name: "Alice", role: "admin" }, { id: 2, name: "Bob", role: "user" }]);
+    // Capture row identities BEFORE toggle so we can prove no re-render fired
+    const beforeRows = Array.from(t.querySelectorAll('tbody tr[data-row-id]'));
+    // Hide "role" via the same data-bg-action chain the panel uses
+    t.dispatchEvent(new MouseEvent("click", { bubbles: true })); // warm up
+    g.columns.find((c) => c.id === "role")!.visible = !g.columns.find((c) => c.id === "role")!.visible;
+    // Equivalent: trigger the action handler manually by clicking a synthesized button
+    const btn = document.createElement("button");
+    btn.setAttribute("data-bg-action", "toggle-column");
+    btn.setAttribute("data-bg-value", "role");
+    // Reset visible (we just flipped it manually for setup), then dispatch
+    g.columns.find((c) => c.id === "role")!.visible = true;
+    g.element.parentElement!.appendChild(btn);
+    btn.click();
+    // After click: role cells should be hidden, but row <tr>s are the same DOM nodes
+    const roleCells = t.querySelectorAll<HTMLElement>('[data-column-id="role"]');
+    for (const c of roleCells) expect(c.hidden).toBe(true);
+    const afterRows = Array.from(t.querySelectorAll('tbody tr[data-row-id]'));
+    expect(afterRows).toEqual(beforeRows); // identity check — no re-render
+    g.destroy();
+  });
+
+  it("showing a previously-hidden column flips hidden back to false", () => {
+    const t = makeVisTable();
+    const g = new Boostgrid(t, { navigation: 0, rowCount: -1 });
+    g.append([{ id: 1, name: "Alice", role: "admin" }]);
+    // Hide
+    g.columns.find((c) => c.id === "role")!.visible = false;
+    const btn = document.createElement("button");
+    btn.setAttribute("data-bg-action", "toggle-column");
+    btn.setAttribute("data-bg-value", "role");
+    g.columns.find((c) => c.id === "role")!.visible = true; // reset for click flip
+    g.element.parentElement!.appendChild(btn);
+    btn.click();
+    // Now visible=false; click again to flip back to true
+    btn.click();
+    const roleCells = t.querySelectorAll<HTMLElement>('[data-column-id="role"]');
+    for (const c of roleCells) expect(c.hidden).toBe(false);
+    g.destroy();
+  });
+});
+
+describe("2.4.3 — Virtual scroll pad-only fast path", () => {
+  beforeEach(() => { document.body.innerHTML = ""; });
+
+  it("appending rows while same window keeps existing data <tr>s in place", () => {
+    document.body.innerHTML = `
+      <div class="table-responsive" style="height: 200px">
+        <table id="vsgrid" class="table">
+          <thead><tr>
+            <th data-column-id="id" data-identifier="true" data-type="numeric">ID</th>
+            <th data-column-id="name">Name</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    `;
+    const t = document.getElementById("vsgrid") as HTMLTableElement;
+    const g = new Boostgrid(t, {
+      navigation: 0,
+      rowCount: -1,
+      virtualScroll: true,
+      rowHeight: 30,
+      overscan: 2,
+    });
+    // Seed with enough rows that the virtual window is BOUNDED by the
+    // viewport (not by dataset size). With jsdom's default 480px
+    // viewport and rowHeight=30, the window covers ~18 rows. Seeding
+    // 30 rows makes start/end stable when more rows append.
+    const seed = Array.from({ length: 30 }, (_, i) => ({ id: i + 1, name: `R${i + 1}` }));
+    g.append(seed);
+    const winBefore = g.virtualWindow!;
+    const beforeRows = Array.from(t.querySelectorAll('tbody tr[data-row-id]'))
+      .filter((r) => !r.classList.contains("boostgrid-pad"));
+    expect(beforeRows.length).toBeGreaterThan(0);
+    // Append more rows. Same scroll position, same viewport, so the
+    // visible window's start/end don't move — only padBottom grows.
+    // That's exactly the pad-only fast-path scenario.
+    g.append([
+      { id: 31, name: "R31" }, { id: 32, name: "R32" }, { id: 33, name: "R33" },
+    ]);
+    const winAfter = g.virtualWindow!;
+    expect(winAfter.start).toBe(winBefore.start);
+    expect(winAfter.end).toBe(winBefore.end);
+    expect(winAfter.padBottom).toBeGreaterThan(winBefore.padBottom);
+    // Critical: data <tr>s are the SAME DOM nodes (identity-preserving)
+    // because the fast path mutated pad row heights without rebuilding.
+    const afterRows = Array.from(t.querySelectorAll('tbody tr[data-row-id]'))
+      .filter((r) => !r.classList.contains("boostgrid-pad"));
+    expect(afterRows.length).toBe(beforeRows.length);
+    for (let i = 0; i < beforeRows.length; i++) {
+      expect(afterRows[i]).toBe(beforeRows[i]);
+    }
+    g.destroy();
+  });
+});

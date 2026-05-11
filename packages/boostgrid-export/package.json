@@ -1,6 +1,6 @@
 {
   "name": "boostgrid-export",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "description": "CSV / Excel / Print export plugin for boostgrid.",
   "type": "module",
   "main": "./dist/boostgrid-export.umd.cjs",

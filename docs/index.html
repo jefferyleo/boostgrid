@@ -25,7 +25,7 @@
       "react-dom":         "https://esm.sh/react-dom@18.3.1",
       "react-dom/client":  "https://esm.sh/react-dom@18.3.1/client",
       "vue":               "https://esm.sh/vue@3.4.38",
-      "boostgrid":         "../dist/boostgrid.js?v=2.4.8",
+      "boostgrid":         "../dist/boostgrid.js?v=2.4.9",
       "react-boostgrid":   "../packages/react-boostgrid/dist/react-boostgrid.js?v=2.4.1",
       "vue-boostgrid":     "../packages/vue-boostgrid/dist/vue-boostgrid.js?v=2.4.1",
       "boostgrid-export":  "../packages/boostgrid-export/dist/boostgrid-export.js?v=2.4.1"
@@ -56,7 +56,7 @@
       </a>
 
       <ul class="ribbon-meta">
-        <li><span class="ribbon-key">VERSION</span><span class="ribbon-val">02.4.2</span></li>
+        <li><span class="ribbon-key">VERSION</span><span class="ribbon-val">02.4.3</span></li>
         <li><span class="ribbon-key">SIZE</span><span class="ribbon-val">15.46&nbsp;KB</span></li>
         <li class="hide-md"><span class="ribbon-key">LICENSE</span><span class="ribbon-val">MIT</span></li>
         <li class="ribbon-status"><span class="pulse"></span><span class="ribbon-val">stable</span></li>
@@ -407,6 +407,7 @@
           <aside class="examples-rail">
             <p class="rail-cap">releases&nbsp;/</p>
             <div class="list" id="changelogList" role="tablist">
+              <a href="#cl-2-4-3" data-doc-target="cl-2-4-3">2.4.3 — Polish trio (visibility diff, paint pipeline, virtual pad-only)</a>
               <a href="#cl-2-4-2" data-doc-target="cl-2-4-2">2.4.2 — Selection diff, resize throttle, perf marks</a>
               <a href="#cl-2-4-1" data-doc-target="cl-2-4-1">2.4.1 — Stability &amp; perf patch</a>
               <a href="#cl-2-4-0" data-doc-target="cl-2-4-0">2.4.0 — i18n &amp; sticky polish</a>
@@ -422,12 +423,71 @@
 
           <div class="examples-stage">
 
-            <!-- ── 2.4.2 ──────────────────────────────────────────── -->
-            <article class="block release" id="cl-2-4-2">
+            <!-- ── 2.4.3 ──────────────────────────────────────────── -->
+            <article class="block release" id="cl-2-4-3">
               <header class="release-head">
                 <div class="release-tag">
-                  <span class="release-num">02.4.2</span>
+                  <span class="release-num">02.4.3</span>
                   <span class="release-status release-status--current">current</span>
+                </div>
+                <div class="release-meta">
+                  <time class="caps muted">spring&nbsp;2026</time>
+                  <span class="caps muted">·&nbsp;patch&nbsp;release</span>
+                </div>
+                <p class="release-tagline">
+                  Polish trio. Three small, independent perf wins built on
+                  2.4.2: the column-visibility menu now flips
+                  <code>hidden</code> on existing cells in place;
+                  the cell-paint branch is hoisted out of the inner cell
+                  loop into a per-render closure array; and the virtual
+                  scroll skips body rebuild when only the pad heights
+                  changed. No public API surface change. Bundle ticks
+                  to 15.68&nbsp;KB brotli, still well under the 18&nbsp;KB ceiling.
+                </p>
+              </header>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">PERF</span>Diffed column-visibility toggle</h3>
+                <ul class="release-list">
+                  <li><strong>Hide / show flips <code>hidden</code> in place.</strong> Toggling a non-frozen column from the visibility menu used to fire <code>renderHeader()&nbsp;+&nbsp;renderBody()&nbsp;+&nbsp;renderFooter()</code> — three full DOM rebuilds. Now one <code>querySelectorAll</code> per toggle, then a boolean attribute flip on each matching <code>&lt;th&gt;</code> / <code>&lt;td&gt;</code>. Wins scale with row count.</li>
+                  <li><strong>Frozen columns still take the full path.</strong> Hiding a frozen column shifts its siblings' sticky offsets, which need the cached offset arrays to recompute. Most users don't hide frozen columns.</li>
+                  <li><strong>Caveat (intentional).</strong> Colspan'd rows (group headers, "no results", master/detail panels) keep their previous colspan until the next full render. The visual overshoot is one column wide and harmless.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">PERF</span>Pre-resolved cell-paint pipeline</h3>
+                <ul class="release-list">
+                  <li><strong>Branch hoisted out of the cell loop.</strong> The inner per-cell <code>col.formatter ? td.innerHTML = … : td.textContent = …</code> branch fires N&nbsp;rows&nbsp;×&nbsp;M&nbsp;cols times per render. Now a <code>paint[]</code> array of closures is resolved once per column at the top of <code>renderBody</code>; the cell loop just calls <code>paint[i](td,&nbsp;row)</code>.</li>
+                  <li><strong>Closures capture the column reference.</strong> Tested specifically (the bug-prone case is closing over the loop index) so formatter columns keep their per-row data correct.</li>
+                  <li><strong>Tree-mode caret cells stay on the legacy composition path</strong> — their caret + label structure doesn't fit the simple paint signature.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">PERF</span>Virtual scroll: pad-only fast path</h3>
+                <ul class="release-list">
+                  <li><strong>New rows + same window = pad mutation only.</strong> When ajax delivers more rows but the user is scrolled at the top so the visible slice didn't move, only the pad <code>&lt;tr&gt;</code>s' <code>style.height</code> is updated. The data <code>&lt;tr&gt;</code>s keep their identity — preserving any active cell-selection rectangle and any focus the user had inside the body.</li>
+                  <li><strong>New private snapshot field.</strong> <code>grid.lastRenderedVirtualWindow</code> holds the previous frame's <code>VirtualWindow</code> so the next render can compare and decide whether to rebuild. Cleared on <code>destroy()</code> and on virtual-scroll teardown.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--migration">MIGRATION</span>Coming&nbsp;from&nbsp;2.4.2?</h3>
+                <ul class="release-list release-list--prose">
+                  <li><strong>Drop-in.</strong> No public API additions, no behavior change for any documented call.</li>
+                  <li><strong>Bundle</strong>: 15.46&nbsp;KB &rarr; 15.68&nbsp;KB brotli (+~220&nbsp;B for the three diff branches and the snapshot field). Hard ceiling stays at 18&nbsp;KB.</li>
+                  <li><strong>Tests</strong>: 140 &rarr; 144 specs (+4 covering the new code paths).</li>
+                </ul>
+              </section>
+            </article>
+
+            <!-- ── 2.4.2 ──────────────────────────────────────────── -->
+            <article class="block release release--archive" id="cl-2-4-2">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num release-num--archive">02.4.2</span>
+                  <span class="release-status">previous</span>
                 </div>
                 <div class="release-meta">
                   <time class="caps muted">spring&nbsp;2026</time>
@@ -913,11 +973,11 @@
       <span class="cred-sep">·</span>
       <span class="caps muted">MIT</span>
       <span class="cred-spacer"></span>
-      <span class="caps muted cred-build">build&nbsp;v2.4.2&nbsp;·&nbsp;15.46&nbsp;KB</span>
+      <span class="caps muted cred-build">build&nbsp;v2.4.3&nbsp;·&nbsp;15.68&nbsp;KB</span>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script type="module" src="assets/site.js?v=2.4.8"></script>
+  <script type="module" src="assets/site.js?v=2.4.9"></script>
 </body>
 </html>

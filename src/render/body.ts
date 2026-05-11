@@ -14,6 +14,25 @@ interface TreeRowMeta<TRow extends Row> {
   isExpanded: boolean;
 }
 
+/**
+ * Cell-paint closure resolved once per column at the top of `renderBody`,
+ * then invoked per-cell with no further branching. Replaces the inner
+ * `col.formatter ? td.innerHTML = … : td.textContent = …` branch that
+ * previously fired N rows × M cols times per render.
+ *
+ * Note: tree-mode caret cells have their own composition path inside
+ * `buildRow` and don't go through this array.
+ */
+type CellPaint<TRow extends Row> = (td: HTMLTableCellElement, row: TRow) => void;
+
+function makeCellPaint<TRow extends Row>(visibleCols: Column<TRow>[]): CellPaint<TRow>[] {
+  return visibleCols.map((col) =>
+    col.formatter
+      ? (td: HTMLTableCellElement, row: TRow) => { td.innerHTML = col.formatter!(col, row); }
+      : (td: HTMLTableCellElement, row: TRow) => { td.textContent = col.converter.to(row[col.id]); },
+  );
+}
+
 const ALIGN: Record<string, string> = {
   left: "text-start",
   center: "text-center",
@@ -27,6 +46,33 @@ const ALIGN: Record<string, string> = {
  */
 export function renderBody<TRow extends Row = Row>(grid: Boostgrid<TRow>): void {
   const tbody = $("tbody", grid.element) ?? grid.element.appendChild(document.createElement("tbody"));
+
+  // Virtual scroll pad-only fast path: when the visible slice is unchanged
+  // but the pad heights moved (e.g. ajax delivered more rows while the
+  // user was scrolled at the top), mutate the pad <tr>s in place instead
+  // of rebuilding the entire body. This MUST run before clearChildren so
+  // the pad rows still exist in the DOM. Cell-selection range stays valid
+  // because the data <tr>s keep their identity.
+  if (grid.options.virtualScroll && grid.virtualWindow) {
+    const win = grid.virtualWindow;
+    const prev = grid.lastRenderedVirtualWindow;
+    if (
+      prev
+      && prev.start === win.start
+      && prev.end === win.end
+      && (prev.padTop !== win.padTop || prev.padBottom !== win.padBottom)
+      && tbody.children.length > 0
+    ) {
+      const first = tbody.firstElementChild as HTMLElement | null;
+      const last = tbody.lastElementChild as HTMLElement | null;
+      if (first?.classList.contains("boostgrid-pad")) first.style.height = `${win.padTop}px`;
+      if (last && last !== first && last.classList.contains("boostgrid-pad")) {
+        last.style.height = `${win.padBottom}px`;
+      }
+      grid.lastRenderedVirtualWindow = { ...win };
+      return;
+    }
+  }
   clearChildren(tbody);
 
   const visibleCols = grid.columns.filter((c) => c.visible);
@@ -36,6 +82,9 @@ export function renderBody<TRow extends Row = Row>(grid: Boostgrid<TRow>): void 
   // cell in every row would re-walk the visible-columns array via
   // frozenLeftPx / frozenRightPx — quadratic in column count.
   const offsets = computeFrozenOffsets(grid, visibleCols);
+  // Resolve the cell-paint closure once per column. The inner per-cell
+  // loop in `buildRow` then calls paint[i](td, row) with zero branching.
+  const paint = makeCellPaint(visibleCols);
 
   if (grid.currentRows.length === 0) {
     const tr = el("tr");
@@ -82,7 +131,7 @@ export function renderBody<TRow extends Row = Row>(grid: Boostgrid<TRow>): void 
           indentPx: indent,
           isExpanded: grid.isTreeExpanded(node.id),
         };
-        frag.appendChild(buildRow(grid, node.row, visibleCols, offsets, meta));
+        frag.appendChild(buildRow(grid, node.row, visibleCols, offsets, paint, meta));
       }
       tbody.appendChild(frag);
       return;
@@ -100,7 +149,7 @@ export function renderBody<TRow extends Row = Row>(grid: Boostgrid<TRow>): void 
         if (d.type === "header") {
           frag.appendChild(renderGroupHeader(grid, d.ctx, colSpan, d.expanded));
         } else if (d.type === "row") {
-          frag.appendChild(buildRow(grid, d.row, visibleCols, offsets));
+          frag.appendChild(buildRow(grid, d.row, visibleCols, offsets, paint));
         } else {
           const footer = renderGroupFooter(grid, d.ctx, visibleCols);
           if (footer) frag.appendChild(footer);
@@ -112,21 +161,23 @@ export function renderBody<TRow extends Row = Row>(grid: Boostgrid<TRow>): void 
   }
 
   // Virtual scroll: render only the windowed slice plus pad rows above and
-  // below so the scrollbar shape stays correct.
+  // below so the scrollbar shape stays correct. The pad-only fast path
+  // at the top of this function handles the same-slice / new-pad case.
   if (grid.options.virtualScroll && grid.virtualWindow) {
     const win = grid.virtualWindow;
     const slice = grid.currentRows.slice(win.start, win.end);
     const frag = document.createDocumentFragment();
     if (win.padTop > 0) frag.appendChild(padRow(colSpan, win.padTop));
-    for (const row of slice) frag.appendChild(buildRow(grid, row, visibleCols, offsets));
+    for (const row of slice) frag.appendChild(buildRow(grid, row, visibleCols, offsets, paint));
     if (win.padBottom > 0) frag.appendChild(padRow(colSpan, win.padBottom));
     tbody.appendChild(frag);
+    grid.lastRenderedVirtualWindow = { ...win };
     return;
   }
 
   const frag = document.createDocumentFragment();
   for (const row of grid.currentRows) {
-    frag.appendChild(buildRow(grid, row, visibleCols, offsets));
+    frag.appendChild(buildRow(grid, row, visibleCols, offsets, paint));
     const detail = buildDetailRow(grid, row, visibleCols, colSpan);
     if (detail) frag.appendChild(detail);
   }
@@ -210,6 +261,7 @@ function buildRow<TRow extends Row>(
   row: TRow,
   visibleCols: Column<TRow>[],
   offsets: FrozenOffsets,
+  paint: CellPaint<TRow>[],
   treeMeta?: TreeRowMeta<TRow>,
 ): HTMLTableRowElement {
   const idCol = grid.identifier;
@@ -317,10 +369,10 @@ function buildRow<TRow extends Row>(
       if (col.formatter) content.innerHTML = col.formatter(col, row);
       else content.textContent = col.converter.to(row[col.id]);
       td.appendChild(content);
-    } else if (col.formatter) {
-      td.innerHTML = col.formatter(col, row);
     } else {
-      td.textContent = col.converter.to(row[col.id]);
+      // Pre-resolved paint closure — no per-cell branching. visibleIndex
+      // was incremented above; the array is 0-indexed so we use -1.
+      paint[visibleIndex - 1](td, row);
     }
     tr.appendChild(td);
   }

@@ -77,6 +77,13 @@ export class Boostgrid<TRow extends Row = Row> {
    * a circular import.
    */
   virtualWindow: VirtualWindow | null = null;
+  /**
+   * Snapshot of the window the previous virtual-scroll renderBody pass
+   * actually painted. Public so `render/body.ts` can compare and short-
+   * circuit a full rebuild when only the pad heights changed. Cleared
+   * by `destroy()` and on virtual-scroll teardown.
+   */
+  lastRenderedVirtualWindow: VirtualWindow | null = null;
   /** Hook the virtual-scroll module sets to lazy-bind its scroll listener
    *  to <tbody> after renderBody creates it. Null when virtualScroll is off. */
   ensureVirtualBinding: (() => void) | null = null;
@@ -388,6 +395,7 @@ export class Boostgrid<TRow extends Row = Row> {
     // the actual fetch too, when supported.
     this.ajaxRequestId++;
     if (this.ajaxAbort) { this.ajaxAbort.abort(); this.ajaxAbort = null; }
+    this.lastRenderedVirtualWindow = null;
     this.cleanupFns.forEach((fn) => fn());
     this.cleanupFns = [];
     this.toolbarTop?.remove();
@@ -1142,9 +1150,28 @@ export class Boostgrid<TRow extends Row = Row> {
           const col = this.columns.find((c) => c.id === value);
           if (col) {
             col.visible = !col.visible;
-            this.renderHeader();
-            this.renderBody();
-            this.renderFooter();
+            // Diffed fast path for non-frozen columns: flip `hidden` on
+            // every existing cell in this column. The header / body /
+            // footer DOM stays put; only one boolean attribute moves.
+            // Frozen columns can't take this path because hiding one
+            // shifts the sticky offsets of its siblings — the offset
+            // cache needs the full re-render to recompute.
+            //
+            // Caveat: rows whose colspan reads visible-column count
+            // (group headers, "no results", master/detail panels) keep
+            // their old colspan until the next full render. The visual
+            // overshoot is one column wide and harmless; loadData() and
+            // any user action that triggers a re-render restores it.
+            if (col.frozen) {
+              this.renderHeader();
+              this.renderBody();
+              this.renderFooter();
+            } else {
+              const sel = `[data-column-id="${cssEscape(value!)}"]`;
+              const cells = this.element.querySelectorAll<HTMLElement>(sel);
+              const hide = !col.visible;
+              for (const cell of cells) cell.hidden = hide;
+            }
             saveState(this);
           }
           break;

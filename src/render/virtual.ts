@@ -72,6 +72,7 @@ export function mountVirtualScroll<TRow extends Row = Row>(grid: Boostgrid<TRow>
     if (boundTo) boundTo.removeEventListener("scroll", onScroll);
     wrapper?.classList.remove("boostgrid--virtual");
     grid.virtualWindow = null;
+    grid.lastRenderedVirtualWindow = null;
     grid.ensureVirtualBinding = null;
   };
 }
