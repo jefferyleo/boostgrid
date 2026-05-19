@@ -1402,6 +1402,7 @@ const METHODS = [
   ["sort([dictionary])",   "this",          "Apply { id: \"asc\" } sort descriptor."],
   ["select([ids])",        "this",          "Select by id, or all visible if omitted."],
   ["deselect([ids])",      "this",          "Inverse of select()."],
+  ["scrollToRow(index)",   "this",          "Scroll the virtual viewport so the row at this filtered-data index is in view. Clamped to `[0, total - 1]`. No-op when `virtualScroll` is off."],
   ["reload()",             "this",          "Reset state and re-render."],
   ["destroy()",            "this",          "Tear down chrome and unwrap the table."],
   ["getCurrentPage()",     "number",        ""],

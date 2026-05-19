@@ -29,7 +29,11 @@ export function mountCellEdit<TRow extends Row = Row>(grid: Boostgrid<TRow>): ()
     if (!column || !row || !column.editable) return;
 
     if (active) commit(active, /* silent */ true);
-    active = openEditor(grid, td, column, row, () => { active = null; });
+    active = openEditor(grid, td, column, row, () => {
+      active = null;
+      grid.commitActiveEdit = null;
+    });
+    grid.commitActiveEdit = () => { if (active) commit(active, /* silent */ true); };
   };
 
   const onDblClick = (e: Event) => openIfApplicable(e.target as Element | null);
@@ -38,6 +42,7 @@ export function mountCellEdit<TRow extends Row = Row>(grid: Boostgrid<TRow>): ()
 
   return () => {
     if (active) commit(active, /* silent */ true);
+    grid.commitActiveEdit = null;
     grid.element.removeEventListener("dblclick", onDblClick);
   };
 }

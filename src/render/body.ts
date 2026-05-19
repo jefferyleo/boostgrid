@@ -73,8 +73,6 @@ export function renderBody<TRow extends Row = Row>(grid: Boostgrid<TRow>): void 
       return;
     }
   }
-  clearChildren(tbody);
-
   const visibleCols = grid.columns.filter((c) => c.visible);
   const leadingCells = (grid.options.selection ? 1 : 0) + (grid.options.rowDetail ? 1 : 0);
   const colSpan = visibleCols.length + leadingCells;
@@ -85,6 +83,56 @@ export function renderBody<TRow extends Row = Row>(grid: Boostgrid<TRow>): void 
   // Resolve the cell-paint closure once per column. The inner per-cell
   // loop in `buildRow` then calls paint[i](td, row) with zero branching.
   const paint = makeCellPaint(visibleCols);
+
+  // Virtual scroll element pool — reuse <tr>s in place when the windowed
+  // slice changes. Avoids the create+append+GC cost of rebuilding the
+  // visible slice on every scroll tick. Only the flat windowed-list shape
+  // goes through here; tree mode and groupBy take precedence as before
+  // and continue to render via the fragment path below.
+  if (
+    grid.options.virtualScroll
+    && grid.virtualWindow
+    && grid.currentRows.length > 0
+    && !grid.options.treeMode
+    && !grid.options.groupBy
+  ) {
+    grid.commitActiveEdit?.();
+    const win = grid.virtualWindow;
+    const { topPad, bottomPad } = ensurePadRows(tbody, colSpan);
+    // Collect existing pool rows; discard any tbody child that isn't a
+    // pad and isn't a pool row (raw HTML rows on first mount, leftovers
+    // from a prior tree/group render, "no results" row).
+    const pool: HTMLTableRowElement[] = [];
+    for (const child of Array.from(tbody.children)) {
+      if (child === topPad || child === bottomPad) continue;
+      if (child.classList.contains("boostgrid-pool-row")) {
+        pool.push(child as HTMLTableRowElement);
+      } else {
+        child.remove();
+      }
+    }
+    const needed = win.end - win.start;
+    while (pool.length < needed) {
+      const tr = bareRow(grid, visibleCols, offsets);
+      tbody.insertBefore(tr, bottomPad);
+      pool.push(tr);
+    }
+    while (pool.length > needed) {
+      pool.pop()!.remove();
+    }
+    for (let i = 0; i < needed; i++) {
+      rebindRow(grid, pool[i], grid.currentRows[win.start + i], visibleCols, paint);
+    }
+    topPad.style.height = `${win.padTop}px`;
+    bottomPad.style.height = `${win.padBottom}px`;
+    grid.lastRenderedVirtualWindow = { ...win };
+    grid.rerenderSelectionState();
+    const css = (grid as unknown as { cellSelectState?: CellSelectState }).cellSelectState;
+    if (css?.range) paintCellSelection(grid, css.range);
+    return;
+  }
+
+  clearChildren(tbody);
 
   if (grid.currentRows.length === 0) {
     const tr = el("tr");
@@ -158,21 +206,6 @@ export function renderBody<TRow extends Row = Row>(grid: Boostgrid<TRow>): void 
       tbody.appendChild(frag);
       return;
     }
-  }
-
-  // Virtual scroll: render only the windowed slice plus pad rows above and
-  // below so the scrollbar shape stays correct. The pad-only fast path
-  // at the top of this function handles the same-slice / new-pad case.
-  if (grid.options.virtualScroll && grid.virtualWindow) {
-    const win = grid.virtualWindow;
-    const slice = grid.currentRows.slice(win.start, win.end);
-    const frag = document.createDocumentFragment();
-    if (win.padTop > 0) frag.appendChild(padRow(colSpan, win.padTop));
-    for (const row of slice) frag.appendChild(buildRow(grid, row, visibleCols, offsets, paint));
-    if (win.padBottom > 0) frag.appendChild(padRow(colSpan, win.padBottom));
-    tbody.appendChild(frag);
-    grid.lastRenderedVirtualWindow = { ...win };
-    return;
   }
 
   const frag = document.createDocumentFragment();
@@ -377,6 +410,140 @@ function buildRow<TRow extends Row>(
     tr.appendChild(td);
   }
   return tr;
+}
+
+/**
+ * Build an empty <tr> with all structural cells in place but no row data
+ * bound — used by the virtual-scroll pool path. Leading select / detail
+ * cells are added when those features are on; cells start in default
+ * (unselected / collapsed) state and get rebound per row by `rebindRow`.
+ * Frozen offsets and column-derived classes/attributes are written once
+ * here and never touched again — they're row-invariant.
+ */
+function bareRow<TRow extends Row>(
+  grid: Boostgrid<TRow>,
+  visibleCols: Column<TRow>[],
+  offsets: FrozenOffsets,
+): HTMLTableRowElement {
+  // Marker class — pool-path-only. Lets the pool tell apart its own
+  // recyclable <tr>s from any pre-existing rows in <tbody> (raw HTML,
+  // "no results" row, leftovers from a prior tree/group render).
+  const tr = el("tr", { class: "boostgrid-pool-row" });
+  const hasFrozen = visibleCols.some((c) => c.frozen === "left");
+  if (grid.options.selection) {
+    const cls = hasFrozen ? "bg-select-cell boostgrid-frozen" : "bg-select-cell";
+    const td = el("td", { class: cls, style: hasFrozen ? "left: 0;" : null });
+    const cb = el("input", {
+      type: grid.options.multiSelect ? "checkbox" : "radio",
+      class: "form-check-input bg-select-row",
+      name: "bg-select",
+    });
+    td.appendChild(cb);
+    tr.appendChild(td);
+  }
+  if (grid.options.rowDetail) {
+    const cls = hasFrozen ? "bg-detail-cell boostgrid-frozen" : "bg-detail-cell";
+    const left = grid.options.selection ? 40 : 0;
+    const td = el("td", {
+      class: cls,
+      style: hasFrozen ? `left: ${left}px;` : null,
+    });
+    const caret = el("span", {
+      class: "boostgrid-detail-caret",
+      "data-bg-action": "toggle-detail",
+      role: "button",
+    });
+    const icon = el("i", { class: "bi bi-chevron-right", "aria-hidden": "true" });
+    caret.appendChild(icon);
+    td.appendChild(caret);
+    tr.appendChild(td);
+  }
+  let visibleIndex = 0;
+  for (const col of visibleCols) {
+    const classes = [
+      ALIGN[col.align] ?? "",
+      col.cssClass,
+      col.frozen ? "boostgrid-frozen" : "",
+    ].filter(Boolean).join(" ");
+    const styleParts: string[] = [];
+    if (col.frozen === "left") styleParts.push(`left: ${offsets.left[visibleIndex]}px;`);
+    else if (col.frozen === "right") styleParts.push(`right: ${offsets.right[visibleIndex]}px;`);
+    const td = el("td", {
+      class: classes,
+      "data-column-id": col.id,
+      "data-editable": col.editable ? "true" : null,
+      "data-frozen-side": col.frozen ?? null,
+      style: styleParts.length ? styleParts.join(" ") : null,
+    });
+    tr.appendChild(td);
+    visibleIndex++;
+  }
+  return tr;
+}
+
+/**
+ * Rebind a pooled <tr> to a new row payload. Updates data-row-id, the
+ * leading detail-caret expanded state (selection checkbox state is
+ * applied later by `refreshSelectionVisuals`), and writes new content
+ * into each data cell via the pre-resolved paint closures.
+ */
+function rebindRow<TRow extends Row>(
+  grid: Boostgrid<TRow>,
+  tr: HTMLTableRowElement,
+  row: TRow,
+  visibleCols: Column<TRow>[],
+  paint: CellPaint<TRow>[],
+): void {
+  const idCol = grid.identifier;
+  const rowId = idCol ? String(row[idCol] ?? "") : "";
+  if (rowId) tr.dataset.rowId = rowId;
+  else delete tr.dataset.rowId;
+  let cellOffset = 0;
+  if (grid.options.selection) cellOffset++;
+  if (grid.options.rowDetail) {
+    const caret = tr.children[cellOffset]?.querySelector<HTMLElement>(".boostgrid-detail-caret");
+    if (caret) {
+      const idValue = /^-?\d+(\.\d+)?$/.test(rowId) ? Number(rowId) : rowId;
+      const expanded = !!rowId && grid.isRowDetailExpanded(idValue);
+      caret.className = `boostgrid-detail-caret${expanded ? " boostgrid-detail-caret--open" : ""}`;
+      if (rowId) caret.setAttribute("data-bg-value", rowId);
+      else caret.removeAttribute("data-bg-value");
+      caret.setAttribute(
+        "aria-label",
+        expanded ? grid.options.labels.hideDetails : grid.options.labels.showDetails,
+      );
+      const icon = caret.querySelector("i");
+      if (icon) icon.className = expanded ? "bi bi-chevron-down" : "bi bi-chevron-right";
+    }
+    cellOffset++;
+  }
+  for (let i = 0; i < visibleCols.length; i++) {
+    const td = tr.children[cellOffset + i] as HTMLTableCellElement | undefined;
+    if (td) paint[i](td, row);
+  }
+}
+
+/**
+ * Ensure the tbody has a top and bottom pad row, creating either if
+ * missing. Used by the virtual-scroll pool path so recycled data <tr>s
+ * can be inserted between them without worrying about first-render
+ * state.
+ */
+function ensurePadRows(tbody: HTMLElement, colSpan: number): {
+  topPad: HTMLTableRowElement;
+  bottomPad: HTMLTableRowElement;
+} {
+  let topPad = tbody.firstElementChild as HTMLTableRowElement | null;
+  if (!topPad || !topPad.classList.contains("boostgrid-pad")) {
+    topPad = padRow(colSpan, 0);
+    tbody.insertBefore(topPad, tbody.firstChild);
+  }
+  let bottomPad = tbody.lastElementChild as HTMLTableRowElement | null;
+  if (!bottomPad || !bottomPad.classList.contains("boostgrid-pad") || bottomPad === topPad) {
+    bottomPad = padRow(colSpan, 0);
+    tbody.appendChild(bottomPad);
+  }
+  return { topPad, bottomPad };
 }
 
 function escapeRegExp(s: string): string {

@@ -25,7 +25,7 @@
       "react-dom":         "https://esm.sh/react-dom@18.3.1",
       "react-dom/client":  "https://esm.sh/react-dom@18.3.1/client",
       "vue":               "https://esm.sh/vue@3.4.38",
-      "boostgrid":         "../dist/boostgrid.js?v=2.4.9",
+      "boostgrid":         "../dist/boostgrid.js?v=2.5.0",
       "react-boostgrid":   "../packages/react-boostgrid/dist/react-boostgrid.js?v=2.4.1",
       "vue-boostgrid":     "../packages/vue-boostgrid/dist/vue-boostgrid.js?v=2.4.1",
       "boostgrid-export":  "../packages/boostgrid-export/dist/boostgrid-export.js?v=2.4.1"
@@ -407,6 +407,7 @@
           <aside class="examples-rail">
             <p class="rail-cap">releases&nbsp;/</p>
             <div class="list" id="changelogList" role="tablist">
+              <a href="#cl-2-5-0" data-doc-target="cl-2-5-0">2.5.0 — Element pool under virtual scroll &amp; scrollToRow</a>
               <a href="#cl-2-4-3" data-doc-target="cl-2-4-3">2.4.3 — Polish trio (visibility diff, paint pipeline, virtual pad-only)</a>
               <a href="#cl-2-4-2" data-doc-target="cl-2-4-2">2.4.2 — Selection diff, resize throttle, perf marks</a>
               <a href="#cl-2-4-1" data-doc-target="cl-2-4-1">2.4.1 — Stability &amp; perf patch</a>
@@ -423,12 +424,76 @@
 
           <div class="examples-stage">
 
-            <!-- ── 2.4.3 ──────────────────────────────────────────── -->
-            <article class="block release" id="cl-2-4-3">
+            <!-- ── 2.5.0 ──────────────────────────────────────────── -->
+            <article class="block release" id="cl-2-5-0">
               <header class="release-head">
                 <div class="release-tag">
-                  <span class="release-num">02.4.3</span>
+                  <span class="release-num">02.5.0</span>
                   <span class="release-status release-status--current">current</span>
+                </div>
+                <div class="release-meta">
+                  <time class="caps muted">spring&nbsp;2026</time>
+                  <span class="caps muted">·&nbsp;minor&nbsp;release</span>
+                </div>
+                <p class="release-tagline">
+                  Focused minor. Element pooling lands under virtual
+                  scroll: the data <code>&lt;tr&gt;</code>s between the
+                  pad rows become a fixed-capacity pool, rebound to new
+                  row payloads in place instead of rebuilt from scratch
+                  on every scroll tick. Per-cell work drops from
+                  "create&nbsp;td&nbsp;+&nbsp;set class&nbsp;+&nbsp;set style&nbsp;+&nbsp;paint" to just
+                  "paint" &mdash; an expected 5–10× scroll speed-up.
+                  Shipped alongside a small new public method,
+                  <code>scrollToRow(index)</code>, the first index-based
+                  navigation method on the grid. Bundle ticks to
+                  16.25&nbsp;KB brotli, well under the 18&nbsp;KB ceiling.
+                </p>
+              </header>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">PERF</span>Element pool under virtual scroll</h3>
+                <ul class="release-list">
+                  <li><strong>Recycle, don't rebuild.</strong> The windowed body render no longer calls <code>clearChildren(tbody)</code> on every scroll tick. The data <code>&lt;tr&gt;</code>s already in the DOM become a pool: on each render pass, the pool is grown if the window widened, shrunk if it narrowed, and every row in it is rebound to its new payload via the pre-resolved <code>paint[]</code> closures from 2.4.3. Row <code>&lt;tr&gt;</code> identities stay stable across scroll &mdash; preserving any focus inside the body and any DOM state the user attached.</li>
+                  <li><strong>Marker class for safety.</strong> Pool-built rows carry a <code>boostgrid-pool-row</code> class so the pool can tell its own recyclable rows apart from raw HTML leftovers, the "no results" row, or rows built by a prior tree / group render in the same tbody.</li>
+                  <li><strong>Selection &amp; cell-selection reapplied once per pass.</strong> The <code>table-active</code> class on selected rows and the cell-selection rectangle are reapplied <em>after</em> the rebind pass via the existing <code>refreshSelectionVisuals</code> / <code>paintCellSelection</code> helpers &mdash; not per-row inside the loop. Selection state survives recycle cleanly.</li>
+                  <li><strong>Pool path is virtual-flat-list only.</strong> Tree mode, groupBy, and row-detail rendering paths return earlier in <code>renderBody</code> as before and are unaffected. The existing pad-only fast path from 2.4.3 still fires first when the slice didn't move at all.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">FEATURE</span>scrollToRow(index)</h3>
+                <ul class="release-list">
+                  <li><strong>New public method.</strong> <code>grid.scrollToRow(index)</code> scrolls the virtual viewport so <code>currentRows[index]</code> becomes visible. Index is into the current filtered + sorted view (same shape as <code>getCurrentRows()</code>). Clamped to <code>[0,&nbsp;total&nbsp;-&nbsp;1]</code>. No-op when <code>virtualScroll</code> is off or the dataset is empty. Returns <code>this</code> for chaining.</li>
+                  <li><strong>Synchronous.</strong> The window refresh and re-render both happen before the call returns, so callers can immediately query the rendered DOM &mdash; e.g. flash a row that just got jumped to.</li>
+                  <li><strong>First index-based navigation on the grid.</strong> All prior navigation was by row id or page number. A <code>scrollToRow(rowId)</code> overload is queued for a follow-up patch.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">PERF</span>Active edit committed before recycle</h3>
+                <ul class="release-list">
+                  <li><strong>Mid-edit scrolls no longer lose data.</strong> Before 2.5.0, scrolling while a cell edit was open silently destroyed the edit when the body rebuilt. The pool path now invokes a <code>commitActiveEdit</code> hook before rebinding any row, so the in-flight value is silently committed (same semantics as opening another edit).</li>
+                  <li><strong>Full-rebuild path keeps prior semantics for now.</strong> Wiring the same hook into the non-virtual full-rebuild path is a one-liner but was scoped out to keep this round tight.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--migration">MIGRATION</span>Coming&nbsp;from&nbsp;2.4.3?</h3>
+                <ul class="release-list release-list--prose">
+                  <li><strong>Drop-in for everything you were already doing.</strong> No behavior change for documented calls; existing virtual-scroll grids automatically benefit from the pool.</li>
+                  <li><strong>One new method.</strong> <code>scrollToRow(index)</code> is the only public type-surface addition. Two internal hooks (<code>commitActiveEdit</code>, <code>rerenderSelectionState</code>) are present on the instance but are intentionally undocumented.</li>
+                  <li><strong>Bundle</strong>: 15.68&nbsp;KB &rarr; 16.25&nbsp;KB brotli (+~570&nbsp;B). Hard ceiling stays at 18&nbsp;KB.</li>
+                  <li><strong>Tests</strong>: 144 &rarr; 153 specs (+9 in a new <code>element&nbsp;pool</code> block).</li>
+                </ul>
+              </section>
+            </article>
+
+            <!-- ── 2.4.3 ──────────────────────────────────────────── -->
+            <article class="block release release--archive" id="cl-2-4-3">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num release-num--archive">02.4.3</span>
+                  <span class="release-status">previous</span>
                 </div>
                 <div class="release-meta">
                   <time class="caps muted">spring&nbsp;2026</time>
@@ -978,6 +1043,6 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script type="module" src="assets/site.js?v=2.4.9"></script>
+  <script type="module" src="assets/site.js?v=2.5.0"></script>
 </body>
 </html>

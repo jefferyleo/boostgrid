@@ -87,6 +87,10 @@ export class Boostgrid<TRow extends Row = Row> {
   /** Hook the virtual-scroll module sets to lazy-bind its scroll listener
    *  to <tbody> after renderBody creates it. Null when virtualScroll is off. */
   ensureVirtualBinding: (() => void) | null = null;
+  /** Hook `render/edit.ts` sets to allow the virtual-scroll pool path to
+   *  commit any in-flight cell edit before recycling the row that owns it.
+   *  Null when no edit is currently open. */
+  commitActiveEdit: (() => void) | null = null;
   /** Collapsed group paths. Path strings are joined with `//`
    *  (see `groupPathToString` in render/group.ts) so multi-level
    *  collapse targets one branch precisely. Public so `render/group.ts`
@@ -250,6 +254,14 @@ export class Boostgrid<TRow extends Row = Row> {
     renderBody(this);
   }
 
+  /** Internal hook used by the virtual-scroll pool path to re-evaluate
+   *  row-selection visuals (table-active class + checkbox state) across
+   *  visible rows after a recycle pass. Not part of the documented public
+   *  API. */
+  rerenderSelectionState(): void {
+    this.refreshSelectionVisuals();
+  }
+
   // Hooks used by state.ts to apply restored values without exposing
   // private fields. Kept public for the helpers but not part of the
   // documented user-facing API.
@@ -321,6 +333,24 @@ export class Boostgrid<TRow extends Row = Row> {
     this.renderHeader();
     this.loadData();
     this.emit("sorted", this.sortDictionary);
+    return this;
+  }
+
+  /** Scroll the virtual viewport so the row at `index` is in view. The
+   *  index is into the current filtered + sorted dataset (the same view
+   *  that `getCurrentRows()` exposes). Clamped to `[0, total - 1]`.
+   *  No-op when `virtualScroll` is off or the dataset is empty.
+   *  Synchronously refreshes the virtual window and re-renders, so the
+   *  target row is in the DOM after the call returns. Returns `this`. */
+  scrollToRow(index: number): this {
+    if (!this.options.virtualScroll) return this;
+    const total = this.filtered.length || this.currentRows.length;
+    if (total === 0) return this;
+    const clamped = Math.max(0, Math.min(index, total - 1));
+    const tbody = this.element.querySelector<HTMLTableSectionElement>(":scope > tbody");
+    if (tbody) tbody.scrollTop = clamped * this.options.rowHeight;
+    refreshVirtualWindow(this);
+    this.rerenderBody();
     return this;
   }
 

@@ -4,6 +4,47 @@ All notable changes to Boostgrid are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.5.0] — 2026-05-12
+
+### Added
+- **`scrollToRow(index)` on the public API.** Programmatically scrolls
+  the virtual viewport so `currentRows[index]` becomes visible, clamped
+  to `[0, total - 1]`. No-op when `virtualScroll` is off or the
+  dataset is empty. Returns `this` for chaining. Synchronously refreshes
+  the virtual window and re-renders, so callers can rely on the row
+  being in the DOM after the call returns. The first index-based
+  navigation method on the grid (all prior navigation was by row id
+  or page number).
+
+### Performance
+- **Element pooling under virtual scroll.** The windowed body render
+  no longer rebuilds the slice on every scroll tick. The data `<tr>`s
+  between the top and bottom pad rows are now a fixed-capacity pool:
+  rebound to the new row payload in place, grown only when the window
+  widens, shrunk only when it narrows. Per-cell work drops from
+  "create td + set class + set style + paint" to just "paint".
+  Cell-selection rectangle and row-selection class are reapplied once
+  after the rebind pass instead of being implicitly destroyed and
+  rebuilt. Expected ~5–10× speed-up on scroll-heavy workloads.
+- **Active cell edit is committed before its row is recycled.** Pool-
+  path scrolls in 2.4.x would have silently destroyed an in-flight
+  edit; now the value is committed silently before the row's `<tr>`
+  is rebound to a new payload. The full-rebuild path keeps its
+  prior "silently destroyed" semantics (out of scope for this round).
+
+### Changed
+- Bundle: 15.68 KB → 16.25 KB brotli (+~570 bytes for the three pool
+  helpers, the `commitActiveEdit` hook, the `rerenderSelectionState`
+  wrapper, and `scrollToRow`). Hard ceiling stays at 18 KB.
+
+### Tests
+- 144 → 153 specs (+9 in a new `describe("element pool")` block
+  covering tr-identity preservation across scroll, pool grow on
+  initial render, pool shrink on dataset narrowing, `scrollToRow`
+  scrollTop / window / clamping / no-op behavior, row-selection
+  class re-application on recycled rows, pad-row identity
+  preservation, and pad-height updates after scroll).
+
 ## [2.4.3] — 2026-05-10
 
 ### Performance
