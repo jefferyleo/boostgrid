@@ -22,6 +22,7 @@
   <div class="code-samples-tabs">
     <button type="button" class="code-samples-tab" data-code-tab="tg-ts">TypeScript</button>
     <button type="button" class="code-samples-tab" data-code-tab="tg-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="tg-vue">Vue</button>
     <button type="button" class="code-samples-tab" data-code-tab="tg-class">Class form</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="tg-ts"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
@@ -76,4 +77,28 @@ grid.<span class="fn">append</span>([{ <span class="prop">id</span>: <span class
       ctx.filteredRows.<span class="fn">reduce</span>((s, r) =&gt; s + r.total, <span class="num">0</span>).<span class="fn">toFixed</span>(<span class="num">2</span>),
   },
 });</code></pre>
+  <pre class="code-samples-panel" data-code-panel="tg-vue"><code><span class="cm">&lt;!-- TypedGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { ref } <span class="kw">from</span> <span class="str">"vue"</span>;
+<span class="kw">import</span> { VueBoostgrid, <span class="kw">type</span> VueBoostgridHandle } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">interface</span> Message {
+  <span class="prop">id</span>: <span class="kw">number</span>; <span class="prop">sender</span>: <span class="kw">string</span>; <span class="prop">subject</span>: <span class="kw">string</span>; <span class="prop">received</span>: <span class="kw">string</span>;
+}
+
+<span class="kw">const</span> rows = <span class="fn">ref</span>&lt;Message[]&gt;(initial);
+<span class="kw">const</span> handle = <span class="fn">ref</span>&lt;VueBoostgridHandle | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span>
+    <span class="attr">ref</span>=<span class="str">"handle"</span>
+    <span class="attr">:data</span>=<span class="str">"rows"</span>
+    <span class="attr">:columns</span>=<span class="str">"cols"</span>
+    <span class="attr">@selected</span>=<span class="str">"(rs) =&gt; {
+      // rs is typed as the rows you pass — no `as Message[]` cast needed
+      const ids = rs.map((r) =&gt; r.id);
+    }"</span>
+  /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

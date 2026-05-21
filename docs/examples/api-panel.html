@@ -37,6 +37,7 @@
   <div class="code-samples-tabs">
     <button type="button" class="code-samples-tab" data-code-tab="ap-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="ap-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ap-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="ap-vanilla"><code><span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, { <span class="prop">selection</span>: <span class="kw">true</span>, <span class="prop">multiSelect</span>: <span class="kw">true</span> });
 
@@ -63,4 +64,22 @@ ref.current?.<span class="fn">sort</span>({ <span class="prop">received</span>: 
 ref.current?.<span class="fn">reload</span>();
 ref.current?.<span class="fn">getSelectedRows</span>();
 ref.current?.grid;            <span class="cm">// raw Boostgrid instance escape hatch</span></code></pre>
+  <pre class="code-samples-panel" data-code-panel="ap-vue"><code><span class="cm">&lt;!-- ApiPanelGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { ref } <span class="kw">from</span> <span class="str">"vue"</span>;
+<span class="kw">import</span> { VueBoostgrid, <span class="kw">type</span> VueBoostgridHandle } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> handle = <span class="fn">ref</span>&lt;VueBoostgridHandle | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+<span class="cm">// Mutating data flows through reactive state; imperative reads via the handle</span>
+handle.value?.<span class="fn">search</span>(<span class="str">"alpha"</span>);
+handle.value?.<span class="fn">sort</span>({ <span class="prop">received</span>: <span class="str">"desc"</span> });
+handle.value?.<span class="fn">reload</span>();
+handle.value?.<span class="fn">getSelectedRows</span>();
+handle.value?.grid;             <span class="cm">// raw Boostgrid instance escape hatch</span>
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span> <span class="attr">ref</span>=<span class="str">"handle"</span> <span class="attr">:data</span>=<span class="str">"rows"</span> <span class="attr">:columns</span>=<span class="str">"cols"</span> /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

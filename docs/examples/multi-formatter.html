@@ -24,6 +24,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="mf-html">HTML</button>
     <button type="button" class="code-samples-tab" data-code-tab="mf-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="mf-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="mf-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="mf-html"><code>&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"amount"</span>   <span class="attr">data-formatter</span>=<span class="str">"money"</span>&gt;Amount&lt;/<span class="tag">th</span>&gt;
 &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"received"</span> <span class="attr">data-formatter</span>=<span class="str">"rel"</span>&gt;Received&lt;/<span class="tag">th</span>&gt;
@@ -60,4 +61,20 @@
     { <span class="prop">id</span>: <span class="str">"status"</span>,   <span class="prop">text</span>: <span class="str">"Status"</span>,   <span class="prop">formatter</span>: formatters.pill  },
   ]}
 /&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="mf-vue"><code><span class="cm">&lt;!-- MultiFormatterGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { VueBoostgrid } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> formatters = { money, rel, pill };  <span class="cm">// same fns as the vanilla tab</span>
+
+<span class="kw">const</span> cols = [
+  { <span class="prop">id</span>: <span class="str">"amount"</span>,   <span class="prop">text</span>: <span class="str">"Amount"</span>,   <span class="prop">formatter</span>: formatters.money },
+  { <span class="prop">id</span>: <span class="str">"received"</span>, <span class="prop">text</span>: <span class="str">"Received"</span>, <span class="prop">formatter</span>: formatters.rel   },
+  { <span class="prop">id</span>: <span class="str">"status"</span>,   <span class="prop">text</span>: <span class="str">"Status"</span>,   <span class="prop">formatter</span>: formatters.pill  },
+];
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span> <span class="attr">:data</span>=<span class="str">"rows"</span> <span class="attr">:columns</span>=<span class="str">"cols"</span> /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

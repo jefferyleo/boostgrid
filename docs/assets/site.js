@@ -71,7 +71,15 @@ const EXAMPLES = [
     async setup() {
       const data = await loadSample();
       fillTbody("#ex-search tbody", data, ["id","sender","subject","received"]);
-      attach("#ex-search");
+      // navigation: 3 — make the top toolbar visible so the search input
+      // (and column-visibility menu) render. Other options mirror the code
+      // sample shown alongside so visitors see the documented config live.
+      attach("#ex-search", {
+        navigation: 3,
+        searchSettings: { delay: 200, characters: 1 },
+        caseSensitive: false,
+        multiSort: false,
+      });
     },
   },
   {
@@ -452,9 +460,13 @@ const EXAMPLES = [
         received: `2026-${String((i % 12) + 1).padStart(2, "0")}-${String((i % 27) + 1).padStart(2, "0")}`,
       }));
       fillTbody("#ex-vs tbody", rows, ["id", "sender", "subject", "received"]);
-      attach("#ex-vs", { virtualScroll: true, rowHeight: 32, overscan: 5 });
+      const [grid] = attach("#ex-vs", { virtualScroll: true, rowHeight: 32, overscan: 5 });
       const counter = document.getElementById("ex-vs-count");
       if (counter) counter.textContent = N.toLocaleString();
+      // Wire the "Jump to row 5000" button to demo the 2.5.0 scrollToRow(index)
+      // public method. Clamped on the call site; no extra guards needed here.
+      const jumpBtn = document.getElementById("ex-vs-jump");
+      if (jumpBtn) jumpBtn.addEventListener("click", () => grid.scrollToRow(4999));
     },
   },
   {

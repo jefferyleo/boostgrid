@@ -27,6 +27,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="ev-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="ev-dom">DOM events</button>
     <button type="button" class="code-samples-tab" data-code-tab="ev-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ev-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="ev-vanilla"><code><span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, { <span class="prop">selection</span>: <span class="kw">true</span> });
 
@@ -49,4 +50,18 @@ grid.element.<span class="fn">addEventListener</span>(<span class="str">"boostgr
   <span class="attr">onSearched</span>={(q) =&gt; <span class="fn">log</span>(<span class="str">"searched"</span>, q)}
   <span class="attr">onSelected</span>={(rs) =&gt; <span class="fn">log</span>(<span class="str">"selected"</span>, rs)}
 /&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ev-vue"><code><span class="cm">&lt;!-- EventsGrid.vue — wrapper exposes named events that map 1:1 to grid events --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { VueBoostgrid } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span>
+    <span class="attr">:data</span>=<span class="str">"rows"</span>
+    <span class="attr">:columns</span>=<span class="str">"cols"</span>
+    <span class="attr">@sorted</span>=<span class="str">"(dict) =&gt; log('sorted', dict)"</span>
+    <span class="attr">@searched</span>=<span class="str">"(q) =&gt; log('searched', q)"</span>
+    <span class="attr">@selected</span>=<span class="str">"(rs) =&gt; log('selected', rs)"</span>
+  /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

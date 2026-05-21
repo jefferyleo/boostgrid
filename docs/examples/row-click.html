@@ -26,6 +26,7 @@
   <div class="code-samples-tabs">
     <button type="button" class="code-samples-tab" data-code-tab="rc-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="rc-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="rc-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="rc-vanilla"><code><span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
   <span class="prop">selection</span>:     <span class="kw">true</span>,
@@ -48,4 +49,23 @@ grid.<span class="fn">on</span>(<span class="str">"deselected"</span>, () =&gt; 
   <span class="attr">onSelected</span>={(rs) =&gt; <span class="fn">setIds</span>(rs.<span class="fn">map</span>((r) =&gt; r.id))}
   <span class="attr">onDeselected</span>={() =&gt; <span class="fn">setIds</span>(ref.current?.<span class="fn">getSelectedRows</span>().<span class="fn">map</span>(...))}
 /&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="rc-vue"><code><span class="cm">&lt;!-- RowClickGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { ref } <span class="kw">from</span> <span class="str">"vue"</span>;
+<span class="kw">import</span> { VueBoostgrid, <span class="kw">type</span> VueBoostgridHandle } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> handle = <span class="fn">ref</span>&lt;VueBoostgridHandle | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+<span class="kw">const</span> ids = <span class="fn">ref</span>&lt;<span class="kw">number</span>[]&gt;([]);
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span>
+    <span class="attr">ref</span>=<span class="str">"handle"</span>
+    <span class="attr">:data</span>=<span class="str">"rows"</span>
+    <span class="attr">:columns</span>=<span class="str">"cols"</span>
+    <span class="attr">:options</span>=<span class="str">"{ selection: true, multiSelect: true, rowSelect: true, keepSelection: true }"</span>
+    <span class="attr">@selected</span>=<span class="str">"(rs) =&gt; ids = rs.map((r) =&gt; r.id)"</span>
+    <span class="attr">@deselected</span>=<span class="str">"() =&gt; ids = handle?.getSelectedRows() ?? []"</span>
+  /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

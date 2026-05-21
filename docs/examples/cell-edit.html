@@ -32,6 +32,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="ce-html">HTML</button>
     <button type="button" class="code-samples-tab" data-code-tab="ce-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="ce-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ce-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="ce-html"><code><span class="cm">&lt;!-- Mark editable columns --&gt;</span>
 &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"sender"</span>  <span class="attr">data-editable</span>=<span class="str">"true"</span>&gt;Sender&lt;/<span class="tag">th</span>&gt;
@@ -61,4 +62,19 @@
     },
   }}
 /&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ce-vue"><code><span class="cm">&lt;!-- CellEditGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { VueBoostgrid } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> opts = {
+  <span class="prop">onCellEdit</span>: <span class="kw">async</span> (commit) =&gt; {
+    <span class="kw">try</span> { <span class="kw">await</span> savePatch(commit.row.id, { [commit.column.id]: commit.newValue }); }
+    <span class="kw">catch</span> { commit.<span class="fn">revert</span>(); }
+  },
+};
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span> <span class="attr">:data</span>=<span class="str">"rows"</span> <span class="attr">:columns</span>=<span class="str">"cols"</span> <span class="attr">:options</span>=<span class="str">"opts"</span> /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

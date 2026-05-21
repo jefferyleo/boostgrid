@@ -51,6 +51,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="mg-aggr">Aggregator key syntax</button>
     <button type="button" class="code-samples-tab" data-code-tab="mg-html">HTML</button>
     <button type="button" class="code-samples-tab" data-code-tab="mg-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="mg-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="mg-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
 
@@ -132,4 +133,29 @@ grid.<span class="fn">rerenderBody</span>();</code></pre>
     },
   }}
 /&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="mg-vue"><code><span class="cm">&lt;!-- MultiGroupingGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { VueBoostgrid } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> cols = [
+  { <span class="prop">id</span>: <span class="str">"id"</span>,     <span class="prop">text</span>: <span class="str">"ID"</span>,     <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span> },
+  { <span class="prop">id</span>: <span class="str">"region"</span>, <span class="prop">text</span>: <span class="str">"Region"</span> },
+  { <span class="prop">id</span>: <span class="str">"stage"</span>,  <span class="prop">text</span>: <span class="str">"Stage"</span> },
+  { <span class="prop">id</span>: <span class="str">"deal"</span>,   <span class="prop">text</span>: <span class="str">"Deal"</span> },
+  { <span class="prop">id</span>: <span class="str">"amount"</span>, <span class="prop">text</span>: <span class="str">"Amount"</span>, <span class="prop">type</span>: <span class="str">"numeric"</span> },
+];
+
+<span class="kw">const</span> opts = {
+  <span class="prop">groupBy</span>: [<span class="str">"region"</span>, <span class="str">"stage"</span>],
+  <span class="prop">groupSubtotalsOnTop</span>: <span class="kw">true</span>,
+  <span class="prop">groupAggregators</span>: {
+    <span class="str">"amount@0"</span>: (_c, ctx) =&gt; <span class="str">`&lt;strong&gt;$${sum(ctx.rows)}&lt;/strong&gt;`</span>,
+    <span class="str">"amount@1"</span>: (_c, ctx) =&gt; <span class="str">`$${sum(ctx.rows)}`</span>,
+  },
+};
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span> <span class="attr">:data</span>=<span class="str">"deals"</span> <span class="attr">:columns</span>=<span class="str">"cols"</span> <span class="attr">:options</span>=<span class="str">"opts"</span> /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

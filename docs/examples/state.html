@@ -36,6 +36,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="st-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="st-shape">Storage shape</button>
     <button type="button" class="code-samples-tab" data-code-tab="st-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="st-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="st-vanilla"><code><span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
   <span class="prop">stateSave</span>: <span class="kw">true</span>,
@@ -74,4 +75,16 @@ grid.<span class="fn">clearSavedState</span>().<span class="fn">reload</span>();
     <span class="prop">stateKey</span>:  <span class="str">"my-grid"</span>,
   }}
 /&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="st-vue"><code><span class="cm">&lt;!-- StatefulGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { VueBoostgrid } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span>
+    <span class="attr">:data</span>=<span class="str">"rows"</span>
+    <span class="attr">:columns</span>=<span class="str">"cols"</span>
+    <span class="attr">:options</span>=<span class="str">"{ stateSave: true, stateKey: 'my-grid' }"</span>
+  /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

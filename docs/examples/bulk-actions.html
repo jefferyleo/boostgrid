@@ -23,6 +23,7 @@
   <div class="code-samples-tabs">
     <button type="button" class="code-samples-tab" data-code-tab="bulk-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="bulk-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="bulk-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="bulk-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
 
@@ -63,4 +64,19 @@ grid.element.parentElement?.<span class="fn">addEventListener</span>(<span class
       <span class="str">`&lt;button data-bg-action="archive"&gt;Archive ${selected.length}&lt;/button&gt;`</span>,
   }}
 /&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="bulk-vue"><code><span class="cm">&lt;!-- BulkActionsGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { VueBoostgrid } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> opts = {
+  <span class="prop">selection</span>: <span class="kw">true</span>,
+  <span class="prop">multiSelect</span>: <span class="kw">true</span>,
+  <span class="prop">bulkActions</span>: (selected) =&gt;
+    <span class="str">`&lt;button data-bg-action="archive"&gt;Archive ${selected.length}&lt;/button&gt;`</span>,
+};
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span> <span class="attr">:data</span>=<span class="str">"rows"</span> <span class="attr">:columns</span>=<span class="str">"columns"</span> <span class="attr">:options</span>=<span class="str">"opts"</span> /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

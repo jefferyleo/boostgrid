@@ -18,6 +18,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="fmt-html">HTML</button>
     <button type="button" class="code-samples-tab" data-code-tab="fmt-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="fmt-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="fmt-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="fmt-html"><code>&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"status"</span>
     <span class="attr">data-formatter</span>=<span class="str">"statusBadge"</span>
@@ -54,4 +55,28 @@
     { <span class="prop">id</span>: <span class="str">"status"</span>, <span class="prop">text</span>: <span class="str">"Status"</span>, <span class="prop">formatter</span>: statusBadge, <span class="prop">align</span>: <span class="str">"center"</span> },
   ]}
 /&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="fmt-vue"><code><span class="cm">&lt;!-- StatusGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { VueBoostgrid } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> <span class="fn">statusBadge</span> = (_col, row) =&gt; {
+  <span class="kw">const</span> map = {
+    <span class="num">0</span>: [<span class="str">"success"</span>, <span class="str">"OK"</span>],
+    <span class="num">1</span>: [<span class="str">"info"</span>,    <span class="str">"Info"</span>],
+    <span class="num">2</span>: [<span class="str">"warning"</span>, <span class="str">"Warn"</span>],
+    <span class="num">3</span>: [<span class="str">"danger"</span>,  <span class="str">"Error"</span>],
+  };
+  <span class="kw">const</span> [variant, label] = map[<span class="fn">Number</span>(row.status)] ?? [<span class="str">"secondary"</span>, <span class="str">"?"</span>];
+  <span class="kw">return</span> <span class="str">`&lt;span class="badge text-bg-</span>${variant}<span class="str">"&gt;</span>${label}<span class="str">&lt;/span&gt;`</span>;
+};
+
+<span class="kw">const</span> cols = [
+  <span class="cm">/* … other columns … */</span>
+  { <span class="prop">id</span>: <span class="str">"status"</span>, <span class="prop">text</span>: <span class="str">"Status"</span>, <span class="prop">formatter</span>: statusBadge, <span class="prop">align</span>: <span class="str">"center"</span> },
+];
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span> <span class="attr">:data</span>=<span class="str">"rows"</span> <span class="attr">:columns</span>=<span class="str">"cols"</span> /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

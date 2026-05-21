@@ -1,15 +1,20 @@
 <h4>Virtual scroll · 10,000 rows</h4>
 <p class="text-muted">
   Set <code>virtualScroll: true</code> with a fixed <code>rowHeight</code> and
-  Boostgrid will render only the rows in the viewport plus an
-  <code>overscan</code> on each side. Pad <code>&lt;tr&gt;</code>s above and below
-  the slice keep the scrollbar shape correct.
+  Boostgrid renders only the rows in the viewport plus an
+  <code>overscan</code> on each side. Pad <code>&lt;tr&gt;</code>s above and
+  below the slice preserve the scrollbar shape. Since v2.5.0, the visible
+  <code>&lt;tr&gt;</code> elements are recycled as a pool on every scroll
+  tick instead of being rebuilt, and <code>scrollToRow(index)</code> exposes
+  jump-scroll on the public API.
 </p>
 
 <div class="d-flex flex-wrap gap-3 align-items-center mb-3 small text-muted">
   <span><strong id="ex-vs-count">10,000</strong> rows in the dataset</span>
   <span>·</span>
   <span>row height <code>32px</code> · overscan <code>5</code></span>
+  <span>·</span>
+  <button type="button" id="ex-vs-jump" class="btn btn-sm btn-outline-primary">Jump to row 5000</button>
 </div>
 
 <table id="ex-vs" class="table table-hover">
@@ -29,19 +34,29 @@
     <button type="button" class="code-samples-tab" data-code-tab="vs-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="vs-css">CSS hint</button>
     <button type="button" class="code-samples-tab" data-code-tab="vs-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="vs-vue">Vue</button>
   </div>
-  <pre class="code-samples-panel" data-code-panel="vs-vanilla"><code><span class="fn">attach</span>(<span class="str">"#grid"</span>, {
+  <pre class="code-samples-panel" data-code-panel="vs-vanilla"><code><span class="kw">const</span> [grid] = <span class="fn">attach</span>(<span class="str">"#grid"</span>, {
   <span class="prop">virtualScroll</span>: <span class="kw">true</span>,
   <span class="prop">rowHeight</span>:     <span class="num">32</span>,    <span class="cm">// must match the actual row height</span>
   <span class="prop">overscan</span>:      <span class="num">5</span>,     <span class="cm">// rows rendered above + below the viewport</span>
 });
 
-<span class="cm">// `rowsPerPage` is forced to -1 internally — virtual scroll is the slicing layer.</span></code></pre>
+<span class="cm">// rowsPerPage is forced to -1 internally — virtual scroll is the slicing layer.</span>
+
+<span class="cm">// Jump to an arbitrary row programmatically (2.5.0+):</span>
+grid.<span class="fn">scrollToRow</span>(<span class="num">4999</span>);   <span class="cm">// clamped to [0, total - 1]; returns `this`.</span></code></pre>
   <pre class="code-samples-panel" data-code-panel="vs-css"><code><span class="cm">/* Override the default 480px viewport via the wrapper class: */</span>
 .boostgrid--virtual .boostgrid-table tbody {
   --boostgrid-vh: 600px;
 }</code></pre>
-  <pre class="code-samples-panel" data-code-panel="vs-react"><code>&lt;<span class="tag">ReactBoostgrid</span>
+  <pre class="code-samples-panel" data-code-panel="vs-react"><code><span class="kw">import</span> { useRef } <span class="kw">from</span> <span class="str">"react"</span>;
+<span class="kw">import</span> { ReactBoostgrid, <span class="kw">type</span> ReactBoostgridHandle } <span class="kw">from</span> <span class="str">"react-boostgrid"</span>;
+
+<span class="kw">const</span> ref = <span class="fn">useRef</span>&lt;ReactBoostgridHandle&gt;(<span class="kw">null</span>);
+
+&lt;<span class="tag">ReactBoostgrid</span>
+  <span class="attr">ref</span>={ref}
   <span class="attr">data</span>={tenThousandRows}
   <span class="attr">columns</span>={cols}
   <span class="attr">options</span>={{
@@ -49,5 +64,34 @@
     <span class="prop">rowHeight</span>:     <span class="num">32</span>,
     <span class="prop">overscan</span>:      <span class="num">5</span>,
   }}
-/&gt;</code></pre>
+/&gt;
+
+<span class="cm">// Jump scroll via the ref handle (2.5.0+):</span>
+ref.current?.<span class="fn">scrollToRow</span>(<span class="num">4999</span>);</code></pre>
+  <pre class="code-samples-panel" data-code-panel="vs-vue"><code><span class="cm">&lt;!-- VirtualScrollGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { ref } <span class="kw">from</span> <span class="str">"vue"</span>;
+<span class="kw">import</span> { VueBoostgrid, <span class="kw">type</span> VueBoostgridHandle } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> <span class="fn">props</span> = <span class="fn">defineProps</span>&lt;{ tenThousandRows: <span class="kw">any</span>[] }&gt;();
+<span class="kw">const</span> handle = <span class="fn">ref</span>&lt;VueBoostgridHandle | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+<span class="kw">const</span> cols = [
+  { <span class="prop">id</span>: <span class="str">"id"</span>,       <span class="prop">text</span>: <span class="str">"ID"</span>,       <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span> },
+  { <span class="prop">id</span>: <span class="str">"sender"</span>,   <span class="prop">text</span>: <span class="str">"Sender"</span> },
+  { <span class="prop">id</span>: <span class="str">"subject"</span>,  <span class="prop">text</span>: <span class="str">"Subject"</span> },
+  { <span class="prop">id</span>: <span class="str">"received"</span>, <span class="prop">text</span>: <span class="str">"Received"</span> },
+];
+
+<span class="cm">// Jump scroll via the template ref handle (2.5.0+):</span>
+handle.value?.<span class="fn">scrollToRow</span>(<span class="num">4999</span>);
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span>
+    <span class="attr">ref</span>=<span class="str">"handle"</span>
+    <span class="attr">:data</span>=<span class="str">"props.tenThousandRows"</span>
+    <span class="attr">:columns</span>=<span class="str">"cols"</span>
+    <span class="attr">:options</span>=<span class="str">"{ virtualScroll: true, rowHeight: 32, overscan: 5 }"</span>
+  /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

@@ -31,6 +31,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="cmd-html">HTML</button>
     <button type="button" class="code-samples-tab" data-code-tab="cmd-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="cmd-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="cmd-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="cmd-html"><code>&lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"commands"</span>
     <span class="attr">data-formatter</span>=<span class="str">"commands"</span>
@@ -102,4 +103,49 @@ grid.element.<span class="fn">addEventListener</span>(<span class="str">"click"<
       <span class="prop">sortable</span>: <span class="kw">false</span>, <span class="prop">searchable</span>: <span class="kw">false</span>, <span class="prop">align</span>: <span class="str">"center"</span>, <span class="prop">width</span>: <span class="str">"120"</span> },
   ]}
 /&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="cmd-vue"><code><span class="cm">&lt;!-- CommandsGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { ref, onMounted, onBeforeUnmount } <span class="kw">from</span> <span class="str">"vue"</span>;
+<span class="kw">import</span> { VueBoostgrid, <span class="kw">type</span> VueBoostgridHandle } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> handle = <span class="fn">ref</span>&lt;VueBoostgridHandle | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+<span class="kw">const</span> rows = <span class="fn">ref</span>(initial);
+
+<span class="kw">const</span> <span class="fn">commands</span> = (_col, row) =&gt; <span class="str">`</span>
+<span class="str">  &lt;div class="btn-group btn-group-sm"&gt;</span>
+<span class="str">    &lt;button class="btn btn-outline-primary"</span>
+<span class="str">            data-bg-action="cmd-edit" data-bg-value="</span>${row.id}<span class="str">"&gt;</span>
+<span class="str">      &lt;i class="bi bi-pencil"&gt;&lt;/i&gt;</span>
+<span class="str">    &lt;/button&gt;</span>
+<span class="str">    &lt;button class="btn btn-outline-danger"</span>
+<span class="str">            data-bg-action="cmd-delete" data-bg-value="</span>${row.id}<span class="str">"&gt;</span>
+<span class="str">      &lt;i class="bi bi-trash"&gt;&lt;/i&gt;</span>
+<span class="str">    &lt;/button&gt;</span>
+<span class="str">  &lt;/div&gt;`</span>;
+
+<span class="cm">// Single delegated listener — survives re-render.</span>
+<span class="kw">let</span> el: HTMLElement | <span class="kw">null</span> = <span class="kw">null</span>;
+<span class="kw">const</span> <span class="fn">handler</span> = (e) =&gt; {
+  <span class="kw">const</span> btn = e.target.<span class="fn">closest</span>(<span class="str">"[data-bg-action]"</span>);
+  <span class="kw">if</span> (!btn) <span class="kw">return</span>;
+  <span class="kw">const</span> id = <span class="fn">Number</span>(btn.dataset.bgValue);
+  <span class="kw">if</span> (btn.dataset.bgAction === <span class="str">"cmd-edit"</span>)   <span class="fn">openEditDialog</span>(id);
+  <span class="kw">if</span> (btn.dataset.bgAction === <span class="str">"cmd-delete"</span>) rows.value = rows.value.<span class="fn">filter</span>((r) =&gt; r.id !== id);
+};
+<span class="fn">onMounted</span>(() =&gt; {
+  el = handle.value?.grid?.element ?? <span class="kw">null</span>;
+  el?.<span class="fn">addEventListener</span>(<span class="str">"click"</span>, handler);
+});
+<span class="fn">onBeforeUnmount</span>(() =&gt; el?.<span class="fn">removeEventListener</span>(<span class="str">"click"</span>, handler));
+
+<span class="kw">const</span> cols = [
+  <span class="cm">/* … other columns … */</span>
+  { <span class="prop">id</span>: <span class="str">"commands"</span>, <span class="prop">text</span>: <span class="str">"Actions"</span>, <span class="prop">formatter</span>: commands,
+    <span class="prop">sortable</span>: <span class="kw">false</span>, <span class="prop">searchable</span>: <span class="kw">false</span>, <span class="prop">align</span>: <span class="str">"center"</span>, <span class="prop">width</span>: <span class="str">"120"</span> },
+];
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span> <span class="attr">ref</span>=<span class="str">"handle"</span> <span class="attr">:data</span>=<span class="str">"rows"</span> <span class="attr">:columns</span>=<span class="str">"cols"</span> /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

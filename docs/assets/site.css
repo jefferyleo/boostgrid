@@ -1,8 +1,11 @@
 /* ════════════════════════════════════════════════════════════════════
    BOOSTGRID DOCS · Refined Editorial — Light
-   Off-white canvas, italic Fraunces display, Manrope body, JetBrains Mono
-   code, ember-orange accent (preserved), hairline rules, oversized numerals
-   as design. Reads like a printed reference manual.
+   Off-white canvas, Ubuntu display + body, Ubuntu Mono code, ember-orange
+   accent, hairline rules. Italic is reserved for semantic <em> emphasis
+   inside titles and code comments; all other heading weights use the
+   regular cut for legibility. A 10-rung type scale (`--fs-*`) drives
+   every heading and body size — change the rung in one place and the
+   whole site moves with it.
    ════════════════════════════════════════════════════════════════════ */
 
 /* ── 1. Tokens & overrides ─────────────────────────────────────── */
@@ -30,6 +33,20 @@
   --display: "Ubuntu", ui-sans-serif, system-ui, sans-serif;
   --body:    "Ubuntu", ui-sans-serif, system-ui, sans-serif;
   --mono:    "Ubuntu Mono", ui-monospace, "SF Mono", Consolas, monospace;
+
+  /* type scale — one rung per role, modular ~1.200 ratio.
+     Use these vars instead of one-off font-size values so the whole
+     site stays consistent and the scale can be tuned in one place. */
+  --fs-display:  clamp(3.2rem, 9vw, 7.4rem);   /* hero only */
+  --fs-h1:       clamp(2.4rem, 6vw, 4.2rem);   /* tab / section titles */
+  --fs-h2:       clamp(1.5rem, 2.6vw, 2rem);   /* block titles */
+  --fs-h3:       1.5rem;                       /* example titles */
+  --fs-h4:       1.25rem;                      /* sub-headings */
+  --fs-lede:     1.125rem;                     /* lede / pull quotes */
+  --fs-body:     1rem;                         /* default prose */
+  --fs-body-sm:  0.9375rem;                    /* tables / dense lists */
+  --fs-caption:  0.8125rem;                    /* small mono / metadata */
+  --fs-eyebrow:  0.6875rem;                    /* uppercased mono labels */
 
   /* bootstrap re-skin (light) */
   --bs-body-bg:        var(--ink-0);
@@ -182,10 +199,9 @@ strong, b { color: var(--cream); font-weight: 600; }
 .brand-mark-grid i:nth-child(11) { background: var(--ember); opacity: 1; }
 .brand-word {
   font-family: var(--display);
-  font-style: italic;
-  font-weight: 400;
-  font-size: 1.35rem;
-  letter-spacing: -0.02em;
+  font-weight: 500;
+  font-size: var(--fs-h4);
+  letter-spacing: -0.018em;
 }
 
 /* meta strip */
@@ -255,7 +271,13 @@ strong, b { color: var(--cream); font-weight: 600; }
   display: flex; list-style: none; margin: 0; padding: 0;
   gap: 0;
   overflow-x: auto;
+  /* Keep horizontal scroll available for narrow viewports, but hide the
+     scrollbar chrome itself — the 5 chapter tabs fit on desktop and
+     showing a thin scrollbar under them was visually noisy. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.tabs::-webkit-scrollbar { display: none; }
 .tab-item { flex: 0 0 auto; }
 .tab-link {
   background: transparent;
@@ -291,9 +313,8 @@ strong, b { color: var(--cream); font-weight: 600; }
 .tab-link.active .tab-num { color: var(--ember); }
 .tab-label {
   font-family: var(--display);
-  font-size: 1.05rem;
-  font-style: italic;
-  font-weight: 400;
+  font-size: var(--fs-body);
+  font-weight: 500;
   letter-spacing: -0.005em;
 }
 
@@ -326,9 +347,8 @@ strong, b { color: var(--cream); font-weight: 600; }
 }
 .block-title {
   font-family: var(--display);
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(1.4rem, 2.6vw, 2rem);
+  font-weight: 500;
+  font-size: var(--fs-h2);
   letter-spacing: -0.018em;
   margin: 0;
   color: var(--cream);
@@ -354,7 +374,7 @@ strong, b { color: var(--cream); font-weight: 600; }
 .hero-title {
   font-family: var(--display);
   font-weight: 300;
-  font-size: clamp(3.2rem, 9vw, 7.4rem);
+  font-size: var(--fs-display);
   line-height: 0.92;
   letter-spacing: -0.04em;
   color: var(--cream);
@@ -371,7 +391,6 @@ strong, b { color: var(--cream); font-weight: 600; }
   to { opacity: 1; transform: none; }
 }
 .hero-line--em {
-  font-style: italic;
   font-weight: 300;
   color: var(--ember);
   padding-left: 0.06em;
@@ -389,7 +408,7 @@ strong, b { color: var(--cream); font-weight: 600; }
 }
 .hero-pull p { margin: 0; }
 .hero-lede {
-  font-size: clamp(1.05rem, 1.4vw, 1.18rem);
+  font-size: var(--fs-lede);
   line-height: 1.65;
   max-width: 60ch;
   color: var(--text);
@@ -400,7 +419,7 @@ strong, b { color: var(--cream); font-weight: 600; }
 
 .hero--small { padding: 1rem 0 2.5rem; }
 .hero-title--small {
-  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  font-size: var(--fs-h1);
 }
 .hero-title em {
   font-style: italic;
@@ -582,7 +601,7 @@ strong, b { color: var(--cream); font-weight: 600; }
 
 /* ── 9. Prose, notes ───────────────────────────────────────────── */
 .prose {
-  font-size: 1.02rem;
+  font-size: var(--fs-body);
   line-height: 1.65;
   max-width: 64ch;
   margin: 0 0 1.25rem;
@@ -641,7 +660,7 @@ strong, b { color: var(--cream); font-weight: 600; }
   padding: 0.85rem 1rem;
   color: var(--text);
   font-family: var(--body);
-  font-size: 0.95rem;
+  font-size: var(--fs-body-sm);
   font-weight: 500;
   position: relative;
   transition: background 160ms ease, color 160ms ease, padding-left 200ms ease;
@@ -791,10 +810,9 @@ strong, b { color: var(--cream); font-weight: 600; }
    so it reads as the heading of the example, not part of the integration. */
 .frame h4 {
   font-family: var(--display);
-  font-style: italic;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--cream);
-  font-size: 1.5rem;
+  font-size: var(--fs-h3);
   letter-spacing: -0.005em;
   margin: 0 0 0.7rem;
 }
@@ -818,7 +836,7 @@ strong, b { color: var(--cream); font-weight: 600; }
   width: 100%;
   margin: 0;
   border-collapse: collapse;
-  font-size: 0.92rem;
+  font-size: var(--fs-body-sm);
 }
 .reftable thead th {
   background: var(--ink-2);
@@ -940,27 +958,26 @@ strong, b { color: var(--cream); font-weight: 600; }
 }
 
 .perf-num {
-  font-family: var(--display);
-  font-style: italic;
-  font-weight: 200;
-  font-size: 3rem;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 2.4rem;
   line-height: 1;
   color: var(--ember);
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
+  font-feature-settings: "tnum";
 }
 .perf h4 {
   font-family: var(--display);
-  font-style: italic;
-  font-weight: 400;
-  font-size: 1.18rem;
+  font-weight: 600;
+  font-size: var(--fs-h4);
   color: var(--cream);
   margin: 0 0 0.4rem;
   letter-spacing: -0.01em;
 }
 .perf p {
   margin: 0;
-  font-size: 0.92rem;
-  line-height: 1.55;
+  font-size: var(--fs-body-sm);
+  line-height: 1.6;
   color: var(--text-2);
 }
 
@@ -1020,7 +1037,6 @@ strong, b { color: var(--cream); font-weight: 600; }
   inset: 0;
   display: grid; place-items: center;
   font-family: var(--display);
-  font-style: italic;
   font-weight: 300;
   font-size: clamp(4rem, 11vw, 7rem);
   color: var(--cream);
@@ -1072,7 +1088,7 @@ strong, b { color: var(--cream); font-weight: 600; }
 .colophon-title {
   font-family: var(--display);
   font-weight: 300;
-  font-size: clamp(2.6rem, 6vw, 4.4rem);
+  font-size: var(--fs-h1);
   line-height: 1;
   color: var(--cream);
   letter-spacing: -0.035em;
@@ -1085,8 +1101,8 @@ strong, b { color: var(--cream); font-weight: 600; }
 
 /* drop-cap on first paragraph */
 .colophon-lede {
-  font-size: 1.18rem;
-  line-height: 1.6;
+  font-size: var(--fs-lede);
+  line-height: 1.65;
   color: var(--text);
   max-width: 60ch;
   margin: 0 0 1.4rem;
@@ -1103,7 +1119,7 @@ strong, b { color: var(--cream); font-weight: 600; }
   margin: 0.05em 0 0;
 }
 .colophon-text {
-  font-size: 1rem;
+  font-size: var(--fs-body);
   line-height: 1.65;
   color: var(--text);
   max-width: 60ch;
@@ -1119,10 +1135,10 @@ strong, b { color: var(--cream); font-weight: 600; }
 }
 .sig-name {
   font-family: var(--display);
-  font-style: italic;
-  font-weight: 300;
-  font-size: 1.6rem;
+  font-weight: 500;
+  font-size: var(--fs-h3);
   color: var(--cream);
+  letter-spacing: -0.015em;
 }
 .sig-place { color: var(--text-3); }
 
@@ -1180,7 +1196,10 @@ strong, b { color: var(--cream); font-weight: 600; }
   border-bottom: 1px solid var(--rule);
   background: var(--ink-2);
   overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.code-samples-tabs::-webkit-scrollbar { display: none; }
 .code-samples-tab {
   background: transparent;
   border: 0;
@@ -1292,8 +1311,7 @@ pre code { white-space: pre-wrap; }
 }
 .release-num--archive { color: var(--text-3); }
 .release-num--next {
-  font-style: italic;
-  font-family: var(--display);
+  font-family: var(--mono);
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--ember-2);
@@ -1328,9 +1346,9 @@ pre code { white-space: pre-wrap; }
 .release-tagline {
   grid-column: 2;
   margin: 0;
-  font-family: var(--display);
-  font-size: 1.25rem;
-  line-height: 1.45;
+  font-family: var(--body);
+  font-size: var(--fs-lede);
+  line-height: 1.55;
   color: var(--text);
   max-width: 60ch;
 }

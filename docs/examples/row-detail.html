@@ -32,6 +32,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="rd-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="rd-api">API</button>
     <button type="button" class="code-samples-tab" data-code-tab="rd-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="rd-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="rd-vanilla"><code><span class="kw">import</span> { attach } <span class="kw">from</span> <span class="str">"boostgrid"</span>;
 
@@ -71,4 +72,17 @@ grid.<span class="fn">collapseAllRowDetails</span>();
     <span class="prop">rowDetailExpanded</span>: <span class="str">"none"</span>,
   }}
 /&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="rd-vue"><code><span class="cm">&lt;!-- RowDetailGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { VueBoostgrid } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> opts = {
+  <span class="prop">rowDetail</span>: (row) =&gt; <span class="str">`&lt;p&gt;Detail for #${row.id}&lt;/p&gt;`</span>,
+  <span class="prop">rowDetailExpanded</span>: <span class="str">"none"</span>,
+};
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span> <span class="attr">:data</span>=<span class="str">"rows"</span> <span class="attr">:columns</span>=<span class="str">"columns"</span> <span class="attr">:options</span>=<span class="str">"opts"</span> /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

@@ -30,6 +30,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="fz-html">HTML</button>
     <button type="button" class="code-samples-tab" data-code-tab="fz-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="fz-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="fz-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="fz-html"><code><span class="cm">&lt;!-- The .table-responsive parent is what gives the sticky cells something to scroll under --&gt;</span>
 &lt;<span class="tag">div</span> <span class="attr">class</span>=<span class="str">"table-responsive"</span>&gt;
@@ -63,4 +64,21 @@
     ]}
   /&gt;
 &lt;/<span class="tag">div</span>&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="fz-vue"><code><span class="cm">&lt;!-- FrozenGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { VueBoostgrid } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> cols = [
+  { <span class="prop">id</span>: <span class="str">"id"</span>,     <span class="prop">text</span>: <span class="str">"ID"</span>,     <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span>, <span class="prop">frozen</span>: <span class="str">"left"</span>, <span class="prop">width</span>: <span class="str">"80"</span> },
+  { <span class="prop">id</span>: <span class="str">"sender"</span>, <span class="prop">text</span>: <span class="str">"Sender"</span>, <span class="prop">frozen</span>: <span class="str">"left"</span>, <span class="prop">width</span>: <span class="str">"220"</span> },
+  { <span class="prop">id</span>: <span class="str">"subject"</span>, <span class="prop">text</span>: <span class="str">"Subject"</span>, <span class="prop">width</span>: <span class="str">"320"</span> },
+  <span class="cm">/* … */</span>
+];
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">div</span> <span class="attr">class</span>=<span class="str">"table-responsive"</span>&gt;
+    &lt;<span class="tag">VueBoostgrid</span> <span class="attr">:data</span>=<span class="str">"rows"</span> <span class="attr">:columns</span>=<span class="str">"cols"</span> /&gt;
+  &lt;/<span class="tag">div</span>&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

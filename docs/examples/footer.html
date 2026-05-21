@@ -25,6 +25,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="ft-html">HTML</button>
     <button type="button" class="code-samples-tab" data-code-tab="ft-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="ft-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ft-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="ft-html"><code><span class="cm">&lt;!-- A column with data-footer-formatter resolves through options.footerFormatters --&gt;</span>
 &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"amount"</span>
@@ -79,4 +80,33 @@ grid.<span class="fn">getFooterCell</span>(<span class="str">"amount"</span>);  
     },
   }}
 /&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ft-vue"><code><span class="cm">&lt;!-- FooterGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { VueBoostgrid } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="fn">defineProps</span>&lt;{ rows: <span class="kw">any</span>[] }&gt;();
+<span class="kw">const</span> money = <span class="kw">new</span> <span class="fn">Intl.NumberFormat</span>(<span class="str">"en-US"</span>, { <span class="prop">style</span>: <span class="str">"currency"</span>, <span class="prop">currency</span>: <span class="str">"USD"</span> });
+
+<span class="kw">const</span> cols = [
+  { <span class="prop">id</span>: <span class="str">"id"</span>,      <span class="prop">text</span>: <span class="str">"ID"</span>,      <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span> },
+  { <span class="prop">id</span>: <span class="str">"sender"</span>,  <span class="prop">text</span>: <span class="str">"Sender"</span> },
+  { <span class="prop">id</span>: <span class="str">"subject"</span>, <span class="prop">text</span>: <span class="str">"Subject"</span> },
+  { <span class="prop">id</span>: <span class="str">"amount"</span>,  <span class="prop">text</span>: <span class="str">"Amount"</span>,
+    <span class="prop">formatter</span>: (_c, r) =&gt; money.<span class="fn">format</span>(<span class="fn">Number</span>(r.amount) || <span class="num">0</span>),
+    <span class="prop">footerFormatter</span>: (_c, ctx) =&gt;
+      money.<span class="fn">format</span>(ctx.filteredRows.<span class="fn">reduce</span>((s, r) =&gt; s + <span class="fn">Number</span>(r.amount || <span class="num">0</span>), <span class="num">0</span>)),
+  },
+];
+
+<span class="kw">const</span> opts = {
+  <span class="prop">footerCallback</span>: (tr, ctx) =&gt; {
+    <span class="kw">const</span> cell = tr.<span class="fn">querySelector</span>(<span class="str">'[data-column-id="subject"]'</span>);
+    <span class="kw">if</span> (cell) cell.textContent = <span class="str">`Showing </span>${ctx.start}<span class="str">–</span>${ctx.end}<span class="str"> of </span>${ctx.filteredRows.length}<span class="str">`</span>;
+  },
+};
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span> <span class="attr">:data</span>=<span class="str">"rows"</span> <span class="attr">:columns</span>=<span class="str">"cols"</span> <span class="attr">:options</span>=<span class="str">"opts"</span> /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

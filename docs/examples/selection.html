@@ -24,6 +24,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="sel-html">HTML</button>
     <button type="button" class="code-samples-tab" data-code-tab="sel-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="sel-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="sel-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="sel-html"><code><span class="cm">&lt;!-- Enable selection via data-* on the table --&gt;</span>
 &lt;<span class="tag">table</span> <span class="attr">id</span>=<span class="str">"grid"</span> <span class="attr">class</span>=<span class="str">"table table-hover"</span>
@@ -71,4 +72,26 @@ grid.<span class="fn">on</span>(<span class="str">"deselected"</span>, (rows) =&
 <span class="cm">// Imperative escape hatches via the ref handle:</span>
 ref.current?.<span class="fn">getSelectedRows</span>();   <span class="cm">// [1, 4, 12]</span>
 ref.current?.grid?.<span class="fn">select</span>([<span class="num">1</span>, <span class="num">4</span>]);</code></pre>
+  <pre class="code-samples-panel" data-code-panel="sel-vue"><code><span class="cm">&lt;!-- SelectableGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { ref } <span class="kw">from</span> <span class="str">"vue"</span>;
+<span class="kw">import</span> { VueBoostgrid, <span class="kw">type</span> VueBoostgridHandle } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> handle = <span class="fn">ref</span>&lt;VueBoostgridHandle | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+<span class="cm">// Imperative via the template ref handle:</span>
+handle.value?.<span class="fn">getSelectedRows</span>();      <span class="cm">// [1, 4, 12]</span>
+handle.value?.grid?.<span class="fn">select</span>([<span class="num">1</span>, <span class="num">4</span>]);
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span>
+    <span class="attr">ref</span>=<span class="str">"handle"</span>
+    <span class="attr">:data</span>=<span class="str">"rows"</span>
+    <span class="attr">:columns</span>=<span class="str">"columns"</span>
+    <span class="attr">:options</span>=<span class="str">"{ selection: true, multiSelect: true, rowSelect: true, keepSelection: true }"</span>
+    <span class="attr">@selected</span>=<span class="str">"(rows) =&gt; console.log('+', rows)"</span>
+    <span class="attr">@deselected</span>=<span class="str">"(rows) =&gt; console.log('-', rows)"</span>
+  /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

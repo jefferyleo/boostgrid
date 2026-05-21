@@ -18,6 +18,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="srch-html">HTML</button>
     <button type="button" class="code-samples-tab" data-code-tab="srch-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="srch-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="srch-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="srch-html"><code><span class="cm">&lt;!-- data-order on the column sets the initial sort --&gt;</span>
 &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"received"</span> <span class="attr">data-order</span>=<span class="str">"desc"</span>&gt;Received&lt;/<span class="tag">th</span>&gt;
@@ -60,4 +61,31 @@ grid.<span class="fn">on</span>(<span class="str">"sorted"</span>,   (dict)   =&
 <span class="cm">// Programmatic via ref:</span>
 ref.current?.<span class="fn">search</span>(<span class="str">"alpha"</span>);
 ref.current?.<span class="fn">sort</span>({ <span class="prop">received</span>: <span class="str">"asc"</span> });</code></pre>
+  <pre class="code-samples-panel" data-code-panel="srch-vue"><code><span class="cm">&lt;!-- SearchSort.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { ref } <span class="kw">from</span> <span class="str">"vue"</span>;
+<span class="kw">import</span> { VueBoostgrid, <span class="kw">type</span> VueBoostgridHandle } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> handle = <span class="fn">ref</span>&lt;VueBoostgridHandle | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+<span class="kw">const</span> cols = [
+  { <span class="prop">id</span>: <span class="str">"id"</span>,       <span class="prop">text</span>: <span class="str">"ID"</span>,       <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span> },
+  { <span class="prop">id</span>: <span class="str">"sender"</span>,   <span class="prop">text</span>: <span class="str">"Sender"</span> },
+  { <span class="prop">id</span>: <span class="str">"received"</span>, <span class="prop">text</span>: <span class="str">"Received"</span>, <span class="prop">order</span>: <span class="str">"desc"</span> },
+];
+
+<span class="cm">// Programmatic via handle:</span>
+handle.value?.<span class="fn">search</span>(<span class="str">"alpha"</span>);
+handle.value?.<span class="fn">sort</span>({ <span class="prop">received</span>: <span class="str">"asc"</span> });
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span>
+    <span class="attr">ref</span>=<span class="str">"handle"</span>
+    <span class="attr">:data</span>=<span class="str">"rows"</span>
+    <span class="attr">:columns</span>=<span class="str">"cols"</span>
+    <span class="attr">:options</span>=<span class="str">"{ searchSettings: { delay: 200, characters: 1 }, caseSensitive: false, multiSort: false }"</span>
+    <span class="attr">@searched</span>=<span class="str">"(q) =&gt; console.log('q=', q)"</span>
+    <span class="attr">@sorted</span>=  <span class="str">"(dict) =&gt; console.log('sort', dict)"</span>
+  /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

@@ -28,6 +28,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="aln-html">HTML</button>
     <button type="button" class="code-samples-tab" data-code-tab="aln-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="aln-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="aln-vue">Vue</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="aln-html"><code><span class="cm">&lt;!-- Header and cell alignment are independent --&gt;</span>
 &lt;<span class="tag">th</span> <span class="attr">data-column-id</span>=<span class="str">"id"</span>
@@ -75,4 +76,27 @@
       <span class="prop">cssClass</span>: <span class="str">"text-uppercase"</span>, <span class="prop">headerCssClass</span>: <span class="str">"fw-bold"</span> },
   ]}
 /&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="aln-vue"><code><span class="cm">&lt;!-- AlignedGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { VueBoostgrid } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="cm">// Alignment is configured directly on each column object.</span>
+<span class="kw">const</span> cols = [
+  { <span class="prop">id</span>: <span class="str">"id"</span>,       <span class="prop">text</span>: <span class="str">"ID"</span>,       <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span>,
+    <span class="prop">align</span>: <span class="str">"right"</span>, <span class="prop">headerAlign</span>: <span class="str">"right"</span> },
+  { <span class="prop">id</span>: <span class="str">"sender"</span>,   <span class="prop">text</span>: <span class="str">"Sender"</span>,
+    <span class="prop">align</span>: <span class="str">"left"</span>,  <span class="prop">headerAlign</span>: <span class="str">"left"</span> },
+  { <span class="prop">id</span>: <span class="str">"subject"</span>,  <span class="prop">text</span>: <span class="str">"Subject"</span>,
+    <span class="prop">align</span>: <span class="str">"center"</span>, <span class="prop">headerAlign</span>: <span class="str">"center"</span> },
+  { <span class="prop">id</span>: <span class="str">"received"</span>, <span class="prop">text</span>: <span class="str">"Received"</span>,
+    <span class="prop">align</span>: <span class="str">"right"</span>, <span class="prop">headerAlign</span>: <span class="str">"left"</span> },
+  { <span class="prop">id</span>: <span class="str">"status"</span>,   <span class="prop">text</span>: <span class="str">"Status"</span>,
+    <span class="prop">align</span>: <span class="str">"center"</span>, <span class="prop">headerAlign</span>: <span class="str">"center"</span>,
+    <span class="prop">cssClass</span>: <span class="str">"text-uppercase"</span>, <span class="prop">headerCssClass</span>: <span class="str">"fw-bold"</span> },
+];
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span> <span class="attr">:data</span>=<span class="str">"rows"</span> <span class="attr">:columns</span>=<span class="str">"cols"</span> /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
 </section>

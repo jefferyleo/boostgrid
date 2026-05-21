@@ -28,6 +28,7 @@
     <button type="button" class="code-samples-tab" data-code-tab="ed-html">HTML</button>
     <button type="button" class="code-samples-tab" data-code-tab="ed-vanilla">Vanilla JS</button>
     <button type="button" class="code-samples-tab" data-code-tab="ed-react">React</button>
+    <button type="button" class="code-samples-tab" data-code-tab="ed-vue">Vue</button>
     <button type="button" class="code-samples-tab" data-code-tab="ed-req">Request</button>
   </div>
   <pre class="code-samples-panel" data-code-panel="ed-html"><code><span class="cm">&lt;!-- Mark editable columns with a formatter --&gt;</span>
@@ -94,6 +95,47 @@ grid.element.<span class="fn">addEventListener</span>(<span class="str">"change"
     { <span class="prop">id</span>: <span class="str">"subject"</span>, <span class="prop">text</span>: <span class="str">"Subject"</span>, <span class="prop">formatter</span>: editText },
   ]}
 /&gt;</code></pre>
+  <pre class="code-samples-panel" data-code-panel="ed-vue"><code><span class="cm">&lt;!-- EditableGrid.vue --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">setup</span> <span class="attr">lang</span>=<span class="str">"ts"</span>&gt;
+<span class="kw">import</span> { ref, onMounted, onBeforeUnmount } <span class="kw">from</span> <span class="str">"vue"</span>;
+<span class="kw">import</span> { VueBoostgrid, <span class="kw">type</span> VueBoostgridHandle } <span class="kw">from</span> <span class="str">"vue-boostgrid"</span>;
+
+<span class="kw">const</span> handle = <span class="fn">ref</span>&lt;VueBoostgridHandle | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+<span class="kw">const</span> rows = <span class="fn">ref</span>(initial);
+
+<span class="kw">const</span> <span class="fn">editText</span> = (col, row) =&gt; {
+  <span class="kw">const</span> v = <span class="fn">String</span>(row[col.id] ?? <span class="str">""</span>).<span class="fn">replace</span>(<span class="str">/"/g</span>, <span class="str">"&amp;quot;"</span>);
+  <span class="kw">return</span> <span class="str">`&lt;input class="form-control form-control-sm"</span>
+<span class="str">      data-edit-id="</span>${row.id}<span class="str">"</span>
+<span class="str">      data-edit-field="</span>${col.id}<span class="str">"</span>
+<span class="str">      value="</span>${v}<span class="str">"&gt;`</span>;
+};
+
+<span class="kw">let</span> el: HTMLElement | <span class="kw">null</span> = <span class="kw">null</span>;
+<span class="kw">const</span> <span class="fn">on</span> = (e) =&gt; {
+  <span class="kw">const</span> inp = e.target.<span class="fn">closest</span>(<span class="str">"input[data-edit-field]"</span>);
+  <span class="kw">if</span> (!inp) <span class="kw">return</span>;
+  <span class="kw">const</span> id    = <span class="fn">Number</span>(inp.dataset.editId);
+  <span class="kw">const</span> field = inp.dataset.editField;
+  rows.value = rows.value.<span class="fn">map</span>((r) =&gt; r.id === id ? { ...r, [field]: inp.value } : r);
+  <span class="fn">savePatch</span>(id, { [field]: inp.value });
+};
+<span class="fn">onMounted</span>(() =&gt; {
+  el = handle.value?.grid?.element ?? <span class="kw">null</span>;
+  el?.<span class="fn">addEventListener</span>(<span class="str">"change"</span>, on);
+});
+<span class="fn">onBeforeUnmount</span>(() =&gt; el?.<span class="fn">removeEventListener</span>(<span class="str">"change"</span>, on));
+
+<span class="kw">const</span> cols = [
+  { <span class="prop">id</span>: <span class="str">"id"</span>,      <span class="prop">text</span>: <span class="str">"ID"</span>,      <span class="prop">identifier</span>: <span class="kw">true</span>, <span class="prop">type</span>: <span class="str">"numeric"</span>, <span class="prop">align</span>: <span class="str">"right"</span> },
+  { <span class="prop">id</span>: <span class="str">"sender"</span>,  <span class="prop">text</span>: <span class="str">"Sender"</span>,  <span class="prop">formatter</span>: editText },
+  { <span class="prop">id</span>: <span class="str">"subject"</span>, <span class="prop">text</span>: <span class="str">"Subject"</span>, <span class="prop">formatter</span>: editText },
+];
+&lt;/<span class="tag">script</span>&gt;
+
+&lt;<span class="tag">template</span>&gt;
+  &lt;<span class="tag">VueBoostgrid</span> <span class="attr">ref</span>=<span class="str">"handle"</span> <span class="attr">:data</span>=<span class="str">"rows"</span> <span class="attr">:columns</span>=<span class="str">"cols"</span> /&gt;
+&lt;/<span class="tag">template</span>&gt;</code></pre>
   <pre class="code-samples-panel" data-code-panel="ed-req"><code><span class="cm">// PATCH /api/messages/12</span>
 <span class="cm">// Content-Type: application/json</span>
 {
