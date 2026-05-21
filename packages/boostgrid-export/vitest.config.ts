@@ -12,5 +12,9 @@ export default defineConfig({
         external: ["xlsx-js-style"],
       },
     },
+    // Forks pool so the Vite server tears down immediately on test exit
+    // (avoids the 10s "close timed out" hang in publish.bat).
+    pool: "forks",
+    teardownTimeout: 1000,
   },
 });

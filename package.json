@@ -31,7 +31,7 @@
     "docs": "npx -y http-server -p 4174 -s -c-1 -o /docs/index.html",
     "lint": "eslint \"src/**/*.ts\"",
     "size": "size-limit",
-    "pack:nuget": "dotnet pack Boostgrid.csproj --nologo",
+    "pack:nuget": "node -e \"require('child_process').execSync('dotnet pack Boostgrid.csproj --nologo -p:NuspecProperties=\\\"version=' + require('./package.json').version + '\\\"', {stdio:'inherit'})\"",
     "pack:npm": "npm pack --pack-destination dist"
   },
   "keywords": [

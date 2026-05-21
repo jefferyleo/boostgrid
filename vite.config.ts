@@ -24,5 +24,13 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     include: ["test/**/*.test.ts"],
+    // Use forked child processes instead of worker threads. The default
+    // `threads` pool keeps the parent Vite/Vitest server alive ~10s after
+    // the last test ("Tests closed successfully but something prevents
+    // Vite server from exiting"). Forks die cleanly with their child
+    // process, so `vitest run` exits immediately. Slightly slower per
+    // file but avoids the 10s teardown timeout in `publish.bat`.
+    pool: "forks",
+    teardownTimeout: 1000,
   },
 });
