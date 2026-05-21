@@ -4,6 +4,38 @@ All notable changes to Boostgrid are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.5.2] — 2026-05-22
+
+### Fixed
+- **Silent failure when Bootstrap's JS bundle isn't loaded on the host
+  page.** The toolbar's page-size picker and column-visibility menu
+  are Bootstrap dropdowns (`<button data-bs-toggle="dropdown">`). Without
+  `window.bootstrap.Dropdown` they rendered correctly but never opened —
+  no console error, no exception, just a broken UI. `renderToolbar` now
+  emits a one-shot `console.warn` at first top-toolbar mount when the
+  global is missing, naming the dependency and pointing at the CDN URL
+  to add to the host page. Once-per-page-load (not once-per-grid) so
+  multi-grid pages don't spam the console.
+
+### Docs
+- **New "Host-page requirements" section** in the Getting Started area
+  of the docs site (`§ 01.2`) plus the README. Lists the four loads a
+  host page needs in order — Bootstrap 5 CSS, Bootstrap 5 JS bundle, an
+  icon font (Bootstrap Icons or Font Awesome), then Boostgrid — with
+  copy-pasteable CDN URLs and an explicit note about the silent
+  failure this used to cause. Filed because a user following the
+  quick-start saw no icons and a non-functional page-size picker, with
+  no console output to diagnose the gap.
+- **Minimal markup section** renumbered from `§ 01.2` to `§ 01.3` to
+  make room for the new requirements block.
+
+### Changed
+- Bundle: 16.41 KB → 16.7 KB brotli (+~290 bytes for the dependency-
+  detection guard in `renderToolbar`). Hard ceiling stays at 18 KB.
+
+### Tests
+- 153 specs; no count change.
+
 ## [2.5.1] — 2026-05-22
 
 ### Fixed

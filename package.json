@@ -1,6 +1,6 @@
 {
   "name": "boostgrid",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "A modern, framework-agnostic data grid for Bootstrap 5. Vanilla TypeScript, no jQuery.",
   "type": "module",
   "main": "./dist/boostgrid.umd.js",

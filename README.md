@@ -47,6 +47,37 @@ ships ESM + UMD.
 | **Formatters** | Built-in `linkify`, `truncate`, `date`, `commands`, `statusBadge`, `numericRange` + your own |
 | **AJAX** | `url` option for server-side, supports `Content-Range`-style total count |
 
+## Host-page requirements
+
+Boostgrid is a UI component, not a full bundle. The host page must also
+load **Bootstrap 5's CSS _and JavaScript_ bundle** (the toolbar's
+page-size picker and column-visibility menu are Bootstrap dropdowns;
+without `bootstrap.Dropdown` they render but never open) plus **an icon
+font** matching the configured `icons` option — Bootstrap Icons by
+default, or Font Awesome when `icons: fontAwesomeIcons` is set.
+
+```html
+<!-- 1. Bootstrap 5 CSS -->
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+<!-- 2. Bootstrap 5 JS bundle (required for page-size + columns dropdowns) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+
+<!-- 3. An icon font matching the configured `icons` option -->
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<!-- 4. Boostgrid itself -->
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/boostgrid@2/dist/boostgrid.css">
+<script src="https://cdn.jsdelivr.net/npm/boostgrid@2/dist/boostgrid.umd.js" defer></script>
+```
+
+Missing the Bootstrap JS bundle is a silent failure — dropdown buttons
+render but never open. Since 2.5.2, Boostgrid emits a `console.warn` at
+first toolbar mount when `window.bootstrap.Dropdown` is undefined.
+
 ## Install
 
 ```bash
@@ -61,6 +92,9 @@ npm install boostgrid
 # NuGet
 Install-Package Boostgrid
 ```
+
+> Don't forget the [host-page requirements](#host-page-requirements)
+> above — Bootstrap 5 JS and an icon font are both required.
 
 ## Quick start
 

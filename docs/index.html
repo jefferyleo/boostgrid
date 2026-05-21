@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Boostgrid · A grid worth shipping</title>
-  <meta name="description" content="Boostgrid — a vanilla TypeScript data grid for Bootstrap 5. 16.41 KB brotli, no runtime dependencies." />
+  <meta name="description" content="Boostgrid — a vanilla TypeScript data grid for Bootstrap 5. 16.7 KB brotli, no runtime dependencies." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,7 +13,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="../dist/boostgrid.css" />
-  <link rel="stylesheet" href="assets/site.css?v=19" />
+  <link rel="stylesheet" href="assets/site.css?v=20" />
 
   <!-- import map: lets the React wrapper bundle resolve `react`, `react-dom`,
        and `boostgrid` in the browser without a build step -->
@@ -25,10 +25,10 @@
       "react-dom":         "https://esm.sh/react-dom@18.3.1",
       "react-dom/client":  "https://esm.sh/react-dom@18.3.1/client",
       "vue":               "https://esm.sh/vue@3.4.38",
-      "boostgrid":         "../dist/boostgrid.js?v=2.5.1",
-      "react-boostgrid":   "../packages/react-boostgrid/dist/react-boostgrid.js?v=2.5.1",
-      "vue-boostgrid":     "../packages/vue-boostgrid/dist/vue-boostgrid.js?v=2.5.1",
-      "boostgrid-export":  "../packages/boostgrid-export/dist/boostgrid-export.js?v=2.5.1"
+      "boostgrid":         "../dist/boostgrid.js?v=2.5.2",
+      "react-boostgrid":   "../packages/react-boostgrid/dist/react-boostgrid.js?v=2.5.2",
+      "vue-boostgrid":     "../packages/vue-boostgrid/dist/vue-boostgrid.js?v=2.5.2",
+      "boostgrid-export":  "../packages/boostgrid-export/dist/boostgrid-export.js?v=2.5.2"
     }
   }
   </script>
@@ -56,8 +56,8 @@
       </a>
 
       <ul class="ribbon-meta">
-        <li><span class="ribbon-key">VERSION</span><span class="ribbon-val">02.5.1</span></li>
-        <li><span class="ribbon-key">SIZE</span><span class="ribbon-val">16.41&nbsp;KB</span></li>
+        <li><span class="ribbon-key">VERSION</span><span class="ribbon-val">02.5.2</span></li>
+        <li><span class="ribbon-key">SIZE</span><span class="ribbon-val">16.7&nbsp;KB</span></li>
         <li class="hide-md"><span class="ribbon-key">LICENSE</span><span class="ribbon-val">MIT</span></li>
         <li class="ribbon-status"><span class="pulse"></span><span class="ribbon-val">stable</span></li>
       </ul>
@@ -136,7 +136,7 @@
 
           <ul class="stats">
             <li>
-              <span class="stat-fig"><span class="stat-num">16.41</span><span class="stat-unit">kb</span></span>
+              <span class="stat-fig"><span class="stat-num">16.7</span><span class="stat-unit">kb</span></span>
               <span class="stat-cap">brotli · minified · standalone</span>
             </li>
             <li>
@@ -206,10 +206,66 @@
           </div>
         </section>
 
-        <!-- MINIMAL EXAMPLE -->
+        <!-- HOST-PAGE REQUIREMENTS -->
         <section class="block">
           <header class="block-head">
             <span class="block-num">§&nbsp;01.2</span>
+            <h2 class="block-title">Host-page requirements</h2>
+            <span class="block-rule"></span>
+            <span class="caps muted">what&nbsp;the&nbsp;page&nbsp;must&nbsp;load</span>
+          </header>
+
+          <p class="prose">
+            Boostgrid is a UI component, not a full bundle. The host page must
+            also load Bootstrap&nbsp;5's CSS <em>and JavaScript</em> bundle (the
+            toolbar's page-size picker and column-visibility menu are
+            Bootstrap dropdowns; without <code>bootstrap.Dropdown</code> the
+            buttons render but never open), plus an icon font matching the
+            configured <code>icons</code> option (Bootstrap Icons by default,
+            or Font Awesome).
+          </p>
+
+          <div class="terminal terminal--wide">
+            <header class="terminal-bar">
+              <span class="dots"><i></i><i></i><i></i></span>
+              <span class="terminal-host">&lt;head&gt; — minimum load order</span>
+              <button type="button" class="copy" data-copy>copy</button>
+            </header>
+            <pre><code><span class="cm">&lt;!-- 1. Bootstrap 5 CSS --&gt;</span>
+&lt;<span class="tag">link</span> <span class="attr">rel</span>=<span class="str">"stylesheet"</span>
+      <span class="attr">href</span>=<span class="str">"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"</span>&gt;
+
+<span class="cm">&lt;!-- 2. Bootstrap 5 JS bundle (required for the page-size + columns dropdowns) --&gt;</span>
+&lt;<span class="tag">script</span> <span class="attr">src</span>=<span class="str">"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"</span> <span class="attr">defer</span>&gt;&lt;/<span class="tag">script</span>&gt;
+
+<span class="cm">&lt;!-- 3. An icon font matching the configured `icons` option --&gt;</span>
+<span class="cm">&lt;!--    Default: Bootstrap Icons. Swap for Font Awesome when using `icons: fontAwesomeIcons`. --&gt;</span>
+&lt;<span class="tag">link</span> <span class="attr">rel</span>=<span class="str">"stylesheet"</span>
+      <span class="attr">href</span>=<span class="str">"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"</span>&gt;
+
+<span class="cm">&lt;!-- 4. Boostgrid itself --&gt;</span>
+&lt;<span class="tag">link</span> <span class="attr">rel</span>=<span class="str">"stylesheet"</span>
+      <span class="attr">href</span>=<span class="str">"https://cdn.jsdelivr.net/npm/boostgrid@2/dist/boostgrid.css"</span>&gt;
+&lt;<span class="tag">script</span> <span class="attr">src</span>=<span class="str">"https://cdn.jsdelivr.net/npm/boostgrid@2/dist/boostgrid.umd.js"</span> <span class="attr">defer</span>&gt;&lt;/<span class="tag">script</span>&gt;</code></pre>
+          </div>
+
+          <aside class="note" style="margin-top: 2rem">
+            <span class="note-tag">silent failure · since 2.5.2 we warn</span>
+            <p class="prose" style="margin-bottom: 0">
+              If the Bootstrap JS bundle is missing, the dropdown buttons
+              render but never open — no console error, no exception.
+              Since 2.5.2 Boostgrid emits a <code>console.warn</code> at
+              first toolbar mount when <code>window.bootstrap.Dropdown</code>
+              is undefined, so the dependency gap is visible during
+              development.
+            </p>
+          </aside>
+        </section>
+
+        <!-- MINIMAL EXAMPLE -->
+        <section class="block">
+          <header class="block-head">
+            <span class="block-num">§&nbsp;01.3</span>
             <h2 class="block-title">Minimal markup</h2>
             <span class="block-rule"></span>
             <span class="caps muted">html&nbsp;+&nbsp;data-attributes</span>
@@ -431,7 +487,7 @@
             </li>
             <li>
               <span class="perf-num">06</span>
-              <div><h4>Bundle&nbsp;guarded&nbsp;at&nbsp;<code>&lt;&nbsp;18&nbsp;KB</code></h4><p>Every PR runs <code>size-limit</code>. Current ship size is <strong>16.41&nbsp;KB</strong> brotli — numbers tracked against the actual build, not estimated.</p></div>
+              <div><h4>Bundle&nbsp;guarded&nbsp;at&nbsp;<code>&lt;&nbsp;18&nbsp;KB</code></h4><p>Every PR runs <code>size-limit</code>. Current ship size is <strong>16.7&nbsp;KB</strong> brotli — numbers tracked against the actual build, not estimated.</p></div>
             </li>
           </ol>
             </section>
@@ -463,6 +519,7 @@
           <aside class="examples-rail">
             <p class="rail-cap">releases&nbsp;/</p>
             <div class="list" id="changelogList" role="tablist">
+              <a href="#cl-2-5-2" data-doc-target="cl-2-5-2">2.5.2 — Host-page dependency guard</a>
               <a href="#cl-2-5-1" data-doc-target="cl-2-5-1">2.5.1 — CDN MIME fix &amp; docs polish</a>
               <a href="#cl-2-5-0" data-doc-target="cl-2-5-0">2.5.0 — Element pool under virtual scroll &amp; scrollToRow</a>
               <a href="#cl-2-4-3" data-doc-target="cl-2-4-3">2.4.3 — Polish trio (visibility diff, paint pipeline, virtual pad-only)</a>
@@ -481,12 +538,66 @@
 
           <div class="examples-stage">
 
-            <!-- ── 2.5.1 ──────────────────────────────────────────── -->
-            <article class="block release" id="cl-2-5-1">
+            <!-- ── 2.5.2 ──────────────────────────────────────────── -->
+            <article class="block release" id="cl-2-5-2">
               <header class="release-head">
                 <div class="release-tag">
-                  <span class="release-num">02.5.1</span>
+                  <span class="release-num">02.5.2</span>
                   <span class="release-status release-status--current">current</span>
+                </div>
+                <div class="release-meta">
+                  <time class="caps muted">spring&nbsp;2026</time>
+                  <span class="caps muted">·&nbsp;patch&nbsp;release</span>
+                </div>
+                <p class="release-tagline">
+                  Host-page dependency guard. A reported docs gap
+                  closes today: nothing in README or on the docs site
+                  told visitors that the host page also needs
+                  Bootstrap's JS bundle (for the toolbar dropdowns)
+                  and an icon font (for the sort / search / refresh
+                  glyphs). Both omissions were <em>silent</em> —
+                  invisible icons, dropdowns that look ready but never
+                  open, no console error. The Getting started area now
+                  spells out the four required loads in order, and the
+                  toolbar warns at first mount when
+                  <code>window.bootstrap.Dropdown</code> is missing.
+                </p>
+              </header>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--fix">FIX</span>Bootstrap-JS-missing warn at first toolbar mount</h3>
+                <ul class="release-list">
+                  <li><strong>Symptom.</strong> Page-size picker and column-visibility menu rendered but never opened on host pages that loaded Boostgrid without Bootstrap's JS bundle. No console error, no exception — the user's most likely reaction was to assume their <em>integration</em> was wrong, not that a documented dependency was missing from the docs.</li>
+                  <li><strong>Fix.</strong> <code>renderToolbar</code> now emits a one-shot <code>console.warn</code> at first top-toolbar mount when <code>window.bootstrap?.Dropdown</code> is undefined. The message names the missing dependency and includes the exact CDN URL to add. One-shot at module scope so multi-grid pages don't spam the console.</li>
+                  <li><strong>Skipped in non-browser contexts</strong> (SSR, vitest workers that don't define <code>window</code>) — the existing test suite is unaffected.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">DOCS</span>Host-page requirements, spelled out</h3>
+                <ul class="release-list">
+                  <li><strong>New <em>Host-page requirements</em> section</strong> in the docs Getting started tab (<code>§ 01.2</code>), with a copy-pasteable four-load CDN snippet in the canonical order: Bootstrap 5 CSS → Bootstrap 5 JS → icon font → Boostgrid. Includes an explicit callout that the JS-missing case is a silent failure and that 2.5.2 surfaces it via the new warn.</li>
+                  <li><strong>README "Host-page requirements" section</strong> mirrors the docs site copy and links bidirectionally with the Install section so newcomers can't miss it.</li>
+                  <li><strong>Minimal markup</strong> demoted from <code>§ 01.2</code> to <code>§ 01.3</code> to make room. Old anchor URLs (<code>#docs-options</code>, etc.) are unaffected — only the in-page section numbers moved.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--migration">MIGRATION</span>Coming&nbsp;from&nbsp;2.5.1?</h3>
+                <ul class="release-list release-list--prose">
+                  <li><strong>Drop-in for working integrations.</strong> If your host page already loads Bootstrap 5 JS + an icon font, nothing changes. The new warn only fires when those dependencies are absent.</li>
+                  <li><strong>If your console suddenly logs</strong> <code>[boostgrid] Bootstrap's JS bundle is not loaded…</code>, add the Bootstrap JS CDN script shown in <em>Getting started → Host-page requirements</em>.</li>
+                  <li><strong>Bundle:</strong> 16.41&nbsp;KB &rarr; 16.7&nbsp;KB brotli (+~290&nbsp;B for the dependency-detection guard). Hard ceiling stays at 18&nbsp;KB.</li>
+                </ul>
+              </section>
+            </article>
+
+            <!-- ── 2.5.1 ──────────────────────────────────────────── -->
+            <article class="block release release--archive" id="cl-2-5-1">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num release-num--archive">02.5.1</span>
+                  <span class="release-status">previous</span>
                 </div>
                 <div class="release-meta">
                   <time class="caps muted">spring&nbsp;2026</time>
@@ -1157,11 +1268,11 @@
       <span class="cred-sep">·</span>
       <span class="caps muted">MIT</span>
       <span class="cred-spacer"></span>
-      <span class="caps muted cred-build">build&nbsp;v2.5.1&nbsp;·&nbsp;16.41&nbsp;KB</span>
+      <span class="caps muted cred-build">build&nbsp;v2.5.2&nbsp;·&nbsp;16.7&nbsp;KB</span>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script type="module" src="assets/site.js?v=2.5.1"></script>
+  <script type="module" src="assets/site.js?v=2.5.2"></script>
 </body>
 </html>

@@ -3,6 +3,33 @@ import type { Row } from "../types.js";
 import { el } from "../dom.js";
 
 /**
+ * One-shot guard: warn (once per page load, not per grid) when the top
+ * toolbar is about to render dropdowns but Bootstrap's JS bundle isn't
+ * loaded on the host page. Without `bootstrap.Dropdown` the page-size
+ * picker and column-visibility menu look correct but never open — a
+ * silent failure that's costly to debug if you don't know it's a host
+ * dependency. Skipped in non-browser contexts (SSR, vitest workers
+ * that don't define `window`).
+ */
+let _bootstrapJsWarned = false;
+function warnIfBootstrapJsMissing(): void {
+  if (_bootstrapJsWarned) return;
+  if (typeof window === "undefined") return;
+  const w = window as Window & { bootstrap?: { Dropdown?: unknown } };
+  if (w.bootstrap && w.bootstrap.Dropdown) return;
+  _bootstrapJsWarned = true;
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[boostgrid] Bootstrap's JS bundle is not loaded on this page " +
+    "(window.bootstrap.Dropdown is missing). The page-size picker and " +
+    "column-visibility menu will render but won't open. Add " +
+    "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js " +
+    "to your host page. See the docs Getting started section for the full " +
+    "host-page dependency list (Bootstrap CSS/JS + an icon font).",
+  );
+}
+
+/**
  * Toolbar shell: search input, row-count dropdown, column-toggle dropdown,
  * pagination + info row. Mounted above and/or below the table according
  * to options.navigation.
@@ -12,6 +39,7 @@ export function renderToolbar<TRow extends Row = Row>(grid: Boostgrid<TRow>, pos
 
   // top toolbar gets controls; bottom only gets pagination + info
   if (position === "top") {
+    warnIfBootstrapJsMissing();
     bar.appendChild(buildSearch(grid));
     bar.appendChild(buildRowCountDropdown(grid));
     if (grid.options.columnSelection) bar.appendChild(buildColumnDropdown(grid));
