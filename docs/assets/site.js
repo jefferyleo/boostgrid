@@ -1357,25 +1357,30 @@ const OPTIONS = [
   ["navigation",       "0 | 1 | 2 | 3",        "3",         "Toolbar position bitmask: 1=top, 2=bottom, 3=both."],
   ["padding",          "number",               "2",         "Page numbers shown either side of the current page."],
   ["columnSelection",  "boolean",              "true",      "Show the column visibility dropdown."],
-  ["rowCount",         "number | number[]",    "[10,25,50,-1]", "Page sizes; -1 means \"All\"."],
+  ["rowCount",         "number | number[]",    "[10,25,50,-1]", "Page-size picker choices (NOT `rowsPerPage` — that's a DataTables name). First element is the initial page size; `-1` means \"All\". Pass a single number for a fixed page size with no picker."],
   ["selection",        "boolean",              "false",     "Enable row selection."],
   ["multiSelect",      "boolean",              "false",     "Allow multiple selected rows."],
   ["rowSelect",        "boolean",              "false",     "Click anywhere on a row to (de)select."],
   ["keepSelection",    "boolean",              "false",     "Preserve selection across paging/filter/sort."],
+  ["highlightRows",    "boolean",              "false",     "Add the Bootstrap `.table-hover` styling to body rows. Set automatically when the `<table>` already carries the class."],
   ["sorting",          "boolean",              "true",      "Enable sortable column headers."],
   ["multiSort",        "boolean",              "false",     "Sort by multiple columns at once."],
-  ["caseSensitive",    "boolean",              "false",     "Case-sensitive search."],
-  ["searchSettings",   "{delay,characters}",   "{200, 1}",  "Debounce for the search input."],
-  ["virtualScroll",    "boolean",              "false",     "Render only visible rows (for very large datasets)."],
-  ["ajax",             "boolean",              "false",     "Fetch rows from a remote URL."],
-  ["url",              "string | () => string","\"\"",      "Endpoint used when ajax is true."],
+  ["caseSensitive",    "boolean",              "false",     "Case-sensitive search. Top-level option — NOT nested under `searchSettings`."],
+  ["searchSettings",   "{delay,characters}",   "{200, 1}",  "Debounce + minimum-characters threshold for the search input. Holds only those two keys; case sensitivity lives in the top-level `caseSensitive` option."],
+  ["virtualScroll",    "boolean",              "false",     "Render only rows in the viewport (plus `overscan` on each side) and pad rows above/below to keep the scrollbar shape. Forces `rowCount = -1` internally. Since 2.5.0, the visible `<tr>`s are recycled as a pool on every scroll tick instead of rebuilt."],
+  ["ajax",             "boolean",              "false",     "Fetch rows from a remote URL. See the Ajax request/response shape tables below."],
+  ["url",              "string | () => string","\"\"",      "Endpoint used when `ajax: true`. A function form is re-invoked per fetch so the URL can depend on grid state."],
+  ["ajaxSettings",     "{ method: string }",   "{ method: \"POST\" }", "Extra options for the ajax fetch. Currently the HTTP method only; the request body is the `AjaxRequest` shape (see table below)."],
+  ["requestHandler",   "(req: AjaxRequest) => unknown", "identity", "Last-mile shaping of the outgoing request payload. Receives the canonical `AjaxRequest` and returns whatever your server expects."],
+  ["responseHandler",  "(res: any) => AjaxResponse",    "identity", "Last-mile shaping of the incoming response. Receives whatever your server returned and must produce an `AjaxResponse` shape (see table below)."],
+  ["converters",       "Record<string, Converter>", "(built-in)", "Named converters resolved by `column.type` (`\"numeric\"`, `\"string\"`, …). Each converter implements `{ from, to }` for sort/search/display. Override by name to add custom types like `\"currency\"` or `\"date\"`."],
+  ["formatters",       "Record<string, Formatter<TRow>>", "{}", "Named cell formatters resolved by a column's `data-formatter` attribute. Receive `(column, row)` and return an HTML string. See the Custom formatter example."],
   ["icons",            "IconSet",              "bootstrapIcons", "Icon class strings; swap for fontAwesomeIcons for FA."],
   ["footer",           "boolean",              "false",     "Force-enable `<tfoot>` rendering. Implicit when `footerFormatters` or `footerCallback` are set, or when `<tfoot>` markup exists."],
   ["footerFormatters", "Record<string, fn>",   "{}",        "Per-column footer formatters keyed by `data-footer-formatter`. Receive `(column, ctx)` and return HTML."],
   ["footerCallback",   "(tr, ctx) => void",    "null",      "Runs after column footer formatters on every draw. Use it to overwrite cells or correlate values across columns."],
   ["stateSave",        "boolean",              "false",     "Persist sort, page, page-size, search, column visibility (and selection when `keepSelection: true`) to `localStorage`. Restored before first render."],
   ["stateKey",         "string \\| null",       "null",      "localStorage key for state persistence. Defaults to `boostgrid:<table-id>`, or a hash of the column ids when no `id` exists."],
-  ["virtualScroll",    "boolean",              "false",     "Render only rows in the viewport. Forces `rowsPerPage = -1` and adds pad rows to keep the scrollbar shape correct."],
   ["rowHeight",        "number",               "38",        "Fixed row height in px used for virtual-scroll math. Must match actual row height (set via CSS or `data-width` on the table)."],
   ["overscan",         "number",               "5",         "Rows rendered above + below the viewport during virtual scroll, smoothing fast scrolls."],
   ["editable",         "boolean",              "false",     "Default value for `column.editable`. Identifier columns are never editable even when this is on."],
@@ -1404,7 +1409,29 @@ const OPTIONS = [
   ["stickyHeader",     "boolean",                                "false",    "Pin the `<thead>` to the viewport top while the body scrolls past. Pure CSS. Override the offset with `--boostgrid-sticky-top: <Npx>` for fixed-nav layouts."],
   ["truncatedTooltips", "boolean",                               "true",     "Lazily set a `title` attribute on body cells whose content is clipped by overflow. Skips cells already carrying a title or `data-bg-no-tooltip`."],
   ["locale",           "string \\| null",                         "null",     "BCP-47 locale tag for the `Intl`-driven number formatting in the pagination summary. `null` lets the runtime decide."],
+  ["performanceMarks", "boolean",                                "false",    "Emit `performance.mark()` / `measure()` entries around `renderHeader` / `renderBody` / `renderFooter` so the Chrome DevTools Performance panel can profile grid renders in production. Off by default — no observable cost when off."],
   ["labels",           "Labels",                                 "(en)",     "All UI strings in one bag — see the i18n example for the full key list. Override any subset; missing keys fall back to English."],
+];
+
+// Server-side ajax: payload shapes. Documents the canonical wire format
+// that `BoostgridOptions.requestHandler` / `responseHandler` can reshape
+// to match an existing backend. The current value of each request field
+// comes from grid state at fetch time.
+const AJAX_REQUEST = [
+  ["current",          "number",                "1-based page index of the page being requested. `1` on first load."],
+  ["rowCount",         "number",                "Page size. `-1` when the grid is in `virtualScroll` or `rowCount: -1` mode."],
+  ["sort",             "Record<string, \"asc\" \\| \"desc\">", "Active sort directive keyed by `column.id`. Empty object when no sort is active."],
+  ["searchPhrase",     "string",                "Current search input value, exact text. Empty string when the box is cleared."],
+  ["groupBy",          "string[]",              "Active grouping columns in nesting order. Omitted when `groupBy` is off; single-string config is normalised to a 1-element array."],
+  ["collapsedGroups",  "string[]",              "`//`-joined path strings of groups the user has explicitly collapsed. Omitted when grouping is off or no path is collapsed."],
+  ["treeMode",         "boolean",               "`true` when the grid is in tree mode. Lets the server choose a flat-slice vs tree-shaped response."],
+  ["expandedTreeNodes", "Array<string \\| number>", "Row ids the user has expanded (or NOT collapsed, depending on `treeExpanded` default). Sent only when `treeMode: true`."],
+];
+const AJAX_RESPONSE = [
+  ["current",   "number",  "Echo of the requested page index. The grid uses this to confirm the response matches the page the user is on."],
+  ["rowCount",  "number",  "Echo of the requested page size. Lets the server cap or override the requested size."],
+  ["rows",      "Row[]",   "Array of row objects for the requested page. Length must be ≤ `rowCount` (or unbounded when `rowCount: -1`)."],
+  ["total",     "number",  "Total number of rows in the underlying dataset (post-filter, pre-pagination). Drives the pagination summary."],
 ];
 const METHODS = [
   ["append(rows)",         "this",          "Append rows; emits appended."],
@@ -1462,6 +1489,8 @@ const EVENTS = [
 fillTable("optionsTable", OPTIONS);
 fillTable("methodsTable", METHODS);
 fillTable("eventsTable", EVENTS);
+fillTable("ajaxRequestTable", AJAX_REQUEST);
+fillTable("ajaxResponseTable", AJAX_RESPONSE);
 
 // ───── TOC rail with scroll-spy (generalized) ─────
 function initTocRail(railId) {

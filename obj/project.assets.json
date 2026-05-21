@@ -184,7 +184,7 @@
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
-    "version": "1.0.0",
+    "version": "2.5.1",
     "restore": {
       "projectUniqueName": "C:\\Users\\jeffe\\Documents\\Visual Studio 2026\\Projects\\boostgrid\\Boostgrid.csproj",
       "projectName": "Boostgrid",

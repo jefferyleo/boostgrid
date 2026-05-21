@@ -4,6 +4,74 @@ All notable changes to Boostgrid are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.5.1] — 2026-05-22
+
+### Fixed
+- **CDN `<script src>` blocked by strict-MIME browsers.** The previous
+  `main` entry pointed at `dist/boostgrid.umd.cjs`. jsdelivr / unpkg
+  serve `.cjs` files with `Content-Type: application/node`, which
+  modern browsers refuse to execute under strict MIME checking.
+  `main` (plus new `browser` / `unpkg` / `jsdelivr` fields, and an
+  `exports[".default"]` condition) now resolves to a new
+  `dist/boostgrid.umd.js` mirror that serves as
+  `application/javascript`. Node consumers are unaffected — the
+  `exports.require` condition still resolves to the `.cjs` so
+  `require('boostgrid')` keeps working inside `"type": "module"`
+  packages. The `.umd.js` bundle is byte-identical to the `.umd.cjs`;
+  only the extension (and the server-determined MIME) differ.
+- **Silent option-drop when `data-toggle="boostgrid"` auto-init runs
+  before an explicit `attach(target, options)` call.** The pre-existing
+  default-options instance was returned with the caller's options
+  dropped silently. `attach()` now emits a `console.warn` describing
+  the conflict and the recommended fix (omit `data-toggle` and call
+  `attach(target, options)` instead). The runtime behavior is
+  unchanged for users who never relied on the silent merge — the
+  warn is purely diagnostic.
+
+### Changed
+- **Build emits both `dist/boostgrid.umd.cjs` and `dist/boostgrid.umd.js`.**
+  A new Vite plugin (`mirrorUmdAsJs` in `vite.config.ts`) copies the
+  UMD bundle to a `.js` mirror at the end of the build. The
+  Boostgrid.csproj's previous `MirrorUmdAsJs` MSBuild target — which
+  did the same copy only during `dotnet pack` — has been removed; the
+  npm build is now the single source of truth for emitting both files.
+- **`package.json` `main` flipped to `./dist/boostgrid.umd.js`** so
+  CDNs resolve the browser-safe entry. Added explicit `browser`,
+  `unpkg`, `jsdelivr` fields and a `default` export condition all
+  pointing at the same `.umd.js` for defense in depth across bundler
+  resolution algorithms.
+
+### Docs
+- **Docs site: Ajax wire format reference.** A new `§ 03.4 — Ajax
+  wire format` section lists every field of `AjaxRequest` (8 fields)
+  and `AjaxResponse` (4 fields) with type and when-sent semantics.
+  Surfaces the canonical payload shape so server-side adopters don't
+  have to read `core.ts`'s `fetchAjax` to figure out the request /
+  response contract.
+- **Docs site: filled OPTIONS table gaps.** Added 7 missing rows —
+  `highlightRows`, `ajaxSettings`, `requestHandler`, `responseHandler`,
+  `converters`, `formatters`, `performanceMarks` — removed a duplicate
+  `virtualScroll` row, sharpened the `rowCount` and `caseSensitive`
+  descriptions to flag the most-common naming mistakes (assuming
+  `rowsPerPage` instead of `rowCount`; assuming
+  `searchSettings.caseSensitive` instead of the top-level option).
+- **Docs site: auto-init vs explicit attach callout.** New heads-up
+  note under "Getting started → Minimal markup" explaining why
+  `data-toggle="boostgrid"` and a later `attach(target, options)`
+  call conflict, paired with the new `console.warn` for runtime
+  visibility.
+- **README + docs install snippet** now use the explicit
+  `dist/boostgrid.umd.js` CDN path with an inline comment explaining
+  the MIME-type rationale.
+
+### Tests
+- 153 specs; no count change (no public API surface change).
+
+### Notes
+- Bundle: 16.25 KB → 16.41 KB brotli (+~160 bytes for the
+  `console.warn` block in `attach()`). The shipped UMD bundle is
+  otherwise unchanged. Hard ceiling stays at 18 KB.
+
 ## [2.5.0] — 2026-05-12
 
 ### Added

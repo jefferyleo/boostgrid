@@ -53,8 +53,9 @@ ships ESM + UMD.
 # npm
 npm install boostgrid
 
-# CDN
-<script src="https://cdn.jsdelivr.net/npm/boostgrid@2/dist/boostgrid.umd.cjs"></script>
+# CDN — use .umd.js (the CDN serves .cjs with `application/node`,
+#       which modern browsers refuse to execute as a <script>).
+<script src="https://cdn.jsdelivr.net/npm/boostgrid@2/dist/boostgrid.umd.js"></script>
 <link  href="https://cdn.jsdelivr.net/npm/boostgrid@2/dist/boostgrid.css" rel="stylesheet">
 
 # NuGet

@@ -1,7 +1,35 @@
-import { defineConfig } from "vite";
+import { defineConfig, type PluginOption } from "vite";
 import { resolve } from "node:path";
+import { copyFileSync, existsSync } from "node:fs";
+
+/**
+ * UMD bundle ships as both `.umd.cjs` (Node `require()`) and `.umd.js`
+ * (browser via CDN). The `.cjs` extension is required by Node — because
+ * the package has `"type": "module"`, Node would otherwise try to parse
+ * the UMD bundle as ESM and fail. But jsdelivr / unpkg serve `.cjs`
+ * files with `Content-Type: application/node`, which modern browsers
+ * refuse to execute under strict MIME checking. The `.js` mirror solves
+ * that — it serves as `application/javascript` and the UMD wrapper
+ * still detects the browser environment correctly.
+ *
+ * Bytes are identical between the two; the second file is purely a
+ * server-side rename for CDN compatibility.
+ */
+const mirrorUmdAsJs = (): PluginOption => ({
+  name: "boostgrid:mirror-umd-as-js",
+  closeBundle() {
+    const distDir = resolve(__dirname, "dist");
+    const src = resolve(distDir, "boostgrid.umd.cjs");
+    const dst = resolve(distDir, "boostgrid.umd.js");
+    if (!existsSync(src)) return;
+    copyFileSync(src, dst);
+    const srcMap = src + ".map";
+    if (existsSync(srcMap)) copyFileSync(srcMap, dst + ".map");
+  },
+});
 
 export default defineConfig({
+  plugins: [mirrorUmdAsJs()],
   build: {
     lib: {
       entry: resolve(__dirname, "src/index.ts"),

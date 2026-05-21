@@ -25,14 +25,13 @@
   </ItemGroup>
 
   <!--
-    Workaround for `dotnet pack` quirk: when a single-file <file src=… target=…>
-    in a nuspec has a target whose filename has a different extension than the
-    source, dotnet pack treats target as a directory. Mirror the UMD bundle
-    next to it as boostgrid.umd.js so the nuspec target paths line up.
+    The npm build (vite.config.ts → `mirrorUmdAsJs` plugin) is the single
+    source of truth for emitting `dist/boostgrid.umd.js` alongside
+    `dist/boostgrid.umd.cjs`. The .js mirror exists so jsdelivr / unpkg
+    can serve it as `application/javascript` instead of `application/node`
+    (browsers refuse to execute the latter under strict MIME checking).
+    `npm run build:all` must run before this csproj packs so the file is
+    present — publish.bat enforces that order.
   -->
-  <Target Name="MirrorUmdAsJs" BeforeTargets="GenerateNuspec">
-    <Copy SourceFiles="dist\boostgrid.umd.cjs"     DestinationFiles="dist\boostgrid.umd.js"     SkipUnchangedFiles="true" />
-    <Copy SourceFiles="dist\boostgrid.umd.cjs.map" DestinationFiles="dist\boostgrid.umd.js.map" SkipUnchangedFiles="true" />
-  </Target>
 
 </Project>

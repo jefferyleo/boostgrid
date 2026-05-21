@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Boostgrid · A grid worth shipping</title>
-  <meta name="description" content="Boostgrid — a vanilla TypeScript data grid for Bootstrap 5. 16.25 KB brotli, no runtime dependencies." />
+  <meta name="description" content="Boostgrid — a vanilla TypeScript data grid for Bootstrap 5. 16.41 KB brotli, no runtime dependencies." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,7 +13,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="../dist/boostgrid.css" />
-  <link rel="stylesheet" href="assets/site.css?v=18" />
+  <link rel="stylesheet" href="assets/site.css?v=19" />
 
   <!-- import map: lets the React wrapper bundle resolve `react`, `react-dom`,
        and `boostgrid` in the browser without a build step -->
@@ -25,10 +25,10 @@
       "react-dom":         "https://esm.sh/react-dom@18.3.1",
       "react-dom/client":  "https://esm.sh/react-dom@18.3.1/client",
       "vue":               "https://esm.sh/vue@3.4.38",
-      "boostgrid":         "../dist/boostgrid.js?v=2.5.0",
-      "react-boostgrid":   "../packages/react-boostgrid/dist/react-boostgrid.js?v=2.5.0",
-      "vue-boostgrid":     "../packages/vue-boostgrid/dist/vue-boostgrid.js?v=2.5.0",
-      "boostgrid-export":  "../packages/boostgrid-export/dist/boostgrid-export.js?v=2.5.0"
+      "boostgrid":         "../dist/boostgrid.js?v=2.5.1",
+      "react-boostgrid":   "../packages/react-boostgrid/dist/react-boostgrid.js?v=2.5.1",
+      "vue-boostgrid":     "../packages/vue-boostgrid/dist/vue-boostgrid.js?v=2.5.1",
+      "boostgrid-export":  "../packages/boostgrid-export/dist/boostgrid-export.js?v=2.5.1"
     }
   }
   </script>
@@ -56,8 +56,8 @@
       </a>
 
       <ul class="ribbon-meta">
-        <li><span class="ribbon-key">VERSION</span><span class="ribbon-val">02.5.0</span></li>
-        <li><span class="ribbon-key">SIZE</span><span class="ribbon-val">16.25&nbsp;KB</span></li>
+        <li><span class="ribbon-key">VERSION</span><span class="ribbon-val">02.5.1</span></li>
+        <li><span class="ribbon-key">SIZE</span><span class="ribbon-val">16.41&nbsp;KB</span></li>
         <li class="hide-md"><span class="ribbon-key">LICENSE</span><span class="ribbon-val">MIT</span></li>
         <li class="ribbon-status"><span class="pulse"></span><span class="ribbon-val">stable</span></li>
       </ul>
@@ -136,7 +136,7 @@
 
           <ul class="stats">
             <li>
-              <span class="stat-fig"><span class="stat-num">16.25</span><span class="stat-unit">kb</span></span>
+              <span class="stat-fig"><span class="stat-num">16.41</span><span class="stat-unit">kb</span></span>
               <span class="stat-cap">brotli · minified · standalone</span>
             </li>
             <li>
@@ -170,10 +170,11 @@
                 <span class="terminal-host">cdn.jsdelivr.net</span>
                 <button type="button" class="copy" data-copy>copy</button>
               </header>
-              <pre><code><span class="cm">// drop in via CDN</span>
-&lt;script src=<span class="str">"https://cdn.jsdelivr.net/npm/boostgrid@2"</span>&gt;&lt;/script&gt;
+              <pre><code><span class="cm">// drop in via CDN — use the explicit .umd.js path so the CDN</span>
+<span class="cm">// serves it as application/javascript (not application/node).</span>
+&lt;script src=<span class="str">"https://cdn.jsdelivr.net/npm/boostgrid@2/dist/boostgrid.umd.js"</span>&gt;&lt;/script&gt;
 &lt;link rel=<span class="str">"stylesheet"</span>
-      href=<span class="str">"…/boostgrid@2/dist/boostgrid.css"</span>&gt;</code></pre>
+      href=<span class="str">"https://cdn.jsdelivr.net/npm/boostgrid@2/dist/boostgrid.css"</span>&gt;</code></pre>
             </article>
 
             <article class="terminal terminal--accent">
@@ -237,6 +238,25 @@
   &lt;<span class="tag">tbody</span>&gt;…&lt;/<span class="tag">tbody</span>&gt;
 &lt;/<span class="tag">table</span>&gt;</code></pre>
           </div>
+
+          <aside class="note" style="margin-top: 2.5rem">
+            <span class="note-tag">heads&nbsp;up · auto-init vs explicit attach</span>
+            <p class="prose" style="margin-bottom: 0.6rem">
+              <code>data-toggle="boostgrid"</code> triggers auto-init at
+              <code>DOMContentLoaded</code> with default options. If you
+              need to customise anything beyond the column markup
+              (formatters, ajax mode, page sizes, etc.) — <strong>omit
+              <code>data-toggle</code> and call <code>attach(target,
+              options)</code> yourself.</strong>
+            </p>
+            <p class="prose muted" style="margin-bottom: 0">
+              Calling <code>attach()</code> with options against a table
+              that already has an instance returns the existing one
+              <em>without</em> applying your options. Since 2.5.0, the
+              library emits a <code>console.warn</code> in that case so
+              the silent override is visible during development.
+            </p>
+          </aside>
         </section>
 
       </section>
@@ -294,6 +314,7 @@
               <a href="#docs-options" data-doc-target="docs-options">Options</a>
               <a href="#docs-methods" data-doc-target="docs-methods">Methods</a>
               <a href="#docs-events" data-doc-target="docs-events">Events</a>
+              <a href="#docs-ajax" data-doc-target="docs-ajax">Ajax format</a>
               <a href="#docs-performance" data-doc-target="docs-performance">Performance</a>
             </div>
             <p class="rail-cap muted rail-cap--bottom">↳ scroll&nbsp;or&nbsp;click&nbsp;to&nbsp;jump</p>
@@ -345,9 +366,44 @@
               </div>
             </section>
 
-            <section class="block" id="docs-performance">
+            <section class="block" id="docs-ajax">
               <header class="block-head">
                 <span class="block-num">§&nbsp;03.4</span>
+                <h2 class="block-title">Ajax wire format</h2>
+                <span class="block-rule"></span>
+                <span class="caps muted">when&nbsp;<code>ajax: true</code></span>
+              </header>
+              <p class="prose">
+                When <code>ajax: true</code> is set, the grid POSTs an
+                <code>AjaxRequest</code> body to <code>url</code> and
+                expects an <code>AjaxResponse</code> back. Both shapes
+                are reshapable end-to-end via the
+                <code>requestHandler</code> and
+                <code>responseHandler</code> options if your existing
+                backend uses a different layout (DataTables-style,
+                JSON:API, etc.).
+              </p>
+
+              <h3 class="release-set-title" style="margin-top: 2rem"><span class="release-set-pip pip--feature">REQUEST</span>AjaxRequest</h3>
+              <div class="reftable">
+                <table>
+                  <thead><tr><th class="c-key">Field</th><th class="c-type">Type</th><th class="c-desc">Description</th></tr></thead>
+                  <tbody id="ajaxRequestTable"></tbody>
+                </table>
+              </div>
+
+              <h3 class="release-set-title" style="margin-top: 2rem"><span class="release-set-pip pip--feature">RESPONSE</span>AjaxResponse</h3>
+              <div class="reftable">
+                <table>
+                  <thead><tr><th class="c-key">Field</th><th class="c-type">Type</th><th class="c-desc">Description</th></tr></thead>
+                  <tbody id="ajaxResponseTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="block" id="docs-performance">
+              <header class="block-head">
+                <span class="block-num">§&nbsp;03.5</span>
                 <h2 class="block-title">Performance</h2>
                 <span class="block-rule"></span>
                 <span class="caps muted">why&nbsp;it&nbsp;is&nbsp;fast</span>
@@ -375,7 +431,7 @@
             </li>
             <li>
               <span class="perf-num">06</span>
-              <div><h4>Bundle&nbsp;guarded&nbsp;at&nbsp;<code>&lt;&nbsp;18&nbsp;KB</code></h4><p>Every PR runs <code>size-limit</code>. Current ship size is <strong>16.25&nbsp;KB</strong> brotli — numbers tracked against the actual build, not estimated.</p></div>
+              <div><h4>Bundle&nbsp;guarded&nbsp;at&nbsp;<code>&lt;&nbsp;18&nbsp;KB</code></h4><p>Every PR runs <code>size-limit</code>. Current ship size is <strong>16.41&nbsp;KB</strong> brotli — numbers tracked against the actual build, not estimated.</p></div>
             </li>
           </ol>
             </section>
@@ -407,6 +463,7 @@
           <aside class="examples-rail">
             <p class="rail-cap">releases&nbsp;/</p>
             <div class="list" id="changelogList" role="tablist">
+              <a href="#cl-2-5-1" data-doc-target="cl-2-5-1">2.5.1 — CDN MIME fix &amp; docs polish</a>
               <a href="#cl-2-5-0" data-doc-target="cl-2-5-0">2.5.0 — Element pool under virtual scroll &amp; scrollToRow</a>
               <a href="#cl-2-4-3" data-doc-target="cl-2-4-3">2.4.3 — Polish trio (visibility diff, paint pipeline, virtual pad-only)</a>
               <a href="#cl-2-4-2" data-doc-target="cl-2-4-2">2.4.2 — Selection diff, resize throttle, perf marks</a>
@@ -424,12 +481,74 @@
 
           <div class="examples-stage">
 
-            <!-- ── 2.5.0 ──────────────────────────────────────────── -->
-            <article class="block release" id="cl-2-5-0">
+            <!-- ── 2.5.1 ──────────────────────────────────────────── -->
+            <article class="block release" id="cl-2-5-1">
               <header class="release-head">
                 <div class="release-tag">
-                  <span class="release-num">02.5.0</span>
+                  <span class="release-num">02.5.1</span>
                   <span class="release-status release-status--current">current</span>
+                </div>
+                <div class="release-meta">
+                  <time class="caps muted">spring&nbsp;2026</time>
+                  <span class="caps muted">·&nbsp;patch&nbsp;release</span>
+                </div>
+                <p class="release-tagline">
+                  Three reported issues — one CDN-blocking bug, one
+                  silent footgun, and a docs gap — closed in one
+                  metadata-and-docs patch. Shipped JavaScript is
+                  byte-identical to 2.5.0; the change is in how
+                  jsdelivr / unpkg resolve the package entry point
+                  (so the CDN snippet from the docs actually loads),
+                  in a new <code>console.warn</code> that surfaces a
+                  long-silent option-drop, and in a new Ajax wire
+                  format reference on the docs site.
+                </p>
+              </header>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--fix">FIX</span>CDN script tag blocked by strict-MIME browsers</h3>
+                <ul class="release-list">
+                  <li><strong>Symptom.</strong> The advertised CDN snippet <code>&lt;script src="https://cdn.jsdelivr.net/npm/boostgrid@2"&gt;&lt;/script&gt;</code> was refused by Chrome, Firefox, and Edge with <em>"MIME type ('application/node') is not executable"</em>. The browser-root URL resolved through <code>package.json</code> <code>main</code> to <code>dist/boostgrid.umd.cjs</code>; jsdelivr and unpkg serve <code>.cjs</code> with <code>Content-Type: application/node</code>.</li>
+                  <li><strong>Fix.</strong> Vite now emits a mirrored <code>dist/boostgrid.umd.js</code> (byte-identical to the <code>.cjs</code>) alongside the original. <code>main</code> + new <code>browser</code> / <code>unpkg</code> / <code>jsdelivr</code> fields + an <code>exports[".default"]</code> condition all point at the <code>.umd.js</code>, so every CDN resolution path lands on a file that serves as <code>application/javascript</code>.</li>
+                  <li><strong>Node consumers unchanged.</strong> The <code>exports.require</code> condition still resolves to <code>.umd.cjs</code>, which Node needs because the package has <code>"type": "module"</code> and would otherwise try to parse the UMD bundle as ESM.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--fix">FIX</span>Silent option-drop when auto-init runs before explicit attach</h3>
+                <ul class="release-list">
+                  <li><strong>Symptom.</strong> A <code>&lt;table data-toggle="boostgrid"&gt;</code> auto-init ran at <code>DOMContentLoaded</code> with defaults; a later <code>attach('#myGrid', { ajax: true, formatters: { ... } })</code> returned the existing default-options instance with the new options silently dropped. The only way to discover this was by reading <code>index.ts</code>.</li>
+                  <li><strong>Fix.</strong> <code>attach()</code> now emits a <code>console.warn</code> when called with non-empty <code>options</code> against an already-attached table, naming the table id and pointing at the most likely cause (the <code>data-toggle</code> attribute). The runtime behavior is otherwise unchanged.</li>
+                  <li><strong>Docs.</strong> A heads-up callout in <em>Getting started → Minimal markup</em> explains the auto-init vs. explicit attach precedence so the conflict is visible before the user trips on it.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--feature">DOCS</span>Ajax wire format + OPTIONS table polish</h3>
+                <ul class="release-list">
+                  <li><strong>New <em>Ajax wire format</em> section</strong> in the Documentation tab (<code>§ 03.4</code>) lists every field of <code>AjaxRequest</code> and <code>AjaxResponse</code> with type and when-sent semantics. Server-side adopters no longer have to grep <code>core.ts</code> to figure out the canonical payload shape.</li>
+                  <li><strong>Seven missing options added:</strong> <code>highlightRows</code>, <code>ajaxSettings</code>, <code>requestHandler</code>, <code>responseHandler</code>, <code>converters</code>, <code>formatters</code>, <code>performanceMarks</code>. A duplicate <code>virtualScroll</code> row was removed.</li>
+                  <li><strong>Sharpened descriptions</strong> for the two most-confusing option names. <code>rowCount</code> now explicitly flags that it is <em>not</em> <code>rowsPerPage</code> (the DataTables name people reach for). <code>caseSensitive</code> now explicitly notes it is the top-level option, not nested inside <code>searchSettings</code>.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--migration">MIGRATION</span>Coming&nbsp;from&nbsp;2.5.0?</h3>
+                <ul class="release-list release-list--prose">
+                  <li><strong>Drop-in.</strong> No code changes required. The shipped JavaScript bundle is byte-identical to 2.5.0; only build artifact filenames and <code>package.json</code> metadata moved.</li>
+                  <li><strong>Update your CDN snippet</strong> to the explicit <code>.umd.js</code> path: <code>https://cdn.jsdelivr.net/npm/boostgrid@2/dist/boostgrid.umd.js</code>. The package-root URL (<code>boostgrid@2</code> with no path) now also resolves correctly thanks to the <code>main</code> flip, but the explicit path is recommended for clarity.</li>
+                  <li><strong>If you mix <code>data-toggle="boostgrid"</code> and explicit <code>attach()</code>:</strong> you'll now see a <code>console.warn</code> in the browser console. Either drop the attribute (recommended) or move your options into HTML <code>data-*</code> attributes on the <code>&lt;table&gt;</code>.</li>
+                  <li><strong>Bundle:</strong> 16.25&nbsp;KB &rarr; 16.41&nbsp;KB brotli (+~160&nbsp;B for the new <code>console.warn</code> block in <code>attach()</code>). Hard ceiling stays at 18&nbsp;KB.</li>
+                </ul>
+              </section>
+            </article>
+
+            <!-- ── 2.5.0 ──────────────────────────────────────────── -->
+            <article class="block release release--archive" id="cl-2-5-0">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num release-num--archive">02.5.0</span>
+                  <span class="release-status">previous</span>
                 </div>
                 <div class="release-meta">
                   <time class="caps muted">spring&nbsp;2026</time>
@@ -1038,11 +1157,11 @@
       <span class="cred-sep">·</span>
       <span class="caps muted">MIT</span>
       <span class="cred-spacer"></span>
-      <span class="caps muted cred-build">build&nbsp;v2.5.0&nbsp;·&nbsp;16.25&nbsp;KB</span>
+      <span class="caps muted cred-build">build&nbsp;v2.5.1&nbsp;·&nbsp;16.41&nbsp;KB</span>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script type="module" src="assets/site.js?v=2.5.0a"></script>
+  <script type="module" src="assets/site.js?v=2.5.1"></script>
 </body>
 </html>

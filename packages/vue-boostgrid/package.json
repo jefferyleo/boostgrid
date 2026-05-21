@@ -1,6 +1,6 @@
 {
   "name": "vue-boostgrid",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "Vue 3 wrapper for boostgrid — a vanilla TypeScript data grid for Bootstrap 5.",
   "type": "module",
   "main": "./dist/vue-boostgrid.umd.cjs",
