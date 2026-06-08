@@ -1238,7 +1238,16 @@ export class Boostgrid<TRow extends Row = Row> {
           break;
         }
       }
-      e.preventDefault();
+      // Cancel the default action for anchors / buttons (hash jump,
+      // `javascript:void(0)` navigation, stray form submits). BUT NOT for
+      // checkbox / radio controls — the column-visibility menu uses
+      // `<input type="checkbox" data-bg-action="toggle-column">`, and
+      // calling preventDefault on its click reverts the native toggle and
+      // suppresses the change event, leaving the box stuck at its initial
+      // checked state even though the column correctly shows/hides.
+      const isToggleInput = t instanceof HTMLInputElement
+        && (t.type === "checkbox" || t.type === "radio");
+      if (!isToggleInput) e.preventDefault();
     }));
 
     // Selection: row checkbox + row click (if rowSelect)

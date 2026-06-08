@@ -38,6 +38,47 @@ describe("Boostgrid column-visibility panel", () => {
     g.destroy();
   });
 
+  it("toggling a column checkbox flips its checked state in lockstep with visibility", () => {
+    const g = new Boostgrid(makeTable(), { rowCount: -1, navigation: 1 });
+    const root = g["rootContainer" as keyof typeof g] as HTMLElement;
+    const cb = root.querySelector<HTMLInputElement>(
+      'input[data-bg-action="toggle-column"][data-bg-value="subject"]',
+    )!;
+    // Initial: column visible, box checked.
+    expect(cb.checked).toBe(true);
+    expect(g.columns.find((c) => c.id === "subject")!.visible).toBe(true);
+
+    // A native checkbox click toggles `checked` BEFORE the delegated handler
+    // runs. The handler must not call preventDefault on it (that would revert
+    // the toggle and leave the box stuck checked — the regression this guards).
+    cb.click();
+    expect(cb.checked).toBe(false);
+    expect(g.columns.find((c) => c.id === "subject")!.visible).toBe(false);
+    expect(g.element.querySelector<HTMLElement>('thead [data-column-id="subject"]')!.hidden).toBe(true);
+
+    // Click again — re-show. Checkbox tracks back to checked.
+    cb.click();
+    expect(cb.checked).toBe(true);
+    expect(g.columns.find((c) => c.id === "subject")!.visible).toBe(true);
+    expect(g.element.querySelector<HTMLElement>('thead [data-column-id="subject"]')!.hidden).toBe(false);
+    g.destroy();
+  });
+
+  it("toggle-column click is not defaultPrevented (checkbox native toggle survives)", () => {
+    const g = new Boostgrid(makeTable(), { rowCount: -1, navigation: 1 });
+    const root = g["rootContainer" as keyof typeof g] as HTMLElement;
+    const cb = root.querySelector<HTMLInputElement>(
+      'input[data-bg-action="toggle-column"][data-bg-value="sender"]',
+    )!;
+    const evt = new MouseEvent("click", { bubbles: true, cancelable: true });
+    cb.dispatchEvent(evt);
+    // jsdom doesn't perform the native checkbox toggle on a synthetic
+    // dispatch, but it DOES honor preventDefault — so asserting the event
+    // wasn't cancelled is the precise regression check.
+    expect(evt.defaultPrevented).toBe(false);
+    g.destroy();
+  });
+
   it("reorder via panel drag mutates grid.columns and persists", () => {
     const g = new Boostgrid(makeTable(), {
       rowCount: -1,

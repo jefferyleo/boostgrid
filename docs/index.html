@@ -13,7 +13,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="../dist/boostgrid.css" />
-  <link rel="stylesheet" href="assets/site.css?v=20" />
+  <link rel="stylesheet" href="assets/site.css?v=21" />
 
   <!-- import map: lets the React wrapper bundle resolve `react`, `react-dom`,
        and `boostgrid` in the browser without a build step -->
@@ -25,10 +25,10 @@
       "react-dom":         "https://esm.sh/react-dom@18.3.1",
       "react-dom/client":  "https://esm.sh/react-dom@18.3.1/client",
       "vue":               "https://esm.sh/vue@3.4.38",
-      "boostgrid":         "../dist/boostgrid.js?v=2.5.2",
-      "react-boostgrid":   "../packages/react-boostgrid/dist/react-boostgrid.js?v=2.5.2",
-      "vue-boostgrid":     "../packages/vue-boostgrid/dist/vue-boostgrid.js?v=2.5.2",
-      "boostgrid-export":  "../packages/boostgrid-export/dist/boostgrid-export.js?v=2.5.2"
+      "boostgrid":         "../dist/boostgrid.js?v=2.5.3",
+      "react-boostgrid":   "../packages/react-boostgrid/dist/react-boostgrid.js?v=2.5.3",
+      "vue-boostgrid":     "../packages/vue-boostgrid/dist/vue-boostgrid.js?v=2.5.3",
+      "boostgrid-export":  "../packages/boostgrid-export/dist/boostgrid-export.js?v=2.5.3"
     }
   }
   </script>
@@ -56,7 +56,7 @@
       </a>
 
       <ul class="ribbon-meta">
-        <li><span class="ribbon-key">VERSION</span><span class="ribbon-val">02.5.2</span></li>
+        <li><span class="ribbon-key">VERSION</span><span class="ribbon-val">02.5.3</span></li>
         <li><span class="ribbon-key">SIZE</span><span class="ribbon-val">16.7&nbsp;KB</span></li>
         <li class="hide-md"><span class="ribbon-key">LICENSE</span><span class="ribbon-val">MIT</span></li>
         <li class="ribbon-status"><span class="pulse"></span><span class="ribbon-val">stable</span></li>
@@ -519,6 +519,7 @@
           <aside class="examples-rail">
             <p class="rail-cap">releases&nbsp;/</p>
             <div class="list" id="changelogList" role="tablist">
+              <a href="#cl-2-5-3" data-doc-target="cl-2-5-3">2.5.3 — Column-toggle checkbox fix</a>
               <a href="#cl-2-5-2" data-doc-target="cl-2-5-2">2.5.2 — Host-page dependency guard</a>
               <a href="#cl-2-5-1" data-doc-target="cl-2-5-1">2.5.1 — CDN MIME fix &amp; docs polish</a>
               <a href="#cl-2-5-0" data-doc-target="cl-2-5-0">2.5.0 — Element pool under virtual scroll &amp; scrollToRow</a>
@@ -538,12 +539,53 @@
 
           <div class="examples-stage">
 
-            <!-- ── 2.5.2 ──────────────────────────────────────────── -->
-            <article class="block release" id="cl-2-5-2">
+            <!-- ── 2.5.3 ──────────────────────────────────────────── -->
+            <article class="block release" id="cl-2-5-3">
               <header class="release-head">
                 <div class="release-tag">
-                  <span class="release-num">02.5.2</span>
+                  <span class="release-num">02.5.3</span>
                   <span class="release-status release-status--current">current</span>
+                </div>
+                <div class="release-meta">
+                  <time class="caps muted">spring&nbsp;2026</time>
+                  <span class="caps muted">·&nbsp;patch&nbsp;release</span>
+                </div>
+                <p class="release-tagline">
+                  One-line bug fix with an outsized symptom. The
+                  column-visibility checkbox showed and hid columns
+                  correctly but never visually toggled — it appeared
+                  stuck checked. The single delegated click handler was
+                  calling <code>preventDefault()</code> on <em>every</em>
+                  action element, including the checkbox, which reverted
+                  the browser's native toggle. The handler now leaves
+                  checkbox / radio controls alone.
+                </p>
+              </header>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--fix">FIX</span>Column-toggle checkbox stuck checked</h3>
+                <ul class="release-list">
+                  <li><strong>Symptom.</strong> Opening the columns dropdown and clicking a checkbox correctly showed or hid that column, but the checkbox itself stayed in its initial state — visible columns looked permanently checked, so the menu appeared broken even though it worked.</li>
+                  <li><strong>Cause.</strong> The one delegated <code>click</code> listener that routes all <code>data-bg-action</code> elements ended with an unconditional <code>e.preventDefault()</code>. Harmless for the anchor- and button-based actions (pagination, sort, refresh), but the column toggle is an <code>&lt;input type="checkbox"&gt;</code> — and cancelling a checkbox's click reverts the native toggle and suppresses its <code>change</code> event.</li>
+                  <li><strong>Fix.</strong> The handler now skips <code>preventDefault</code> for checkbox / radio controls, where the native toggle is the behavior we want. Row-selection checkboxes were never affected — they route through separate delegates that never cancelled the event.</li>
+                </ul>
+              </section>
+
+              <section class="release-set">
+                <h3 class="release-set-title"><span class="release-set-pip pip--migration">MIGRATION</span>Coming&nbsp;from&nbsp;2.5.2?</h3>
+                <ul class="release-list release-list--prose">
+                  <li><strong>Pure drop-in fix.</strong> No API change, no markup change. The columns dropdown checkbox now reflects each column's visibility correctly.</li>
+                  <li><strong>Bundle:</strong> 16.7&nbsp;KB brotli, effectively unchanged (the fix adds a small type guard). Hard ceiling stays at 18&nbsp;KB.</li>
+                </ul>
+              </section>
+            </article>
+
+            <!-- ── 2.5.2 ──────────────────────────────────────────── -->
+            <article class="block release release--archive" id="cl-2-5-2">
+              <header class="release-head">
+                <div class="release-tag">
+                  <span class="release-num release-num--archive">02.5.2</span>
+                  <span class="release-status">previous</span>
                 </div>
                 <div class="release-meta">
                   <time class="caps muted">spring&nbsp;2026</time>
@@ -1268,11 +1310,11 @@
       <span class="cred-sep">·</span>
       <span class="caps muted">MIT</span>
       <span class="cred-spacer"></span>
-      <span class="caps muted cred-build">build&nbsp;v2.5.2&nbsp;·&nbsp;16.7&nbsp;KB</span>
+      <span class="caps muted cred-build">build&nbsp;v2.5.3&nbsp;·&nbsp;16.7&nbsp;KB</span>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script type="module" src="assets/site.js?v=2.5.2"></script>
+  <script type="module" src="assets/site.js?v=2.5.3"></script>
 </body>
 </html>

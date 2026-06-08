@@ -4,6 +4,35 @@ All notable changes to Boostgrid are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.5.3] — 2026-05-22
+
+### Fixed
+- **Column-visibility checkbox stuck in the checked state.** Clicking a
+  column's checkbox in the columns dropdown correctly showed/hid the
+  column, but the checkbox itself never visually toggled — it stayed
+  checked forever (or unchecked, for columns that started hidden). The
+  cause: the single delegated `click` handler called `e.preventDefault()`
+  unconditionally for every `[data-bg-action]` element. That's fine for
+  the anchor- and button-based actions (pagination, sort, refresh), but
+  the column toggle is an `<input type="checkbox">` — and
+  `preventDefault` on a checkbox click reverts the browser's native
+  toggle and suppresses the `change` event, so the box snapped back to
+  its prior state on every click. The handler now skips `preventDefault`
+  for checkbox / radio controls, where the native toggle is exactly the
+  behavior we want to keep. Row-selection checkboxes were unaffected
+  (they route through separate delegates that never called
+  `preventDefault`).
+
+### Tests
+- 153 → 155 specs (+2 in `test/column-visibility-panel.test.ts`: the
+  checkbox's `checked` state now tracks visibility in lockstep across
+  repeated toggles, and the `toggle-column` click is asserted to not be
+  `defaultPrevented`).
+
+### Notes
+- Bundle: 16.7 KB brotli, effectively unchanged (the fix adds a small
+  type guard). Hard ceiling stays at 18 KB.
+
 ## [2.5.2] — 2026-05-22
 
 ### Fixed
